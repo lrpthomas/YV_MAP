@@ -12,7 +12,7 @@ html, body {
   touch-action: manipulation;
 }
 
-#map, #map-container {
+#map, #map-container, .folium-map, [id^="map_"] {
   position: absolute;
   inset: 0;
 }
@@ -71,7 +71,8 @@ html, body {
 
 /* Prevent toolbar overlapping scale/attribution */
 @media (max-width: 768px) {
-  .leaflet-bottom.leaflet-left {
+  .leaflet-bottom.leaflet-left,
+  .leaflet-bottom.leaflet-right {
     margin-bottom: calc(60px + env(safe-area-inset-bottom));
   }
 }
