@@ -11,7 +11,7 @@
     }
 
     var content = meta.getAttribute('content') || '';
-    var hasFit = /viewport-fit\s*=\s*cover/i.test(content);
+    var hasFit = /(?:^|[,\s])viewport-fit\s*=\s*cover(?:[,\s]|$)/i.test(content);
     if (!hasFit) {
       var updated = content.trim();
       if (updated && !/,\s*$/.test(updated)) {
