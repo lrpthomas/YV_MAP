@@ -7,9 +7,14 @@ html, body {
   margin: 0;
   padding: 0;
   overscroll-behavior: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
-#map, #map-container {
+#map, #map-container, .folium-map {
   position: absolute;
   inset: 0;
 }
@@ -17,7 +22,7 @@ html, body {
 /* Toolbar for actions */
 .ym-toolbar {
   position: fixed;
-  bottom: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -25,6 +30,7 @@ html, body {
   background: rgba(0,0,0,0.55);
   border-radius: 12px;
   padding: 8px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
   z-index: 9999;
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
@@ -64,7 +70,8 @@ html, body {
 
 /* Prevent toolbar overlapping scale/attribution */
 @media (max-width: 768px) {
-  .leaflet-bottom.leaflet-left {
+  .leaflet-bottom.leaflet-left,
+  .leaflet-bottom.leaflet-right {
     margin-bottom: 60px;
   }
 }
