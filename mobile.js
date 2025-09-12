@@ -6,6 +6,31 @@
     meta.name = 'viewport';
     meta.content = 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover';
     document.head.appendChild(meta);
+  } else {
+    // Normalize existing viewport to include viewport-fit=cover and width=device-width
+    try {
+      var content = hasViewport.getAttribute('content') || '';
+      var parts = content.split(',');
+      var map = {};
+      for (var i = 0; i < parts.length; i++) {
+        var seg = parts[i].trim();
+        if (!seg) continue;
+        var eq = seg.indexOf('=');
+        if (eq === -1) { map[seg.toLowerCase()] = 'true'; continue; }
+        var key = seg.slice(0, eq).trim().toLowerCase();
+        var val = seg.slice(eq + 1).trim();
+        map[key] = val;
+      }
+      if (!('viewport-fit' in map)) { map['viewport-fit'] = 'cover'; }
+      if (!('width' in map)) { map['width'] = 'device-width'; }
+      var orderedKeys = ['width', 'initial-scale', 'maximum-scale', 'minimum-scale', 'user-scalable', 'viewport-fit'];
+      var finalKeys = [];
+      for (var j = 0; j < orderedKeys.length; j++) { if (orderedKeys[j] in map) finalKeys.push(orderedKeys[j]); }
+      for (var k in map) { if (Object.prototype.hasOwnProperty.call(map, k) && finalKeys.indexOf(k) === -1) finalKeys.push(k); }
+      var rebuilt = [];
+      for (var m = 0; m < finalKeys.length; m++) { rebuilt.push(finalKeys[m] + '=' + map[finalKeys[m]]); }
+      hasViewport.setAttribute('content', rebuilt.join(', '));
+    } catch (_) { /* no-op */ }
   }
 
   // Create a mobile toolbar and move existing action buttons into it
