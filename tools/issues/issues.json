@@ -1,0 +1,168 @@
+[
+  {
+    "title": "Epic: Modularize monolithic HTML into a TypeScript app",
+    "labels": ["epic", "area/architecture", "priority/p1"],
+    "body": "Current app is a single static HTML with inline JS/CSS and global state. Migrate to a modular TypeScript app with proper state management and build tooling.\n\nAcceptance criteria:\n- Vite + TypeScript + ESLint + Prettier set up\n- React (or Vue) scaffolded with Leaflet\n- Map initialization, layers, and controls refactored into modules\n- No global variables; state is explicit and typed\n- Inline CSS/scripts removed from HTML"
+  },
+  {
+    "title": "Scaffold Vite + TypeScript + ESLint + Prettier",
+    "labels": ["enhancement", "task", "area/architecture", "priority/p1"],
+    "body": "Initialize a modern toolchain to replace monolithic HTML.\n\nDone when:\n- Vite app with TypeScript compiles and serves\n- ESLint + Prettier configured\n- npm scripts: dev, build, lint, format"
+  },
+  {
+    "title": "Create React app shell with Leaflet map component",
+    "labels": ["enhancement", "task", "area/architecture"],
+    "body": "Introduce React and move map initialization into a `MapView` component.\n\nDone when:\n- React router or simple shell renders a `MapView`\n- Leaflet map renders and centers as before\n- No global `map` variable"
+  },
+  {
+    "title": "Move inline CSS and third-party styles to bundled assets",
+    "labels": ["enhancement", "task", "area/architecture"],
+    "body": "Extract inline CSS and CDN CSS to local, versioned assets. Consider Tailwind with purge for size.\n\nDone when:\n- No style tags in HTML\n- Styles live in `src/styles` or Tailwind\n- Build outputs minified CSS"
+  },
+  {
+    "title": "Bundle dependencies locally and pin versions (no CDNs)",
+    "labels": ["enhancement", "task", "area/security", "area/architecture", "area/performance"],
+    "body": "Replace CDN script/style tags with npm dependencies bundled via Vite. Pin exact versions.\n\nDone when:\n- All JS/CSS libs imported from node_modules\n- Lockfile committed\n- Build succeeds without external CDNs"
+  },
+
+  {
+    "title": "Epic: Data management and performance",
+    "labels": ["epic", "area/data", "area/performance", "priority/p1"],
+    "body": "Large GeoJSON embedded inline causes slow initial load. Offload to external files or API, load on demand, and consider tiling/spatial indexing.\n\nAcceptance criteria:\n- Building data loads asynchronously\n- Loading and error states shown\n- Optional: windowed/visible-only fetches or vector tiles"
+  },
+  {
+    "title": "Externalize building GeoJSON and load via fetch()",
+    "labels": ["enhancement", "task", "area/data", "area/performance", "priority/p1"],
+    "body": "Move embedded building GeoJSON into a separate file or endpoint. Load asynchronously with streaming where possible.\n\nDone when:\n- No inline building data in HTML\n- Data fetched at runtime with progress/loader\n- Errors handled with retry/toast"
+  },
+  {
+    "title": "Introduce named LayerGroups and avoid map.eachLayer()",
+    "labels": ["enhancement", "task", "area/data", "area/selection"],
+    "body": "Group layers into named `L.LayerGroup`s for controlled iteration and simpler logic.\n\nDone when:\n- Building features live under a `buildingsLayer` group\n- Selection iterates only relevant layers"
+  },
+  {
+    "title": "Investigate vector tiles or spatial index for large datasets",
+    "labels": ["enhancement", "task", "area/data", "area/performance"],
+    "body": "Evaluate serving buildings via vector tiles (e.g., PMTiles) or a database with spatial index (PostGIS/Cloud SQL/Firestore geo). Provide a short ADR with findings."
+  },
+
+  {
+    "title": "Epic: Selection and editing UX",
+    "labels": ["epic", "area/selection", "area/ui", "priority/p1"],
+    "body": "Refactor selection logic, integrate Leaflet.draw controls, handle MultiPolygons properly, and add export improvements."
+  },
+  {
+    "title": "Refactor selection using @turf/turf with robust geometry handling",
+    "labels": ["enhancement", "task", "area/selection"],
+    "body": "Replace ad-hoc `turfify` and `map.eachLayer()` approach with typed helpers that handle Polygon/MultiPolygon/FeatureCollection.\n\nDone when:\n- Selection works for MultiPolygons\n- Logic lives in reusable module or hook\n- Tests cover intersection edge cases"
+  },
+  {
+    "title": "Integrate Leaflet.draw and improve draw/select controls",
+    "labels": ["enhancement", "task", "area/selection", "area/ui"],
+    "body": "Use Leaflet.draw for drawing and editing selection shapes. Ensure clear affordances and delete/edit actions."
+  },
+  {
+    "title": "Replace alert() with toasts/modals and proper error handling",
+    "labels": ["enhancement", "task", "area/ui"],
+    "body": "Swap `alert()` calls for non-blocking toasts/modals. Centralize error handling for network and user errors."
+  },
+  {
+    "title": "Export dialog: choose filename and format (GeoJSON, KML)",
+    "labels": ["enhancement", "task", "area/selection", "area/ui"],
+    "body": "Add export dialog to select filename and format. Disable export when no features."
+  },
+
+  {
+    "title": "Epic: Mobile and accessibility",
+    "labels": ["epic", "area/mobile", "area/a11y", "priority/p2"],
+    "body": "Make UI responsive with touch-friendly controls and keyboard/ARIA support. Lazy-load heavy modules."
+  },
+  {
+    "title": "Responsive layout for map and controls",
+    "labels": ["enhancement", "task", "area/mobile", "area/ui"],
+    "body": "Ensure map fills viewport, controls adapt to small screens, and touch gestures work for pan/zoom/select."
+  },
+  {
+    "title": "Keyboard navigation and ARIA labels for controls",
+    "labels": ["enhancement", "task", "area/a11y", "area/ui"],
+    "body": "Add tab order, focus styles, and ARIA labels for selection/draw/export controls."
+  },
+  {
+    "title": "Lazy-load measurement and other heavy tools",
+    "labels": ["enhancement", "task", "area/performance", "area/mobile"],
+    "body": "Defer loading Leaflet.measure and similar tools until requested to reduce initial bundle size."
+  },
+
+  {
+    "title": "Epic: Security, resilience, and offline",
+    "labels": ["epic", "area/security", "area/offline", "priority/p1"],
+    "body": "Pin dependencies, add CSP, improve error handling, and support offline caching via a service worker."
+  },
+  {
+    "title": "Add strict Content-Security-Policy and remove unsafe-inline",
+    "labels": ["enhancement", "task", "area/security"],
+    "body": "Define a restrictive CSP for scripts/styles/images and eliminate inline scripts/styles via bundling."
+  },
+  {
+    "title": "Add service worker (Workbox) for offline caching",
+    "labels": ["enhancement", "task", "area/offline", "area/performance"],
+    "body": "Use Workbox to precache app shell and cache data assets for resilience and offline use."
+  },
+  {
+    "title": "Handle network failures with retries and user feedback",
+    "labels": ["enhancement", "task", "area/security", "area/ui"],
+    "body": "Add centralized fetch helpers with timeouts, retries, and toast notifications for failures."
+  },
+
+  {
+    "title": "Epic: Testing and CI",
+    "labels": ["epic", "area/testing", "area/ci", "priority/p2"],
+    "body": "Add unit tests for selection/export, e2e UI tests, and CI for lint/test/build."
+  },
+  {
+    "title": "Unit tests for selection and export logic (Jest)",
+    "labels": ["enhancement", "task", "area/testing"],
+    "body": "Cover intersect filter and export serialization with Jest. Include edge cases and invalid input handling."
+  },
+  {
+    "title": "E2E tests for draw/select/export (Playwright or Cypress)",
+    "labels": ["enhancement", "task", "area/testing"],
+    "body": "Automate flows: draw polygon, select buildings, clear, export with filename."
+  },
+  {
+    "title": "GitHub Actions: lint, test, build",
+    "labels": ["enhancement", "task", "area/ci"],
+    "body": "Set up CI pipeline to run ESLint, Prettier check, unit tests, and build on PRs."
+  },
+
+  {
+    "title": "Implement file import (GeoJSON/KML) with validation",
+    "labels": ["enhancement", "task", "area/ui", "area/data"],
+    "body": "Allow users to import local GeoJSON/KML, validate schema/geometry, and add to a layer group."
+  },
+  {
+    "title": "Geometry editing: enable vertex/shape edits on features",
+    "labels": ["enhancement", "task", "area/selection"],
+    "body": "Support editing geometries with Leaflet.draw edit mode and persist changes to export."
+  },
+  {
+    "title": "Auto-carryover fields on edits",
+    "labels": ["enhancement", "task", "area/data"],
+    "body": "When editing or creating features, carry over configured attribute fields as defaults."
+  },
+  {
+    "title": "Dynamic schema updates for feature properties",
+    "labels": ["enhancement", "task", "area/data"],
+    "body": "Allow schema to evolve via a config file, updating forms and validation dynamically."
+  },
+  {
+    "title": "Search: find buildings by name/ID or spatial query",
+    "labels": ["enhancement", "task", "area/ui", "area/data"],
+    "body": "Add a search box to locate buildings by text or filter by attributes; pan/zoom to result."
+  },
+  {
+    "title": "Access control: optional auth and role-based permissions",
+    "labels": ["enhancement", "task", "area/security"],
+    "body": "If editing is restricted, add authentication and roles to gate editing/export features."
+  }
+]
