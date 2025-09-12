@@ -26,10 +26,39 @@
     document.body.appendChild(toolbar);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupToolbar);
-  } else {
+  // Expose the Folium-created Leaflet map as window.map for shared scripts
+  function exposeLeafletMapAlias() {
+    try {
+      if (window.map && typeof window.map.getCenter === 'function') return;
+      var candidate = null;
+      // Prefer keys that match Folium's map_* naming
+      for (var key in window) {
+        if (!Object.prototype.hasOwnProperty.call(window, key)) continue;
+        if (!/^map_[a-f0-9]+$/i.test(key)) continue;
+        var val = window[key];
+        if (val && (typeof val.getCenter === 'function') && (typeof val.addLayer === 'function')) { candidate = val; break; }
+      }
+      // Fallback: first object on window that looks like an L.Map
+      if (!candidate) {
+        for (var k in window) {
+          if (!Object.prototype.hasOwnProperty.call(window, k)) continue;
+          var v = window[k];
+          if (v && (typeof v.getCenter === 'function') && (typeof v.addLayer === 'function')) { candidate = v; break; }
+        }
+      }
+      if (candidate) { window.map = candidate; }
+    } catch (_) { /* no-op */ }
+  }
+
+  function initMobile() {
     setupToolbar();
+    exposeLeafletMapAlias();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobile);
+  } else {
+    initMobile();
   }
 })();
 
