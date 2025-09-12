@@ -14,7 +14,7 @@
     var hasFit = /viewport-fit\s*=\s*cover/i.test(content);
     if (!hasFit) {
       var updated = content.trim();
-      if (updated && !/[;,]$/.test(updated)) {
+      if (updated && !/,\s*$/.test(updated)) {
         updated += ', ';
       }
       updated += 'viewport-fit=cover';
