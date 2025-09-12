@@ -1,12 +1,33 @@
 (function() {
   // Ensure viewport meta for iPhone 16 and other mobiles
-  var hasViewport = document.querySelector('meta[name="viewport"]');
-  if (!hasViewport) {
-    var meta = document.createElement('meta');
-    meta.name = 'viewport';
-    meta.content = 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover';
-    document.head.appendChild(meta);
+  function ensureViewportMeta() {
+    var meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'viewport';
+      meta.content = 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover';
+      document.head.appendChild(meta);
+      return;
+    }
+    try {
+      var current = meta.getAttribute('content') || '';
+      var parts = current.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+      function hasToken(token) {
+        var key = token.split('=')[0];
+        for (var i = 0; i < parts.length; i++) {
+          var p = parts[i];
+          if (p.split('=')[0] === key) { return true; }
+        }
+        return false;
+      }
+      var desired = ['width=device-width','initial-scale=1','maximum-scale=1','viewport-fit=cover'];
+      for (var j = 0; j < desired.length; j++) {
+        if (!hasToken(desired[j])) { parts.push(desired[j]); }
+      }
+      meta.setAttribute('content', parts.join(', '));
+    } catch (_) { /* no-op */ }
   }
+  ensureViewportMeta();
 
   // Create a mobile toolbar and move existing action buttons into it
   function setupToolbar() {
