@@ -30,7 +30,7 @@ def http_request(method: str, url: str, token: str, payload: dict | None):
 			return e.code, {"message": body if body is not None else str(e)}
 
 
-def main():
+def main() -> int:
 	parser = argparse.ArgumentParser(description="Create or update GitHub labels from labels.json")
 	parser.add_argument("--owner", default=os.environ.get("OWNER", "lrpthomas"))
 	parser.add_argument("--repo", default=os.environ.get("REPO", "YV_MAP"))
