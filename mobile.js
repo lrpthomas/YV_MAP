@@ -1,12 +1,28 @@
 (function() {
-  // Ensure viewport meta for iPhone 16 and other mobiles
-  var hasViewport = document.querySelector('meta[name="viewport"]');
-  if (!hasViewport) {
-    var meta = document.createElement('meta');
-    meta.name = 'viewport';
-    meta.content = 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover';
-    document.head.appendChild(meta);
+  // Ensure viewport meta exists and includes viewport-fit=cover for iOS safe areas
+  function ensureViewportMeta() {
+    var meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'viewport';
+      meta.content = 'width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover';
+      document.head.appendChild(meta);
+      return;
+    }
+
+    var content = meta.getAttribute('content') || '';
+    var hasFit = /(?:^|[,\s])viewport-fit\s*=\s*cover(?:[,\s]|$)/i.test(content);
+    if (!hasFit) {
+      var updated = content.trim();
+      if (updated && !/,\s*$/.test(updated)) {
+        updated += ', ';
+      }
+      updated += 'viewport-fit=cover';
+      meta.setAttribute('content', updated);
+    }
   }
+
+  ensureViewportMeta();
 
   // Create a mobile toolbar and move existing action buttons into it
   function setupToolbar() {
