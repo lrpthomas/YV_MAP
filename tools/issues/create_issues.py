@@ -21,11 +21,12 @@ def http_request(method: str, url: str, token: str, payload: dict | None):
 		with urllib.request.urlopen(req, timeout=30) as resp:
 			return resp.getcode(), json.loads(resp.read().decode("utf-8"))
 	except urllib.error.HTTPError as e:
+		body = None
 		try:
 			body = e.read().decode("utf-8")
 			return e.code, json.loads(body)
 		except Exception:
-			return e.code, {"message": body if 'body' in locals() else str(e)}
+			return e.code, {"message": body if body is not None else str(e)}
 
 
 def main():
