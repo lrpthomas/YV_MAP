@@ -24,9 +24,10 @@ def http_request(method: str, url: str, token: str, payload: dict | None):
 		body = None
 		try:
 			body = e.read().decode("utf-8")
-			return e.code, json.loads(body)
-
-
+			try:
+				return e.code, json.loads(body)
+			except json.JSONDecodeError:
+				return e.code, body
 def main():
 	parser = argparse.ArgumentParser(description="Create GitHub issues from issues.json")
 	parser.add_argument("--owner", default=os.environ.get("OWNER", "lrpthomas"))
