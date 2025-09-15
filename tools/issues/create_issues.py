@@ -28,6 +28,8 @@ def http_request(method: str, url: str, token: str, payload: dict | None):
 				return e.code, json.loads(body)
 			except json.JSONDecodeError:
 				return e.code, body
+		except Exception as ex:
+			return e.code, f"Failed to read error body: {ex}"
 def main():
 	parser = argparse.ArgumentParser(description="Create GitHub issues from issues.json")
 	parser.add_argument("--owner", default=os.environ.get("OWNER", "lrpthomas"))
