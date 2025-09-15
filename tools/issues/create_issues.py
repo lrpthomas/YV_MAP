@@ -25,8 +25,6 @@ def http_request(method: str, url: str, token: str, payload: dict | None):
 		try:
 			body = e.read().decode("utf-8")
 			return e.code, json.loads(body)
-			return e.code, {"message": body if body is not None else str(e)}
-			return e.code, {"message": body if body is not None else str(e)}
 
 
 def main():
