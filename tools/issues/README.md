@@ -33,4 +33,4 @@ Files:
 
 Notes:
 - Re-running label creation will update existing labels.
-- Issues are created idempotently only if titles are unique and you avoid re-running; the script does not deduplicate remotely.
+- Issue creation is **not idempotent**: running the script multiple times will create duplicate issues, as there is no deduplication logic. Avoid re-running unless you intend to create duplicates.
