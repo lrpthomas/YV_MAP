@@ -69,7 +69,8 @@ html, body {
 
 /* Prevent toolbar overlapping scale/attribution */
 @media (max-width: 768px) {
-  .leaflet-bottom {
+  .leaflet-bottom.leaflet-left,
+  .leaflet-bottom.leaflet-right {
     margin-bottom: 60px;
   }
 }
