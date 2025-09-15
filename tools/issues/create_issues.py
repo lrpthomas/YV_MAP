@@ -29,6 +29,8 @@ def http_request(method: str, url: str, token: str, payload: dict | None):
 			except json.JSONDecodeError:
 				return e.code, body
 		except Exception as ex:
+			return e.code, {"message": str(ex)}
+		except Exception as ex:
 			return e.code, f"Failed to read error body: {ex}"
 def main():
 	parser = argparse.ArgumentParser(description="Create GitHub issues from issues.json")
