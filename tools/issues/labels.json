@@ -1,0 +1,26 @@
+[
+  {"name":"epic","color":"5319e7","description":"Large, multi-issue initiative"},
+  {"name":"task","color":"1d76db","description":"Concrete implementation task"},
+  {"name":"enhancement","color":"a2eeef","description":"New feature or request"},
+  {"name":"bug","color":"d73a4a","description":"Something isn't working"},
+  {"name":"documentation","color":"0075ca","description":"Improvements or additions to docs"},
+  {"name":"help wanted","color":"008672","description":"Extra attention is needed"},
+  {"name":"good first issue","color":"7057ff","description":"Good for newcomers"},
+
+  {"name":"area/architecture","color":"bfd4f2","description":"Build tooling, structure, TypeScript, bundling"},
+  {"name":"area/data","color":"bfd4f2","description":"Data loading, storage, API, performance"},
+  {"name":"area/selection","color":"bfd4f2","description":"Selection logic, turf, geometry ops"},
+  {"name":"area/ui","color":"bfd4f2","description":"UI components, layout, toasts, dialogs"},
+  {"name":"area/mobile","color":"bfd4f2","description":"Responsive design, touch interactions"},
+  {"name":"area/a11y","color":"bfd4f2","description":"Accessibility and keyboard support"},
+  {"name":"area/security","color":"bfd4f2","description":"CSP, dependencies, authz/authn"},
+  {"name":"area/offline","color":"bfd4f2","description":"Service worker, caching, resilience"},
+  {"name":"area/testing","color":"bfd4f2","description":"Unit, e2e tests, validation"},
+  {"name":"area/performance","color":"bfd4f2","description":"Perf, lazy-loading, bundle size"},
+  {"name":"area/ci","color":"bfd4f2","description":"CI/CD, formatting, linting"},
+
+  {"name":"priority/p0","color":"b60205","description":"Top priority"},
+  {"name":"priority/p1","color":"d93f0b","description":"High priority"},
+  {"name":"priority/p2","color":"fbca04","description":"Medium priority"},
+  {"name":"priority/p3","color":"0e8a16","description":"Low priority"}
+]
