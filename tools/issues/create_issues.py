@@ -30,7 +30,7 @@ def http_request(method: str, url: str, token: str, payload: dict | None):
 				return e.code, body
 		except Exception as ex:
 			return e.code, f"Failed to read error body: {ex}"
-def main():
+def main() -> int:
 	parser = argparse.ArgumentParser(description="Create GitHub issues from issues.json")
 	parser.add_argument("--owner", default=os.environ.get("OWNER", "lrpthomas"))
 	parser.add_argument("--repo", default=os.environ.get("REPO", "YV_MAP"))
