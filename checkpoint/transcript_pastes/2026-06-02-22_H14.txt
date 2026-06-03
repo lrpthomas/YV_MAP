@@ -1,0 +1,34 @@
+varKey	term	system	media	where	example	note	source	delete?
+account_phone	Account / Phone / Agreement	iVUE	base	iVUE account header — the working/billing number on the service order. Format is the 10-digit account string. 101, 125 = INT, 559 = Telephone	101 822 **** IN	Trailing IN / OUT / QDS marks the direction of the order (IN = connect, OUT = disconnect).	value_location	
+mgcp_name	Line Pack — MGCP name	LinePacks	both	LinePacks → the MGCP / endpoint name field. This is the full provisioning string for the voice port.	FRNT-PRSV_GPON-CLX01-01-04-1421-01	Reads as: office (FRNT) – cabinet/tech (PRSV_GPON) – shelf CLX01 – slot 01 – port 04 – etc.	value_location	
+GR303	Line Pack - CRV Number	LinePackss	both	LinePacks → the GR303 / endpoint name field. This is the full provisioning string for the voice port.	FRNT-0306-1994	Taqua provisioning for voice agreements	value_location	
+linepack_equip	Line Pack — Equipment	LinePacks	both	LinePacks → Equipment, second column. The cabinet + card/slot/port identifier.	PRSV_GPON 01-01-04	Second column on the equipment row — not the first.	value_location	
+splitter_port	Line Pack — Splitter Port	LinePacks / Splitter	fiber	LinePacks → Splitter view. Identifies the PON splitter shelf and port the customer rides.	PRSV — S4, P21	S = splitter number, P = port number on that splitter.	value_location	
+cable_name	Cable Name	iVUE	base	iVUE → cable/pair record. The distribution cable + count/pair the service runs on.	PRSV, 44	Cable identifier followed by the pair/fiber count.	value_location	
+mst_ped	MST / Pedestal	Fiberbook / As-Built	base	Fiberbook (or the as-built drawing) → MST and pedestal call-outs for the address.	MST 2 / PED — (from as-built)	Cross-check the as-built against Fiberbook when they disagree.	value_location	
+ivue_equip_id	iVUE Equip ID	iVUE	base	iVUE → Pedistal the home is fed from.	AH1624-1		value_location	
+fsan	Parent Equipment — Internet line item / ONT SN	iVUE	fiber	iVUE → parent equipment under the Internet line item → ONT serial / FSAN field.	FSAN: **PENDING**	Often blank until the ONT is registered — Warehouse or Diana in Customer Care will assign the ONT / Modem providing the serial number required for this field.	value_location	
+so_number	SO Number	iVUE	base	iVUE → service order header; the SO# (a related/grouped order may list several).	142965	Multiple SO#s can appear when orders are bundled.	suggestion	
+date	Order Date	iVUE	base	iVUE → order date; written at the head of the note in M.D.YY form.	8.1.23	Style JF writes it with slashes (8/1/23).	suggestion	
+action	Action Phrase	Notes	base	The work being done — summarized at the top of the note after the date.	DISC & RECON QDS	Drives which workflow/variant applies.	suggestion	
+facs_status	FACS Status	FACS	base	FACS → after edits; record whether records were left alone, updated, or removed.	No FACS Changed	Common: No FACS Changed / FACS Updated / FACS Removed / FACS Cleared.	suggestion	
+phone_out	Phone — OUT	iVUE	base	iVUE → the number being disconnected (the OUT line on a QDS swap).	877 ****	(559)- Optional	suggestion	
+phone_in	Phone — IN	iVUE	base	iVUE → the number being connected (the IN line on a QDS swap).	841 ****	(559)- Optional	suggestion	
+phone_qds	Phone — QDS	iVUE	base	QDS → the QDS-mapped number tied to the service swap.	877 ****	Quick Dial Service for 911 - (559)- Optional	suggestion	
+account_out	Account — OUT	iVUE	base	iVUE → billing account for the OUT number (101-prefixed).	101 877 ****	Internet Account Number non tele prefix indicates internet	suggestion	
+account_in	Account — IN	iVUE	base	iVUE → billing account for the IN number (101-prefixed).	101 841 ****	Internet Account Number non tele prefix indicates internet	suggestion	
+tech	Tech Initials	Notes	base	The technician who wrote/completed the note; initials at the end of the date line.	KM	Also your style selector -**- format (CT, JF, KM…).	suggestion	
+tel_port	TEL Port	LinePacks	both	LinePacks → the voice port string for the TEL section (switch-cabinet-shelf-slot-port + pair).	FRNT-LASH-ADT01-07-44	First token after *TEL.	suggestion	
+dsl_port	DSL Port	LinePacks	both	LinePacks → First Column (Equipment) the data port string for the DSL section.	FRNT-0306-0776 TFRD 287 105N-3-1	First token after *DSL.	suggestion	
+other_port	Other Port	LinePacks	base	LinePacks → any additional port not under TEL/DSL (cross-connect, secondary line).	FRNT-0327-1480 MNRT 43 M6-1-2A		suggestion	
+tel Cable Tie Down_location	TEL Location	FACS	copper	FACS → the cable/pair + binding-post location for the TEL port.	TFRD N06-2-02-07 BP,157	BP = binding post.	suggestion	
+dsl Cable Tie Down_location	DSL Location	FACS	copper	FACS → the cable/pair + binding-post location for the DSL port.	TFRD N06-2-02-08 BP,158	BP = binding post.	suggestion	
+splicer_note	Splicer Note	ATTN SPLICER	base	The field-splicing instruction block in the note (PIC extend / spliced-through call-outs).	@ 3-13 Extend PIC 17,317 (25pr) to (6pr) PIC 6 @ 313-2	Flag for the splicer.	suggestion	
+edge_id	EDGE Customer ID	EDGE	edge	EDGE system → customer ID for EDGE FTTH product (always 125-001-XXXX).	125 001****		suggestion	
+csx	CSX String	iVUE	base	iVUE → combined switch/cable/port assignment string.	FRNT-0306-1994	Sometimes appears short (e.g. 328-****).	suggestion	
+gpon_port	GPON Port	LinePacks	fiber	LinePacks → the GPON upstream port for a fiber ONT.	MLTN-N01-03-02 GPON-B-1	FTTH only.	suggestion	
+edge_port	EDGE Port	EDGE	edge	EDGE system → the FTTH downstream port + pair for EDGE service.	EDGE-MLTN-FTTH PORT-D-30 PAIR 30	EDGE product only; rare.	suggestion	
+source_doc	Source Document	Notes	base	Which monthly file the note came from. "… Line Assignments" = a Service Order; "… Tech Calls" = a trouble/tech-call note.	September Line Assignments.docx	Tech Calls run longer and usually log a field correction.	suggestion	
+workflow_type	Workflow Type	iVUE	base	The classified action pattern for the order (top workflow in the corpus).	GEN_DISCONNECT_QDS_BILLING	Big buckets: DISC_QDS_RECON, VACA_RECONNECT, DISCONNECT_ONLY, UPGRADE_*, NPD.	suggestion	
+tech_attrib	Tech-Call Attribution	Notes	base	On a tech-call note: the "Per <name>" tag crediting who directed the field change.	Per Bart, wound up using pr 1613 on cable 2	Frequent names: SE, Han, Kong, Tammie. Marks a same-SO correction, not a new order.	suggestion	
+port_correction	Port Correction	FACS	base	Tech-call language showing the originally-assigned port was changed in the field.	used PR 1403 instead — FACS Updated	Signals BAD_PORT_UPDATE: the SO port did not work, FACS was updated to the real one.	suggestion

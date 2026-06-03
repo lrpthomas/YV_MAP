@@ -1,0 +1,174 @@
+Exchange	Wirecenter (Node)	Shelf / BAS / MAG	Slot / Blade	Card Type	Card Manufacturer		
+							
+	ABRY (N40)				Calix		
+		N40-1	1-5,7-8	Combo2-24			
+		N40-1	6	Combo-2 24V			
+	ABRY 303 (N41)				Calix		
+		N41-2	1-8, 11-20	RPOTS24			
+		N41-3	1-8, 11-20	RPOTS24			
+		N41-4	1-5	RPOTS24			
+		N41-4	6,14,16,17	Combo-2 24V			
+		N41-4	7, 8, 11-13, 15	Combo-2 24			
+							
+	ACRN (N30-1)				Adtran 1124P		
+		N30-1	1	1124P			
+	ACRN (N31-2)				Adtran 1124P		
+		N31-2	1	1124P			
+	ACRN (N32-3)				Adtran 1124P		
+		N32-3	1	1124P			
+							
+	ALSP (N24)				Adtran TA5000		
+		N24-1	1-8	Combo A2+			
+		N24-1	9	VDSL48PCOMBO			
+		N24-1	13	AE 24-Port			
+		N24-1	22	T1 8-PORT			
+							
+	ANRH (N02)			Combo V	Calix E3		
+							
+							
+	BGSD				AdTran		
+		ADT01	1, 3, 5	ADT 48-PORT			
+							
+							
+	BGSP (N2)			Combo V	Calix E3		
+							
+							
+	BLFR (N27)				Adtran		
+		N27-1	1-5	Combo A2+			
+							
+	BLKM (N42)				Adtran 1124P		
+		N42-1	1-4	1124P			
+							
+	BLMT (N23)				Adtran		
+		N23-1	1-5	Combo A2+			
+			6	Combo V2			
+							
+	BRVL (N48)				Adtran		IVUE shows card in 12
+		N48-1	1-11	Combo A2+			
+			13	VDSL48PCombo			
+			21,22	GE-8			
+							
+	BRVN (N47)				Adtran		
+		N47-1	1-5	Combo V2			
+							
+	CLKN				AdTran 5006		
+		ADT01	1, 3	ADT 48-Port			
+							
+							
+	CNTK (N43)				Calix E5		
+		N43-1					
+		N43-2					
+							
+	CNRD				ADT		
+		ADT01	1	ADT 48-PORT			
+							
+	CRLM				AdTran 1148 VPX		
+		ADT01	1	ADT 48-PORT VDSL			
+							
+							
+	HHLW				AdTran		
+		ADT01	1, 3	ADT 48-Port			needs to be  1124P
+							
+							
+	JSBS (N36)				Adtran		
+		N36-1	1	Combo V2			
+		N36-1	2	Combo A2+			
+							
+	LBFR (N28)				Adtran 1124P		
+		N28-1	1	1124P			
+							
+	LKWD (N44))				Calix E5		
+		N44-1		48PT ADSL2+			IVUE shows card in 5&6
+		N44-2		48PT ADSL2+			
+							
+	LNSN (N21)				Adtran		
+		N21-1	1, 2	Combo A2+			IVUE shows card in 12
+			3	VDSL48PCOMBO			
+							
+	LYNX (N8)				Calix E7		
+		N8-1	1,2	VDSL2-48CR2			
+							
+	MDLK (N26)				Adtran		
+		N26-1	1-11, 13	Combo A2+			
+		N26-1	10	Combo V2			
+							
+	MFRD				AdTran 5006		
+		1	1, 3	48 Port			
+							
+	MGCN (N7)				CALIX E7		
+		N7-1	1, 2	VDSL2-48CR2			
+							
+							
+	MSTN				ADT		
+		1	1, 3, 5, 7	48 Port			
+							(still have a Calix N45 shelf that was originally planned in IVUE)
+	OLDR (N42)				Calix		IVUE shows card in Slot 12
+		N42-1	1-2, 7	Combo2-24V			
+			3	Combo2-24			
+			4-6	RPOTS 24			IVUE shows card in slots 5-10
+							
+	PRAT (N34)				Adtran		
+		N34-1	1-10, 13,14, 16	Combo A2+			
+			11	AE 24-Port-S			
+		N34-1	15	Combo V2			
+							
+	PWHS (N37)				AdTran		
+							
+							
+	RKHL				AdTran		
+		1	1, 3, 5, 7				
+							
+	SCMR (N49)				Adtran		
+		N49-1	1-6	Combo V2			
+							
+	SLVR				AdTran		
+		ADT01	1, 3, 5	ADT 48-Port			
+							
+	SMLL (N19)				Adtran		
+		N19-1	1, 2	Combo V2			
+							
+	SMNL	ADT01	1, 3	ADT 48-Port	AdTran		
+							
+							
+	SPHD	ADT01	1	ADT 48-Port	AdTran		
+							
+							
+	SPRD				AdTRAN		
+		ADT01	1,3	ADT 48 PORT			
+							
+							
+	SRHS (N41)				Adtran		
+		N41-1	1-4	Combo A2+			
+		N41-1	6	GE 8-PORT			
+							
+	SRLM (N44)				Adtran		IVUE shows as 2x 1124 shelves
+		N44-1	1-4	Combo A2+			
+		N44-1	5	VDSL 48-COMBO			
+							
+	TLHS (N45)				Adtran		
+		N45-1	1-2	Combo A2+			
+		N45-1	3	VDSL48PCOMBO			
+							
+	TRMR (N37)				AdTran TA5006		
+		N37-1	1, 2	Combo V2			
+		N37-1	5	T1 8-PORT			
+							
+	TRSP				AdTran		
+		ADT01	1, 3, 5	ADT 48-PORT			
+							
+							
+	TWNP				AdTran 1148 VPX		
+		ADT01	1	ADT 48-PORT VDSL			
+							
+							
+	WMLR (N43)				Adtran		
+		N43-1	1-7	Combo A2+			
+			8	Combo V2			
+							
+	WSHH (N20)						
+		N40-1	1-7	Combo V2	Adtran		
+							
+	WTVL (N38)				Adtran		
+		N38-1	1-4	Combo V2			
+							
+	WTVW (N4))	N4-1	1	Combo V	Calix E3

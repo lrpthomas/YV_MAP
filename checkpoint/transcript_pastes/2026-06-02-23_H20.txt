@@ -1,0 +1,12 @@
+To build Pic-Pair records for as built schematics:
+Select ‘line’ cable leaving (remote) CO and search for Route ID in Oasis. Once you have that record open Right Click in the gray area and select ‘Facility builder’
+The Facility Connection Wizard Window should pop up displaying the (remote) CO near the Left Arrow, the ‘To Junction’ at the top of the screen and the next available out records from the ‘To Junction’
+If there are no records in the ‘To’ cable (window on left) select ‘Create Facility’ at the bottom of the page. This will open another dialogue box displaying the desired Pic count, status, wirecenter…
+ 
+ 
+ 
+TO FIX/REMOVE PIC-PAIR RECORDS:
+ 
+DO NOT TRY TO OPEN FACILITY TABLE IN DATABASE, IT WILL CRASH ACCESS!!
+Instead use ‘Pic-Pair-Fix_sp’ Stored Procedure. Open the stored procedure in design view and change the criteria for the ‘ROUTE_Name’ field to = N ‘LLLL-NNNNNN’ (Ex. NFRK-123456)
+This will narrow down the hundreds of thousands of records down to just those relating to that piece of copper that you are working with.

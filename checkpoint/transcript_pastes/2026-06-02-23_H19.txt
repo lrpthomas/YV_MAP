@@ -1,0 +1,11 @@
+Recap - basically recapturing the service order request     
+PIC - NO PIC - means no carrier for toll or long distance
+Complete - means complete caller ID blocking so the number will reflect PRIVATE on caller ID units
+900 - to block 900 calls - these are normally the adult entertainment calls
+NP - Non published
+The RECAP is mostly for Kim and Kayla to make sure the switch is updated correctly (sun)
+NO FEATURES
+   BLKS: COLLECT, 3RD, INT'L, 900, SEL
+So this is saying blocks, collect calls, 3rd party calls, international calls, 900 calls, and SEL?
+yes, Selective Blocking means that the number will appear on Caller ID units.
+FYI - Ponderosa Long Distance stopped offering International calling in January 2019

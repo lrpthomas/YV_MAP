@@ -1,0 +1,212 @@
+{
+ "set1_atomic": [
+  {
+   "code": "VACA",
+   "meaning": "Vacation — customer leaving on, or returning from, vacation."
+  },
+  {
+   "code": "DISC",
+   "meaning": "Disconnect. Usually followed by what is being disconnected (TEL / DSL / EDGE)."
+  },
+  {
+   "code": "CONN",
+   "meaning": "Connect. Usually paired with what is connected (QDS / a speed / FTTH)."
+  },
+  {
+   "code": "RECON",
+   "meaning": "Reconnect."
+  },
+  {
+   "code": "QDS",
+   "meaning": "Quick Dial Service — the dialing rules layer (controls which numbers are allowed). Pairs with QDT (Quick Dial Tone), the state layer that provides dial tone in a restricted state. QDT = state, QDS = dialing rules; combined they produce a working \"911-only line\" (working nomenclature, not exact spec). Notes only ever write QDS."
+  },
+  {
+   "code": "TEL",
+   "meaning": "Telephone / voice service."
+  },
+  {
+   "code": "DSL",
+   "meaning": "DSL data service."
+  },
+  {
+   "code": "ADSL",
+   "meaning": "Asymmetric DSL."
+  },
+  {
+   "code": "VDSL",
+   "meaning": "Very-high-bit-rate DSL."
+  },
+  {
+   "code": "FTTH",
+   "meaning": "Fiber to the Home."
+  },
+  {
+   "code": "EDGE",
+   "meaning": "EDGE FTTH product."
+  },
+  {
+   "code": "INT",
+   "meaning": "Internet."
+  },
+  {
+   "code": "UPGRADE",
+   "meaning": "Increase service tier / speed."
+  },
+  {
+   "code": "DOWNGRADE",
+   "meaning": "Decrease service tier."
+  },
+  {
+   "code": "BND",
+   "meaning": "Bonded — two pairs working together for higher speed (also written BONDED)."
+  },
+  {
+   "code": "SNGL",
+   "meaning": "Single pair (non-bonded)."
+  },
+  {
+   "code": "CBOL",
+   "meaning": "Connected But Only-Online — the telephone line is removed; the customer stays connected to internet. Always paired with a 101 internet account that stays active."
+  },
+  {
+   "code": "BILLING",
+   "meaning": "Billing action (usually 'Billing Correction')."
+  },
+  {
+   "code": "CORRECTION",
+   "meaning": "A correction — billing or service-point."
+  },
+  {
+   "code": "NPD",
+   "meaning": "Non-Pay Disconnect."
+  },
+  {
+   "code": "PERM",
+   "meaning": "Permanent (e.g. PERM DISC = permanent disconnect)."
+  },
+  {
+   "code": "MOVE",
+   "meaning": "Move service to a new location."
+  },
+  {
+   "code": "XCONN",
+   "meaning": "Cross-connect."
+  },
+  {
+   "code": "ACP",
+   "meaning": "TBD — pending confirmation (suspected Affordable Connectivity Program)."
+  }
+ ],
+ "set2_combos": [
+  {
+   "phrase": "VACA RECON",
+   "occurrences": 1126,
+   "meaning": "Reconnect service — customer back from vacation."
+  },
+  {
+   "phrase": "VACA DISC",
+   "occurrences": 978,
+   "meaning": "Disconnect service — customer leaving on vacation."
+  },
+  {
+   "phrase": "DISC TEL (CBOL), QDS CONN, & Billing Correction",
+   "occurrences": 1393,
+   "meaning": "Remove the phone line (internet stays), connect the QDS line, and fix billing."
+  },
+  {
+   "phrase": "DISC & QDS CONN",
+   "occurrences": 766,
+   "meaning": "Disconnect the phone, connect QDS."
+  },
+  {
+   "phrase": "DISC TEL (CBOL) & Billing Correction",
+   "occurrences": 365,
+   "meaning": "Remove the phone line (internet stays) and fix billing."
+  },
+  {
+   "phrase": "QDS CONN",
+   "occurrences": 398,
+   "meaning": "Connect a QDS line."
+  },
+  {
+   "phrase": "DISC DSL",
+   "occurrences": 368,
+   "meaning": "Disconnect DSL data only."
+  },
+  {
+   "phrase": "NPD",
+   "occurrences": 320,
+   "meaning": "Non-Pay Disconnect."
+  },
+  {
+   "phrase": "Correcting Service Points",
+   "occurrences": 250,
+   "meaning": "Provide 911 with the line number and address (the dispatch service-point record)."
+  },
+  {
+   "phrase": "DISC",
+   "occurrences": 244,
+   "meaning": "Plain disconnect."
+  },
+  {
+   "phrase": "INT Upgrade to <speed> BND",
+   "occurrences": 476,
+   "meaning": "Internet speed upgrade, bonded."
+  },
+  {
+   "phrase": "INT Upgrade to <speed> ADSL BND",
+   "occurrences": 389,
+   "meaning": "Internet upgrade, ADSL bonded."
+  },
+  {
+   "phrase": "INT Upgrade to <speed> SNGL",
+   "occurrences": 182,
+   "meaning": "Internet upgrade, single pair."
+  },
+  {
+   "phrase": "DISC TEL (CBOL)",
+   "occurrences": 150,
+   "meaning": "Remove the phone line; customer stays connected to internet."
+  },
+  {
+   "phrase": "DISC & QDS RECON",
+   "occurrences": 144,
+   "meaning": "Disconnect the phone, reconnect QDS."
+  },
+  {
+   "phrase": "CONN <speed> BND",
+   "occurrences": 101,
+   "meaning": "New connect at the given speed, bonded."
+  },
+  {
+   "phrase": "ACP INT Upgrade to <speed> VDSL BND",
+   "occurrences": 94,
+   "meaning": "ACP internet upgrade, VDSL bonded."
+  },
+  {
+   "phrase": "INT Upgrade to <speed> FTTH",
+   "occurrences": 84,
+   "meaning": "Internet upgrade to fiber."
+  },
+  {
+   "phrase": "QDS RECON",
+   "occurrences": 75,
+   "meaning": "Reconnect a QDS line."
+  },
+  {
+   "phrase": "DISC TEL",
+   "occurrences": 67,
+   "meaning": "Disconnect the phone line."
+  },
+  {
+   "phrase": "NPD & QDS CONN",
+   "occurrences": 67,
+   "meaning": "Non-Pay Disconnect, then connect QDS."
+  },
+  {
+   "phrase": "QDS DISC",
+   "occurrences": 56,
+   "meaning": "Disconnect a QDS line."
+  }
+ ]
+}

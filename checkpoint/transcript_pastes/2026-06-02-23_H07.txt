@@ -1,0 +1,64 @@
+Facility Restriction						
+Company			Internet Offerings	 C&C Cost 	C&C Code	C&C Description	Note	Lookup Name	Res / Bus		Facility Service	Description	Internal Service Type	Speed Tier ID	Upload Speed	Download Speed	Technology
+Ponderosa	** Can have only 1 of these groups as long as  the address does not already qualify for 25/3 or 100/20 **	** Can have 1 **	Internet Up To 12Mbps / 1Mbps	 55.00 	D000000	Internet Up To 12Mbps / 1Mbps		1.5/.384 ADSL2	Res	No Resale	D000	1.5/.384 ADSL2	Internet	1 - 1 Mbps Download x 256 Kbps Upload	0.38	1.5	Copper Wire
+					D000001	Internet Up To 12Mbps / 1Mbps		3/.768 ADSL2	Res	No Resale	D001	3/.768 ADSL2	Internet	1 - 1 Mbps Download x 256 Kbps Upload	0.77	3	Copper Wire
+					D000002	Internet Up To 12Mbps / 1Mbps		3/.768 ADSL2 B	Res	No Resale	D002	3/.768 ADSL2 BOND	Internet	1 - 1 Mbps Download x 256 Kbps Upload	0.77	3	Copper Wire
+					D000003	Internet Up To 12Mbps / 1Mbps		6/.768 ADSL2	Res	No Resale	D003	6/.768 ADSL2	Internet	2 - 4 Mbps Download x 1 Mbps Upload	0.77	6	Copper Wire
+					D000004	Internet Up To 12Mbps / 1Mbps		6/.768 ADSL2 B	Res	No Resale	D004	6/.768 ADSL2 BOND	Internet	2 - 4 Mbps Download x 1 Mbps Upload	0.77	6	Copper Wire
+					D000005	Internet Up To 12Mbps / 1Mbps		6/1 ADSL2	Res	No Resale	D005	6/1 ADSL2	Internet	2 - 4 Mbps Download x 1 Mbps Upload	1	6	Copper Wire
+					D000006	Internet Up To 12Mbps / 1Mbps		6/1 ADSL2 B	Res	No Resale	D006	6/1 ADSL2 BOND	Internet	2 - 4 Mbps Download x 1 Mbps Upload	1	6	Copper Wire
+					D000007	Internet Up To 12Mbps / 1Mbps		6/1.5 ADSL2	Res	No Resale	D007	6/1.5 ADSL2	Internet	2 - 4 Mbps Download x 1 Mbps Upload	1.5	6	Copper Wire
+					D000008	Internet Up To 12Mbps / 1Mbps		6/1.5 ADSL2 B	Res	No Resale	D008	6/1.5 ADSL2 BOND	Internet	2 - 4 Mbps Download x 1 Mbps Upload	1.5	6	Copper Wire
+					D000009	Internet Up To 12Mbps / 1Mbps		10/.768 ADSL2	Res	No Resale	D009	10/.768 ADSL2	Internet	2 - 4 Mbps Download x 1 Mbps Upload	0.77	10	Copper Wire
+					D000010	Internet Up To 12Mbps / 1Mbps		10/.768 ADSL2 B	Res	No Resale	D010	10/.768 ADSL2 BOND	Internet	2 - 4 Mbps Download x 1 Mbps Upload	0.77	10	Copper Wire
+					D000011	Internet Up To 12Mbps / 1Mbps		12/1 ADSL2	Res	No Resale	D011	12/1 ADSL2	Internet	3 - 10 Mbps Download x 1 Mbps Upload	1	12	Copper Wire
+					D000012	Internet Up To 12Mbps / 1Mbps		12/1 ADSL2 B	Res	No Resale	D012	12/1 ADSL2 BOND	Internet	3 - 10 Mbps Download x 1 Mbps Upload	1	12	Copper Wire
+Ponderosa		** Can have 1 **	Internet Up To 18Mbps / 3Mbps	 60.00 	D000013	Internet Up To 18Mbps / 3Mbps		12/1.5 ADSL2	Res	No Resale	D013	12/1.5 ADSL2	Internet	3 - 10 Mbps Download x 1 Mbps Upload	1.5	12	Copper Wire
+					D000014	Internet Up To 18Mbps / 3Mbps		12/1.5 ADSL2 B	Res	No Resale	D014	12/1.5 ADSL2 BOND	Internet	3 - 10 Mbps Download x 1 Mbps Upload	1.5	12	Copper Wire
+					D000015	Internet Up To 18Mbps / 3Mbps		15/3 ADSL2 B	Res	No Resale	D015	15/3 ADSL2 BOND	Internet	3 - 10 Mbps Download x 1 Mbps Upload	3	15	Copper Wire
+					D000016	Internet Up To 18Mbps / 3Mbps		15/3 VDSL2	Res	No Resale	D016	15/3 VDSL2	Internet	3 - 10 Mbps Download x 1 Mbps Upload	3	15	Copper Wire
+					D000017	Internet Up To 18Mbps / 3Mbps		18/3 ADSL2 B	Res	No Resale	D017	18/3 ADSL2 BOND	Internet	3 - 10 Mbps Download x 1 Mbps Upload	3	18	Copper Wire
+					D000018	Internet Up To 18Mbps / 3Mbps		18/3 VDSL2	Res	No Resale	D018	18/3 VDSL2	Internet	3 - 10 Mbps Download x 1 Mbps Upload	3	18	Copper Wire
+Ponderosa	** Can have 1 of each group **	** Can have 1 **	Internet Up To 25Mbps / 3Mbps	 65.00 	D000019	Internet Up To 25Mbps / 3Mbps		18/5 VDSL2	Res	No Resale	D019	18/5 VDSL2	Internet	3 - 10 Mbps Download x 1 Mbps Upload	5	18	Copper Wire
+					D000020	Internet Up To 25Mbps / 3Mbps		18/5 VDSL2 B	Res	No Resale	D020	18/5 VDSL2 BOND	Internet	3 - 10 Mbps Download x 1 Mbps Upload	5	18	Copper Wire
+					D000021	Internet Up To 25Mbps / 3Mbps		25/3 ADSL2 B	Res	No Resale	D021	25/3 ADSL2 BOND	Internet	4 - 25 Mbps Download x 3 Mbps Upload	3	25	Copper Wire
+					D000022	Internet Up To 25Mbps / 3Mbps		25/3 VDSL2	Res	No Resale	D022	25/3 VDSL2	Internet	4 - 25 Mbps Download x 3 Mbps Upload	3	25	Copper Wire
+					D000023	Internet Up To 25Mbps / 3Mbps		25/3 VDSL2 B	Res	No Resale	D023	25/3 VDSL2 BOND	Internet	4 - 25 Mbps Download x 3 Mbps Upload	3	25	Copper Wire
+Ponderosa		** Can have 1 **	Internet Up To 100Mbps / 20Mbps	 80.00 	D000024	Internet Up To 100Mbps / 20Mbps		25/5 VDSL2	Res	No Resale	D024	25/5 VDSL2	Internet	5 - 25 Mbps Download x 5 Mbps Upload	5	25	Copper Wire
+					D000025	Internet Up To 100Mbps / 20Mbps		25/5 VDSL2 B	Res	No Resale	D025	25/5 VDSL2 BOND	Internet	5 - 25 Mbps Download x 5 Mbps Upload	5	25	Copper Wire
+					D000026	Internet Up To 100Mbps / 20Mbps		35/5 VDSL2	Res	No Resale	D026	35/5 VDSL2	Internet	5 - 25 Mbps Download x 5 Mbps Upload	5	35	Copper Wire
+					D000027	Internet Up To 100Mbps / 20Mbps		35/5 VDSL2 B	Res	No Resale	D027	35/5 VDSL2 BOND	Internet	5 - 25 Mbps Download x 5 Mbps Upload	5	35	Copper Wire
+					D000028	Internet Up To 100Mbps / 20Mbps		50/5 VDSL2	Res	No Resale	D028	50/5 VDSL2	Internet	6 - 50 Mbps Download x 5 Mbps Upload	5	50	Copper Wire
+					D000029	Internet Up To 100Mbps / 20Mbps		50/5 VDSL2 B	Res	No Resale	D029	50/5 VDSL2 BOND	Internet	6 - 50 Mbps Download x 5 Mbps Upload	5	50	Copper Wire
+					D000030	Internet Up To 100Mbps / 20Mbps		50/20 VDSL2	Res	No Resale	D030	50/20 VDSL2	Internet	6 - 50 Mbps Download x 5 Mbps Upload	20	50	Copper Wire
+					D000031	Internet Up To 100Mbps / 20Mbps		50/20 VDSL2 B	Res	No Resale	D031	50/20 VDSL2 BOND	Internet	6 - 50 Mbps Download x 5 Mbps Upload	20	50	Copper Wire
+					D000032	Internet Up To 100Mbps / 20Mbps		65/10 VDSL2	Res	No Resale	D032	65/10 VDSL2	Internet	6 - 50 Mbps Download x 5 Mbps Upload	10	65	Copper Wire
+					D000033	Internet Up To 100Mbps / 20Mbps		65/10 VDSL2 B	Res	No Resale	D033	65/10 VDSL2 BOND	Internet	6 - 50 Mbps Download x 5 Mbps Upload	10	65	Copper Wire
+					D000034	Internet Up To 100Mbps / 20Mbps		80/20 VDSL2	Res	No Resale	D034	80/20 VDSL2	Internet	6 - 50 Mbps Download x 5 Mbps Upload	20	80	Copper Wire
+					D000035	Internet Up To 100Mbps / 20Mbps		80/20 VDSL2 B	Res	No Resale	D035	80/20 VDSL2 BOND	Internet	6 - 50 Mbps Download x 5 Mbps Upload	20	80	Copper Wire
+					D000036	Internet Up To 100Mbps / 20Mbps		100/20 VDSL2 B	Res	No Resale	D036	100/20 VDSL2 BOND	Internet	7 - 100 Mbps Download x 20 Mbps Upload	20	100	Copper Wire
+																	
+											L000	Mira Bella (MRBL)	Other		0	0	
+											L001	Bella Vista (RNSE)	Other		0	0	
+											L002	Tesoro Viejo (TSVJ)	Other		0	0	
+																	
+Ponderosa		** Can have all 3 **	Internet Up To 100Mbps / 100Mbps	 70.00 	P000013	Internet Up To 100Mbps / 100Mbps		100/100 GPON	Res	No Resale	P013	100/100 GPON	Internet	8 - 100 Mbps Download x 25 Mbps Upload	100	100	Optical Carrier / FTTP
+			Internet Up To 250Mbps / 250Mbps	 75.00 	P000017	Internet Up To 250Mbps / 250Mbps		250/250 GPON	Res	No Resale	P017	250/250 GPON	Internet	8 - 100 Mbps Download x 25 Mbps Upload	250	250	Optical Carrier / FTTP
+			Internet Up To 1Gbps / 1Gbps	 90.00 	P000021	Internet Up To 1Gbps / 1Gbps		1000/1000 GPON	Res	No Resale	P021	1000/1000 GPON	Internet	9 - 1 Gbps Download x 500 Mbps Upload	1000	1000	Optical Carrier / FTTP
+																	
+Ponderosa			Every Ponderosa Address								TEL	TELEPHONE	Telephone		0	0	
+																	
+Ponderosa Edge		** Can have all 3 **	Ponderosa Edge Address Only								P007	25/15 GPON	Internet	5 - 25 Mbps Download x 5 Mbps Upload	15	25	Optical Carrier / FTTP
+											P010	50/25 GPON	Internet	6 - 50 Mbps Download x 5 Mbps Upload	25	50	Optical Carrier / FTTP
+											P012	100/50 GPON	Internet	8 - 100 Mbps Download x 25 Mbps Upload	50	100	Optical Carrier / FTTP
+																	
+"Ponderosa
+** Beasore Only **"		** Can have one of each so a total of 3 **	Beasore Addresses Only								D021	25/3 ADSL2 BOND	Internet	4 - 25 Mbps Download x 3 Mbps Upload	3	25	Copper Wire
+					DBESOR1						D022	25/3 VDSL2	Internet	4 - 25 Mbps Download x 3 Mbps Upload	3	25	Copper Wire
+											D023	25/3 VDSL2 BOND	Internet	4 - 25 Mbps Download x 3 Mbps Upload	3	25	Copper Wire
+																	
+					DBESOR2						D026	35/5 VDSL2	Internet	5 - 25 Mbps Download x 5 Mbps Upload	5	35	Copper Wire
+											D027	35/5 VDSL2 BOND	Internet	5 - 25 Mbps Download x 5 Mbps Upload	5	35	Copper Wire
+																	
+					DBESOR3						D030	50/20 VDSL2	Internet	6 - 50 Mbps Download x 5 Mbps Upload	20	50	Copper Wire
+											D031	50/20 VDSL2 BOND	Internet	6 - 50 Mbps Download x 5 Mbps Upload	20	50	Copper Wire

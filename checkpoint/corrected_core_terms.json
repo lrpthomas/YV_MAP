@@ -1,0 +1,332 @@
+[
+  {
+    "varKey": "account_phone",
+    "term": "Account / Phone / Agreement",
+    "system": "iVUE",
+    "media": "base",
+    "where": "iVUE account header \u2014 the working/billing number on the service order. Format is the 10-digit account string. 101, 125 = INT, 559 = Telephone",
+    "example": "101 822 **** IN",
+    "note": "Trailing IN / OUT / QDS marks the direction of the order (IN = connect, OUT = disconnect).",
+    "source": "value_location"
+  },
+  {
+    "varKey": "mgcp_name",
+    "term": "Line Pack \u2014 MGCP name",
+    "system": "LinePacks",
+    "media": "both",
+    "where": "LinePacks \u2192 the MGCP / endpoint name field. This is the full provisioning string for the voice port.",
+    "example": "FRNT-PRSV_GPON-CLX01-01-04-1421-01",
+    "note": "Reads as: office (FRNT) \u2013 cabinet/tech (PRSV_GPON) \u2013 shelf CLX01 \u2013 slot 01 \u2013 port 04 \u2013 etc.",
+    "source": "value_location"
+  },
+  {
+    "varKey": "GR303",
+    "term": "Line Pack - CRV Number",
+    "system": "LinePackss",
+    "media": "both",
+    "where": "LinePacks \u2192 the GR303 / endpoint name field. This is the full provisioning string for the voice port.",
+    "example": "FRNT-0306-1994",
+    "note": "Taqua provisioning for voice agreements",
+    "source": "value_location"
+  },
+  {
+    "varKey": "linepack_equip",
+    "term": "Line Pack \u2014 Equipment",
+    "system": "LinePacks",
+    "media": "both",
+    "where": "LinePacks \u2192 Equipment, second column. The cabinet + card/slot/port identifier.",
+    "example": "PRSV_GPON 01-01-04",
+    "note": "Second column on the equipment row \u2014 not the first.",
+    "source": "value_location"
+  },
+  {
+    "varKey": "splitter_port",
+    "term": "Line Pack \u2014 Splitter Port",
+    "system": "LinePacks / Splitter",
+    "media": "fiber",
+    "where": "LinePacks \u2192 Splitter view. Identifies the PON splitter shelf and port the customer rides.",
+    "example": "PRSV \u2014 S4, P21",
+    "note": "S = splitter number, P = port number on that splitter.",
+    "source": "value_location"
+  },
+  {
+    "varKey": "cable_name",
+    "term": "Cable Name",
+    "system": "iVUE",
+    "media": "base",
+    "where": "iVUE \u2192 cable/pair record. The distribution cable + count/pair the service runs on.",
+    "example": "PRSV, 44",
+    "note": "Cable identifier followed by the pair/fiber count.",
+    "source": "value_location"
+  },
+  {
+    "varKey": "mst_ped",
+    "term": "MST / Pedestal",
+    "system": "Fiberbook / As-Built",
+    "media": "base",
+    "where": "Fiberbook (or the as-built drawing) \u2192 MST and pedestal call-outs for the address.",
+    "example": "MST 2 / PED \u2014 (from as-built)",
+    "note": "Cross-check the as-built against Fiberbook when they disagree.",
+    "source": "value_location"
+  },
+  {
+    "varKey": "ivue_equip_id",
+    "term": "iVUE Equip ID",
+    "system": "iVUE",
+    "media": "base",
+    "where": "iVUE \u2192 Pedistal the home is fed from.",
+    "example": "AH1624-1",
+    "note": "",
+    "source": "value_location"
+  },
+  {
+    "varKey": "fsan",
+    "term": "Parent Equipment \u2014 Internet line item / ONT SN",
+    "system": "iVUE",
+    "media": "fiber",
+    "where": "iVUE \u2192 parent equipment under the Internet line item \u2192 ONT serial / FSAN field.",
+    "example": "FSAN: **PENDING**",
+    "note": "Often blank until the ONT is registered \u2014 Warehouse or Diana in Customer Care will assign the ONT / Modem providing the serial number required for this field.",
+    "source": "value_location"
+  },
+  {
+    "varKey": "so_number",
+    "term": "SO Number",
+    "system": "iVUE",
+    "media": "base",
+    "where": "iVUE \u2192 service order header; the SO# (a related/grouped order may list several).",
+    "example": "142965",
+    "note": "Multiple SO#s can appear when orders are bundled.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "date",
+    "term": "Order Date",
+    "system": "iVUE",
+    "media": "base",
+    "where": "iVUE \u2192 order date; written at the head of the note in M.D.YY form.",
+    "example": "8.1.23",
+    "note": "Style JF writes it with slashes (8/1/23).",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "action",
+    "term": "Action Phrase",
+    "system": "Notes",
+    "media": "base",
+    "where": "The work being done \u2014 summarized at the top of the note after the date.",
+    "example": "DISC & RECON QDS",
+    "note": "Drives which workflow/variant applies.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "facs_status",
+    "term": "FACS Status",
+    "system": "FACS",
+    "media": "base",
+    "where": "FACS \u2192 after edits; record whether records were left alone, updated, or removed.",
+    "example": "No FACS Changed",
+    "note": "Common: No FACS Changed / FACS Updated / FACS Removed / FACS Cleared.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "phone_out",
+    "term": "Phone \u2014 OUT",
+    "system": "iVUE",
+    "media": "base",
+    "where": "iVUE \u2192 the number being disconnected (the OUT line on a QDS swap).",
+    "example": "877 ****",
+    "note": "(559)- Optional",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "phone_in",
+    "term": "Phone \u2014 IN",
+    "system": "iVUE",
+    "media": "base",
+    "where": "iVUE \u2192 the number being connected (the IN line on a QDS swap).",
+    "example": "841 ****",
+    "note": "(559)- Optional",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "phone_qds",
+    "term": "Phone \u2014 QDS",
+    "system": "iVUE",
+    "media": "base",
+    "where": "QDS \u2192 the QDS-mapped number tied to the service swap.",
+    "example": "877 ****",
+    "note": "Quick Dial Service for 911 - (559)- Optional",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "account_out",
+    "term": "Account \u2014 OUT",
+    "system": "iVUE",
+    "media": "base",
+    "where": "iVUE \u2192 billing account for the OUT number (101-prefixed).",
+    "example": "101 877 ****",
+    "note": "Internet Account Number non tele prefix indicates internet",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "account_in",
+    "term": "Account \u2014 IN",
+    "system": "iVUE",
+    "media": "base",
+    "where": "iVUE \u2192 billing account for the IN number (101-prefixed).",
+    "example": "101 841 ****",
+    "note": "Internet Account Number non tele prefix indicates internet",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "tech",
+    "term": "Tech Initials",
+    "system": "Notes",
+    "media": "base",
+    "where": "The technician who wrote/completed the note; initials at the end of the date line.",
+    "example": "KM",
+    "note": "Also your style selector -**- format (CT, JF, KM\u2026).",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "tel_port",
+    "term": "TEL Port",
+    "system": "LinePacks",
+    "media": "both",
+    "where": "LinePacks \u2192 the voice port string for the TEL section (switch-cabinet-shelf-slot-port + pair).",
+    "example": "FRNT-LASH-ADT01-07-44",
+    "note": "First token after *TEL.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "dsl_port",
+    "term": "DSL Port",
+    "system": "LinePacks",
+    "media": "both",
+    "where": "LinePacks \u2192 First Column (Equipment) the data port string for the DSL section.",
+    "example": "FRNT-0306-0776 TFRD 287 105N-3-1",
+    "note": "First token after *DSL.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "other_port",
+    "term": "Other Port",
+    "system": "LinePacks",
+    "media": "base",
+    "where": "LinePacks \u2192 any additional port not under TEL/DSL (cross-connect, secondary line).",
+    "example": "FRNT-0327-1480 MNRT 43 M6-1-2A",
+    "note": "",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "tel Cable Tie Down_location",
+    "term": "TEL Location",
+    "system": "FACS",
+    "media": "copper",
+    "where": "FACS \u2192 the cable/pair + binding-post location for the TEL port.",
+    "example": "TFRD N06-2-02-07 BP,157",
+    "note": "BP = binding post.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "dsl Cable Tie Down_location",
+    "term": "DSL Location",
+    "system": "FACS",
+    "media": "copper",
+    "where": "FACS \u2192 the cable/pair + binding-post location for the DSL port.",
+    "example": "TFRD N06-2-02-08 BP,158",
+    "note": "BP = binding post.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "splicer_note",
+    "term": "Splicer Note",
+    "system": "ATTN SPLICER",
+    "media": "base",
+    "where": "The field-splicing instruction block in the note (PIC extend / spliced-through call-outs).",
+    "example": "@ 3-13 Extend PIC 17,317 (25pr) to (6pr) PIC 6 @ 313-2",
+    "note": "Flag for the splicer.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "edge_id",
+    "term": "EDGE Customer ID",
+    "system": "EDGE",
+    "media": "edge",
+    "where": "EDGE system \u2192 customer ID for EDGE FTTH product (always 125-001-XXXX).",
+    "example": "125 001****",
+    "note": "",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "csx",
+    "term": "CSX String",
+    "system": "iVUE",
+    "media": "base",
+    "where": "iVUE \u2192 combined switch/cable/port assignment string.",
+    "example": "FRNT-0306-1994",
+    "note": "Sometimes appears short (e.g. 328-****).",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "gpon_port",
+    "term": "GPON Port",
+    "system": "LinePacks",
+    "media": "fiber",
+    "where": "LinePacks \u2192 the GPON upstream port for a fiber ONT.",
+    "example": "MLTN-N01-03-02 GPON-B-1",
+    "note": "FTTH only.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "edge_port",
+    "term": "EDGE Port",
+    "system": "EDGE",
+    "media": "edge",
+    "where": "EDGE system \u2192 the FTTH downstream port + pair for EDGE service.",
+    "example": "EDGE-MLTN-FTTH PORT-D-30 PAIR 30",
+    "note": "EDGE product only; rare.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "source_doc",
+    "term": "Source Document",
+    "system": "Notes",
+    "media": "base",
+    "where": "Which monthly file the note came from. \"\u2026 Line Assignments\" = a Service Order; \"\u2026 Tech Calls\" = a trouble/tech-call note.",
+    "example": "September Line Assignments.docx",
+    "note": "Tech Calls run longer and usually log a field correction.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "workflow_type",
+    "term": "Workflow Type",
+    "system": "iVUE",
+    "media": "base",
+    "where": "The classified action pattern for the order (top workflow in the corpus).",
+    "example": "GEN_DISCONNECT_QDS_BILLING",
+    "note": "Big buckets: DISC_QDS_RECON, VACA_RECONNECT, DISCONNECT_ONLY, UPGRADE_*, NPD.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "tech_attrib",
+    "term": "Tech-Call Attribution",
+    "system": "Notes",
+    "media": "base",
+    "where": "On a tech-call note: the \"Per <name>\" tag crediting who directed the field change.",
+    "example": "Per Bart, wound up using pr 1613 on cable 2",
+    "note": "Frequent names: SE, Han, Kong, Tammie. Marks a same-SO correction, not a new order.",
+    "source": "suggestion"
+  },
+  {
+    "varKey": "port_correction",
+    "term": "Port Correction",
+    "system": "FACS",
+    "media": "base",
+    "where": "Tech-call language showing the originally-assigned port was changed in the field.",
+    "example": "used PR 1403 instead \u2014 FACS Updated",
+    "note": "Signals BAD_PORT_UPDATE: the SO port did not work, FACS was updated to the real one.",
+    "source": "suggestion"
+  }
+]

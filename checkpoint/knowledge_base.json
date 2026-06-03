@@ -1,0 +1,481 @@
+{
+  "version": "3.0",
+  "last_updated": "2026-06-02",
+  "systems": {
+    "ivue": {
+      "name": "iVUE Service",
+      "vendor": "NISC",
+      "nav_tree": [
+        "iVUE Service",
+        "Customer Management",
+        "Administration",
+        "Location",
+        "Service Orders",
+        "Reports/Processes",
+        "Facility Management",
+        "Trouble Management"
+      ],
+      "so_screen": {
+        "search": "Search Type: Service Order \u2192 enter SO# \u2192 Search",
+        "tabs": [
+          "SO",
+          "Workflow",
+          "Agmt",
+          "General",
+          "Interfaces",
+          "Toll",
+          "Dir",
+          "Local",
+          "Serv Addr",
+          "911",
+          "Tax",
+          "Equip",
+          "Deposit",
+          "P&S"
+        ],
+        "request_box": "Left side \u2014 what Customer Service wrote (the incoming order)",
+        "response_box": "Right side \u2014 where GIS writes the facility assignment response",
+        "office_info": {
+          "source": "Telephone/Walk-in/etc",
+          "requested_by": "Customer name",
+          "taken_by": "CSR who took the order",
+          "contact_info": "Contact method dropdown",
+          "contact_number": "Phone number (this may be the CBR#)",
+          "start_date": "When order was created",
+          "complete_by_date": "DUE DATE \u2014 deadline for entire workflow",
+          "complete_by_time": "AM/PM appointment window",
+          "entry_date": "System entry date"
+        },
+        "workflow_tasks": [
+          "C.DIRVAL - REVIEW DIRECTORY SUMMARY",
+          "C.CALLBLK - VERIFY CALLBACK",
+          "C.P&S - ADD CHARGES & CREDITS",
+          "N.NOC - NETWORK OPERATIONS",
+          "I.INTERNET - INTERNET DEPARTMENT",
+          "C.MODEM - ADD MODEM",
+          "E.FACS - FACILITIES (GIS team task)",
+          "P.PROG - PROGRAMMING",
+          "P.VALCONN - VALIDATE CONNECT DATE",
+          "P.SCHEDULE - SCHEDULE/DISPATCH",
+          "P.COMPLETE - ENTER COMPLETED BY DATE",
+          "C.PRORATE - ENTER PRORATE DATE",
+          "CLOSE_SO - CLOSE SO",
+          "911_EXT - 911 EXT",
+          "C.DIR ASST - ADD DA ALLOWANCE"
+        ],
+        "response_workflow": "Copy lines 2-6 to Response box \u2192 Workflow tab \u2192 right-click E.FACS \u2192 Complete"
+      },
+      "facility_management": {
+        "equipment": "Facility Management \u2192 Equipment \u2192 Equipment (search *WIRECENTER*NODE*)",
+        "switch_equip": "Facility Management \u2192 Switch Equipment \u2192 Create Switch Equipment",
+        "cable": "Facility Management \u2192 Cable \u2192 Add; Create Pairs",
+        "admin_wirecenter": "Facility Management \u2192 Administration \u2192 Wire Center",
+        "path_trace": "From equipment record \u2192 Path Trace Connectivity",
+        "service_point": "Service Points tab on SO/Agreement \u2192 Connect/Disconnect Service Points buttons",
+        "facilities_tab": "Facilities tab \u2192 Switch dropdown \u2192 Taqua \u2192 enter Switch/Cable/Pair/Parent Equip/PED",
+        "mass_assignment": "Equipment \u2192 Details Tab \u2192 Mass Assignment \u2192 Switch Equipment Connectivity"
+      },
+      "service_point_operations": {
+        "connect": "Serv Addr tab \u2192 Connect Service Points \u2192 search address \u2192 select \u2192 Add Service Point",
+        "disconnect": "Select old SP \u2192 Disconnect Service Point \u2192 verify Activity = Disconnect",
+        "rename": "Reports/Processes \u2192 Location \u2192 Rename Service Point",
+        "bonding_group": "Select Telephone \u2192 PORT hyperlink \u2192 Group \u2192 choose bonding port \u2192 down arrow \u2192 OK"
+      }
+    },
+    "linepacks": {
+      "name": "LinePacks",
+      "type": "Microsoft Access database (_LinePacks1 table)",
+      "columns": {
+        "Switch": "CSX \u2014 the FRNT- switch equipment string",
+        "Equipment": "Type \u2014 Node/Shelf/Card/Port (also called 'Type' in training docs)",
+        "Status": "Service type + state + bonding info (DSL/TEL/QDS/CBOL/CODISC + (N-N) bond pairs)",
+        "Voice Agreement": "Phone agreement (bare NXX XXXX)",
+        "Data Agreement": "Internet agreement (101 NXX XXXX)",
+        "Line/BP": "LN \u2014 Binding Post number",
+        "Card Type": "Card manufacturer and model"
+      },
+      "status_codes": {
+        "DSL": "Active DSL internet",
+        "TEL": "Active telephone",
+        "QDS": "911-only Quick Dial Service",
+        "CBOL": "Connected But Only-Online (phone removed, internet stays)",
+        "(N-N)": "Bonded pair reference \u2014 port X and port Y bonded together",
+        "CODISC": "CO Disconnect \u2014 port released, available for reuse",
+        "DSL VACA DISC": "Vacation disconnect \u2014 ports HELD, not released",
+        "MOVED": "Service moved to different location",
+        "donotuse": "Bad port \u2014 do not assign",
+        "BAD xx": "Bad port with tech initials who marked it",
+        "NO CARD INSTALLED": "Empty card slot",
+        "PHASING OUT EQUIPMENT": "Equipment being retired"
+      },
+      "search": "Ctrl+F in the Number column to find by phone number"
+    },
+    "taqua": {
+      "name": "Taqua Switch",
+      "purpose": "Creates and manages FRNT- CSX switch equipment strings",
+      "nav": "Switch Equipment \u2192 Create Switch Equipment \u2192 dropdown to Taqua",
+      "format": "Prefix (e.g. FRNT-CRLK-CLX01) + delimiter + port range (1-48)",
+      "note": "CSX in LinePacks MUST MATCH what's in Taqua"
+    },
+    "calix_cms": {
+      "name": "Calix CMS",
+      "purpose": "Verify actual line speeds (attainable rate)",
+      "login": "Credentials on G: drive, add IP address under server info",
+      "lookup": "Search by Node/Shelf/Card/Port from iVUE \u2192 Status page",
+      "speed_formula": {
+        "download": "Attainable rate \u00d7 2 \u00d7 0.8",
+        "upload": "Aggregate transmit rate \u00f7 10 \u00d7 2 \u00d7 0.8"
+      }
+    },
+    "newnet_cms": {
+      "name": "NewNet CMS",
+      "purpose": "Splicing, designation pairs, cable records, AutoCAD basemap link",
+      "url": "http://newnet/sysworkflow/en/neoclassic/processes/main",
+      "used_for": "Cross-connect splicing, cable updates, subscriber records, fiber posting",
+      "sql_view": {
+        "name": "IVUE_CablePair_Facs_Copper",
+        "database": "[NewNetCMS].[dbo].[IVUE_CablePair_Facs_Copper]",
+        "purpose": "Single view joining cables, pairs, equipment, agreements, addresses, speeds, bonding",
+        "key_columns": {
+          "Cable Name": "Cable name for note",
+          "Pair": "Cable pair number",
+          "Switch Equipment": "CSX string",
+          "Equipment Name": "Node/Shelf/Card/Port",
+          "Port_BP": "Port/Binding Post",
+          "Bonded": "Yes/No flag",
+          "Bnd_EquipName": "Bonded pair equipment",
+          "Cat Item": "C&C Code (speed tier D000-D036/P013-P021)",
+          "SubDown": "Subscribed download Mbps",
+          "SubUp": "Subscribed upload Mbps",
+          "TelAgreement": "Phone agreement",
+          "DataAgreement": "Internet agreement",
+          "Service Address": "Customer address",
+          "PendingSOs": "Open service orders on this pair"
+        },
+        "example_query": "SELECT * FROM [NewNetCMS].[dbo].[IVUE_CablePair_Facs_Copper] WHERE [Cable Name] = 'SVLK-1' AND pair BETWEEN 900 AND 1200 ORDER BY pair+0 ASC"
+      },
+      "pic_pair_records": {
+        "purpose": "Build PIC-Pair records for as-built schematics in the cable book",
+        "procedure": [
+          "Select 'line' cable leaving (remote) CO",
+          "Search for Route ID in Oasis",
+          "Right-click in gray area \u2192 select 'Facility Builder'",
+          "Facility Connection Wizard opens: (remote) CO on left, 'To Junction' at top, next available out records from To Junction",
+          "If no records in 'To' cable \u2192 select 'Create Facility' at bottom",
+          "Dialogue shows PIC count, status, wirecenter"
+        ],
+        "fix_remove": {
+          "WARNING": "DO NOT open Facility Table directly in database \u2014 it WILL crash Access!",
+          "method": "Use 'Pic-Pair-Fix_sp' Stored Procedure",
+          "steps": [
+            "Open stored procedure in design view",
+            "Change ROUTE_Name criteria to = N 'LLLL-NNNNNN' (e.g. NFRK-123456)",
+            "This narrows hundreds of thousands of records to just that cable"
+          ]
+        },
+        "oasis": "Oasis is the cable record search within NewNet \u2014 used to find Route IDs for cable segments"
+      }
+    },
+    "arcgis": {
+      "name": "ArcGIS",
+      "tools": {
+        "linecard_by_address": "Search address \u2192 see all pairs at the ped, status, PIC, pair, PED",
+        "qualify_service": "Check distance from carrier vs speed range + Best Service field",
+        "feeder_cable": "Click hyperlink \u2192 shows all pairs, preferred/vacant/working/XD status",
+        "cable_book": "Cable route designations, PIC positions, pair assignments"
+      }
+    },
+    "fiberbook": {
+      "name": "Fiberbook",
+      "path": "G:\\GIS_Projects\\CurrentProjects\\Fiber Books",
+      "contains": "Distribution fiber assignments, power pair assignments, MST port assignments, power BP spreadsheets"
+    },
+    "other_systems": {
+      "parcelquest": "https://pqweb.parcelquest.com \u2014 vicinity maps for EDGE inquiries",
+      "old_linecard": "N:\\OSPLNT\\Archived LineCard\\number.mdb \u2014 pre-iVUE records",
+      "old_maps": "I:\\Eng_GIS\\Old Facility Maps\\ \u2014 pre-2006 AutoCAD basemaps",
+      "staking_sheets": "H:\\Right of Way\\STAKING SHEETS \u2014 1960s-80s cable records",
+      "edge_orders": "H:\\Ponderosa Edge Project\\EDGE ORDERS \u2014 all EDGE SO/IQ history"
+    },
+    "tarana": {
+      "name": "Tarana Wireless",
+      "tool": "Google Network Planner (CNHeat)",
+      "access": "GIS Web Tools \u2192 3rd Party Apps \u2192 Google Network Planner (Tarana)",
+      "procedure": "Search address \u2192 select radio location \u2192 note LAT/LONG + Received Power + Dish + Azimuth + Tilt \u2192 check obstacle path \u2192 compare to Throughput Chart \u2192 fill Inquiry Template",
+      "inquiry_template_fields": [
+        "IQ#",
+        "ACCT#",
+        "AGREEMENT",
+        "ADDRESS",
+        "ParcelQuest",
+        "Base Node",
+        "Received Power",
+        "Capacity 2x40MHz",
+        "Azimuth from/to",
+        "Tilt",
+        "LAT/LONG",
+        "Best Placement",
+        "Notes"
+      ]
+    }
+  },
+  "field_map": {
+    "note": "The Rosetta Stone \u2014 SO_Parsed_Fields.docx",
+    "format": "[Switch] [Cable Name],[Cable Pair] [SAI Cable],[SAI Pair] [Drop Ped Pic] / [Node/Shelf/Card/Port] [Binding Post]",
+    "sources": {
+      "Switch (CSX)": "LinePacks 'CSX' field (Switch column)",
+      "Cable Name & Pair": "Cable Book \u2014 NOT LinePacks",
+      "SAI Cable & Pair": "Cable Book + Cross-Connect report page",
+      "Drop Ped PIC": "Cable Book",
+      "Node/Shelf/Card/Port": "LinePacks 'Type' field (Equipment column)",
+      "Binding Post": "LinePacks 'LN' field (Line/BP column)"
+    }
+  },
+  "port_anatomy": {
+    "port_line": {
+      "example": "FRNT-0306-0847 TFRD,244 PIC,19 105N-4-2",
+      "parts": {
+        "FRNT-0306-0847": "CSX \u2014 Switch Equipment string (created in Taqua)",
+        "TFRD": "Wire center cable abbreviation (4-letter CLLI code)",
+        ",244": "Cable pair number",
+        "PIC,19": "Pair In Cable \u2014 position within the cable count",
+        "105N-4-2": "Cable book route designation (cable-segment-subsegment)"
+      }
+    },
+    "location_line": {
+      "example": "TFRD N06-3-01-31 BP,232",
+      "parts": {
+        "TFRD": "Wire center",
+        "N06": "Node number",
+        "-3": "Shelf",
+        "-01": "Card",
+        "-31": "Port on the card",
+        "BP,232": "Binding Post number at the pedestal"
+      }
+    }
+  },
+  "card_rules": {
+    "adtran": "Shorter distance, Faster speeds. Good for odd/odd, even/even port pairing",
+    "calix": "Slower speeds, Farther distance. Wants DT on Odd-low, DSL on Even-high",
+    "card_1": "Use for bonding",
+    "card_2": "Use for single pair"
+  },
+  "cable_book_status": {
+    "XD": "Cross-connected \u2014 do NOT use for new assignments",
+    "Available": "Open for assignment",
+    "Preferred Count": "Priority pair \u2014 use first",
+    "Vacant": "Empty, can be used",
+    "Working": "Currently in service",
+    "CO Count": "Central Office pair count"
+  },
+  "speed_tiers": {
+    "copper": {
+      "up_to_12_1": {
+        "price": 55,
+        "codes": "D000-D012",
+        "tech": "ADSL2"
+      },
+      "up_to_18_3": {
+        "price": 60,
+        "codes": "D013-D018",
+        "tech": "ADSL2/VDSL2"
+      },
+      "up_to_25_3": {
+        "price": 65,
+        "codes": "D019-D023",
+        "tech": "VDSL2"
+      },
+      "up_to_100_20": {
+        "price": 80,
+        "codes": "D024-D036",
+        "tech": "VDSL2",
+        "note": "100/20 is ALWAYS bonded (D036)"
+      }
+    },
+    "fiber_gpon": {
+      "100_100": {
+        "price": 70,
+        "code": "P013"
+      },
+      "250_250": {
+        "price": 75,
+        "code": "P017"
+      },
+      "1000_1000": {
+        "price": 90,
+        "code": "P021"
+      }
+    },
+    "edge": {
+      "25_15": {
+        "code": "P007"
+      },
+      "50_25": {
+        "code": "P010"
+      },
+      "100_50": {
+        "code": "P012"
+      }
+    }
+  },
+  "agreement_types": {
+    "bare_NXX_XXXX": "Phone agreement",
+    "101_NXX_XXXX": "Internet agreement",
+    "125_001_XXXX": "EDGE fiber agreement",
+    "559": "Area code \u2014 omit going forward",
+    "exchanges": [
+      "822",
+      "841",
+      "855",
+      "868",
+      "877",
+      "893"
+    ]
+  },
+  "tech_styles": {
+    "KM": {
+      "name": "Kyla Moore",
+      "count": 12150,
+      "role": "GIS Technician"
+    },
+    "JF": {
+      "name": "Jeremy Flud",
+      "count": 343,
+      "role": "GIS Technician"
+    },
+    "DS": {
+      "name": "redacted",
+      "count": 50,
+      "role": "former"
+    },
+    "CT": {
+      "name": "Cody Thomas",
+      "count": 2,
+      "role": "NetOps GIS (you)"
+    },
+    "TG": {
+      "name": "unknown",
+      "count": 0,
+      "role": "new tech"
+    }
+  },
+  "answers_to_gaps": {
+    "CBR": "Call Back Reach number \u2014 customer's contact number, provided by customer or from voicemail/application. Can be out-of-area. Shows on SO ticket in the Contact Number field on Office Information tab.",
+    "DUE_DATE": "Complete By Date field on SO Office Information tab. The deadline for the ENTIRE workflow (all tasks, not just E.FACS). Includes AM/PM time window.",
+    "agreement_search": "You don't search separately \u2014 the SO screen shows Account, Customer, Agreement fields. The Agmt tab has full agreement details. Facilities tab shows the service point facilities.",
+    "facs_update": "Facilities tab on SO \u2192 Switch dropdown \u2192 Taqua \u2192 enter new Switch/Cable/Pair/Parent Equip/PED \u2192 Save. For disconnect: Service Points tab \u2192 select SP \u2192 Disconnect Service Point. Connect/Disconnect buttons on Service Points tab.",
+    "edge_system": "NOT a separate system. Uses iVUE + LinePacks + As-Built DWG (I:\\Eng_GIS\\GEO_Drawings\\PonderosaEdge_Millerton_WorkOrderVersion.dwg). 125-prefixed agreements. EDGE orders in H:\\Ponderosa Edge Project\\EDGE ORDERS.",
+    "heatmap": "CNHeat is a Tarana wireless tool showing signal coverage/strength heatmaps. It is NOT a LinePacks feature. Used for Tarana wireless inquiries to estimate received power and coverage."
+  },
+  "rcf_codes": {
+    "RCFA": "Inter Exchange (between PTC exchanges) \u2014 Term Sub Free",
+    "RCFB": "Intra Service Area (within 559/local call) \u2014 EAS/Intra Lata Free/800#",
+    "RCFC": "Intra State (in CA; inside/outside 559; toll call) \u2014 Intra Lata Toll",
+    "RCFD": "Inter State (between states) \u2014 Intra Lata Toll",
+    "RCFAE": "Inter Exchange (employee) \u2014 Term Sub Free",
+    "RCFVM": "Inter Exchange (to voicemail) \u2014 Virtual Subscriber",
+    "RCFF": "RCF Free \u2014 cannot auto-assign via switch",
+    "RCFP": "RCF Additional Path \u2014 cannot auto-assign via switch",
+    "switch_block": "FRNT-0326-1801 through FRNT-0326-1900 reserved for RCF/VM"
+  },
+  "physical_plant": {
+    "pedestal_types": {
+      "BD3": "100 pair max",
+      "BD4": "200 pair max",
+      "BD5": "600 pair max",
+      "BD7": "1200 pair max"
+    },
+    "cable_naming": {
+      "BFC25-24": "25 pair, 24 gauge copper",
+      "SEB 3-22": "3 pair drop, 22 gauge",
+      "UO24": "24 pair fiber in conduit"
+    },
+    "color_codes": {
+      "Blue": "back to CO",
+      "Orange": "North",
+      "Green": "East",
+      "Brown": "South",
+      "Slate": "West",
+      "Red": "Line power or drop"
+    },
+    "marking": {
+      "PTC": "copper facilities",
+      "PTFO": "fiber optic"
+    }
+  },
+  "contacts": {
+    "shelly": "Email to request QDS disconnect before reassigning port",
+    "kim_ryan": "Email with ATTN SPLICER + SO# for splice work, CC GIS",
+    "amanda_martin": "Engineering Clerk \u2014 receives vicinity/facility maps for EDGE inquiries",
+    "dispatch": "Email as heads up for splice work"
+  },
+  "exchanges": {
+    "count": 4,
+    "names": [
+      "North Fork",
+      "O'Neals",
+      "Friant",
+      "Auberry"
+    ],
+    "note": "Each exchange has Ring Protected and Radio sites. The 46-wirecenter equipment inventory is Auberry exchange only."
+  },
+  "training_examples": {
+    "km_notes_doc": {
+      "count": 12,
+      "types": [
+        "disconnect_qds",
+        "reconnect_qds",
+        "vaca_reconnect",
+        "connect_bonded",
+        "fiber_upgrade",
+        "edge_upgrade",
+        "fiber_move",
+        "ftth_new",
+        "move_cross_exchange",
+        "bond_splice",
+        "xconn_1",
+        "xconn_2"
+      ],
+      "source": "Notes.docx \u2014 KM's complete training manual with inline field labels"
+    },
+    "ds_how_to": {
+      "count": 7,
+      "types": [
+        "single_disc",
+        "bonded_vaca",
+        "perm_disc_qds",
+        "int_upgrade_bond",
+        "splice",
+        "xconn",
+        "move"
+      ],
+      "source": "Service_Orders_how_to.docx"
+    },
+    "corpus": {
+      "count": 13159,
+      "km": 12150,
+      "jf": 343,
+      "other": 666
+    }
+  },
+  "switch_features": {
+    "RECAP": {
+      "definition": "Recapturing the service order request \u2014 summary of switch features/blocks needed",
+      "audience": "For Kim and Kayla to update the switch correctly (Taqua/SUN)",
+      "note": "Not a GIS/FACS task \u2014 handled by Programming/Customer Service"
+    },
+    "blocking_codes": {
+      "PIC": "Preferred Interexchange Carrier \u2014 toll/long distance carrier assignment",
+      "NO PIC": "No carrier for toll or long distance",
+      "COMPLETE": "Complete caller ID blocking \u2014 number shows PRIVATE on caller ID",
+      "SEL": "Selective Blocking \u2014 number WILL appear on caller ID",
+      "900": "Block 900 calls (adult entertainment numbers)",
+      "COLLECT": "Block collect calls",
+      "3RD": "Block 3rd party calls",
+      "INTL": "Block international calls (PTC stopped offering international Jan 2019)",
+      "NP": "Non-published \u2014 number not listed in directory",
+      "NO FEATURES": "No special switch features or blocks"
+    },
+    "example": "BLKS: COLLECT, 3RD, INT'L, 900, SEL = block collect, 3rd party, international, 900; selective caller ID (number shows)"
+  }
+}
