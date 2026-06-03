@@ -1,0 +1,10 @@
+1- ill find out, 2-Connected But Only-Online,-
+3-
+What it does QDT (Quick Dial Tone)Gives dial tone in restricted state QDS (Quick Dial Service)Controls what numbers are allowed
+?? In practice:
+QDT = state
+QDS = dialing rules
+And combined:
+→ “911‑only line”- this is what it means not 1200% correct nomenclaturebut it works
+4-we have to provide 911 with line number and address
+5-disc tel (cbol), connected to the internet remove tel line

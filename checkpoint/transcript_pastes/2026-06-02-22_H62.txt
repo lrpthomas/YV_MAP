@@ -1,0 +1,1 @@
+Pairing info: `(5-11)` = this port is paired with port 5 and11 (bonded pairs)

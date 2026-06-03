@@ -1,0 +1,3 @@
+IVUE Path Trace
+Path Trace is a tool in IVUE which allows you to capture additional data about a customer assignment that is not able to be captured in the service point screen.  For copper assignments, Path Trace is used for capturing X-connect and X-connect pairs.  For Fiber assignments, Path Trace is used to capture power pair assignments as well as Feeder Fiber, Splitter and GPON assignments.
+See the IVUE Path Trace Video located at I:\Eng_GIS\Training\GIS Training Library\GIS Track\Facility Assignments\Pathtrace for a tutorial on using Path Trace.

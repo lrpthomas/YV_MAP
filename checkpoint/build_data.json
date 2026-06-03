@@ -1,0 +1,558 @@
+{
+  "speed_tiers": [
+    [
+      "D000",
+      "1.5/.384 ADSL2",
+      55,
+      "Copper"
+    ],
+    [
+      "D001",
+      "3/.768 ADSL2",
+      55,
+      "Copper"
+    ],
+    [
+      "D002",
+      "3/.768 ADSL2 B",
+      55,
+      "Copper"
+    ],
+    [
+      "D003",
+      "6/.768 ADSL2",
+      55,
+      "Copper"
+    ],
+    [
+      "D004",
+      "6/.768 ADSL2 B",
+      55,
+      "Copper"
+    ],
+    [
+      "D005",
+      "6/1 ADSL2",
+      55,
+      "Copper"
+    ],
+    [
+      "D006",
+      "6/1 ADSL2 B",
+      55,
+      "Copper"
+    ],
+    [
+      "D007",
+      "6/1.5 ADSL2",
+      55,
+      "Copper"
+    ],
+    [
+      "D008",
+      "6/1.5 ADSL2 B",
+      55,
+      "Copper"
+    ],
+    [
+      "D009",
+      "10/.768 ADSL2",
+      55,
+      "Copper"
+    ],
+    [
+      "D010",
+      "10/.768 ADSL2 B",
+      55,
+      "Copper"
+    ],
+    [
+      "D011",
+      "12/1 ADSL2",
+      55,
+      "Copper"
+    ],
+    [
+      "D012",
+      "12/1 ADSL2 B",
+      55,
+      "Copper"
+    ],
+    [
+      "D013",
+      "12/1.5 ADSL2",
+      60,
+      "Copper"
+    ],
+    [
+      "D014",
+      "12/1.5 ADSL2 B",
+      60,
+      "Copper"
+    ],
+    [
+      "D015",
+      "15/3 ADSL2 B",
+      60,
+      "Copper"
+    ],
+    [
+      "D016",
+      "15/3 VDSL2",
+      60,
+      "Copper"
+    ],
+    [
+      "D017",
+      "18/3 ADSL2 B",
+      60,
+      "Copper"
+    ],
+    [
+      "D018",
+      "18/3 VDSL2",
+      60,
+      "Copper"
+    ],
+    [
+      "D019",
+      "18/5 VDSL2",
+      65,
+      "Copper"
+    ],
+    [
+      "D020",
+      "18/5 VDSL2 B",
+      65,
+      "Copper"
+    ],
+    [
+      "D021",
+      "25/3 ADSL2 B",
+      65,
+      "Copper"
+    ],
+    [
+      "D022",
+      "25/3 VDSL2",
+      65,
+      "Copper"
+    ],
+    [
+      "D023",
+      "25/3 VDSL2 B",
+      65,
+      "Copper"
+    ],
+    [
+      "D024",
+      "25/5 VDSL2",
+      80,
+      "Copper"
+    ],
+    [
+      "D025",
+      "25/5 VDSL2 B",
+      80,
+      "Copper"
+    ],
+    [
+      "D026",
+      "35/5 VDSL2",
+      80,
+      "Copper"
+    ],
+    [
+      "D027",
+      "35/5 VDSL2 B",
+      80,
+      "Copper"
+    ],
+    [
+      "D028",
+      "50/5 VDSL2",
+      80,
+      "Copper"
+    ],
+    [
+      "D029",
+      "50/5 VDSL2 B",
+      80,
+      "Copper"
+    ],
+    [
+      "D030",
+      "50/20 VDSL2",
+      80,
+      "Copper"
+    ],
+    [
+      "D031",
+      "50/20 VDSL2 B",
+      80,
+      "Copper"
+    ],
+    [
+      "D032",
+      "65/10 VDSL2",
+      80,
+      "Copper"
+    ],
+    [
+      "D033",
+      "65/10 VDSL2 B",
+      80,
+      "Copper"
+    ],
+    [
+      "D034",
+      "80/20 VDSL2",
+      80,
+      "Copper"
+    ],
+    [
+      "D035",
+      "80/20 VDSL2 B",
+      80,
+      "Copper"
+    ],
+    [
+      "D036",
+      "100/20 VDSL2 B",
+      80,
+      "Copper"
+    ],
+    [
+      "P013",
+      "100/100 GPON",
+      70,
+      "Fiber"
+    ],
+    [
+      "P017",
+      "250/250 GPON",
+      75,
+      "Fiber"
+    ],
+    [
+      "P021",
+      "1000/1000 GPON",
+      90,
+      "Fiber"
+    ],
+    [
+      "P007",
+      "25/15 GPON",
+      0,
+      "EDGE"
+    ],
+    [
+      "P010",
+      "50/25 GPON",
+      0,
+      "EDGE"
+    ],
+    [
+      "P012",
+      "100/50 GPON",
+      0,
+      "EDGE"
+    ]
+  ],
+  "equip_inventory": {
+    "ABRY": {
+      "node": "N40",
+      "mfr": "Calix",
+      "cards": "Combo2-24/Combo-2 24V"
+    },
+    "ABRY303": {
+      "node": "N41",
+      "mfr": "Calix",
+      "cards": "RPOTS24/Combo-2 24V/Combo-2 24"
+    },
+    "ACRN": {
+      "node": "N30",
+      "mfr": "Adtran 1124P",
+      "cards": "1124P"
+    },
+    "ALSP": {
+      "node": "N24",
+      "mfr": "Adtran TA5000",
+      "cards": "Combo A2+/VDSL48PCOMBO"
+    },
+    "ANRH": {
+      "node": "N02",
+      "mfr": "Calix E3",
+      "cards": "Combo V"
+    },
+    "BGSD": {
+      "node": "ADT01",
+      "mfr": "AdTran",
+      "cards": "ADT 48-PORT"
+    },
+    "BGSP": {
+      "node": "N2",
+      "mfr": "Calix E3",
+      "cards": "Combo V"
+    },
+    "BLFR": {
+      "node": "N27",
+      "mfr": "Adtran",
+      "cards": "Combo A2+"
+    },
+    "BLKM": {
+      "node": "N42",
+      "mfr": "Adtran 1124P",
+      "cards": "1124P"
+    },
+    "BLMT": {
+      "node": "N23",
+      "mfr": "Adtran",
+      "cards": "Combo A2+/Combo V2"
+    },
+    "BRVL": {
+      "node": "N48",
+      "mfr": "Adtran",
+      "cards": "Combo A2+/VDSL48PCombo/GE-8"
+    },
+    "BRVN": {
+      "node": "N47",
+      "mfr": "Adtran",
+      "cards": "Combo V2"
+    },
+    "CLKN": {
+      "node": "ADT01",
+      "mfr": "AdTran 5006",
+      "cards": "ADT 48-Port"
+    },
+    "CNTK": {
+      "node": "N43",
+      "mfr": "Calix E5",
+      "cards": "\u2014"
+    },
+    "CNRD": {
+      "node": "ADT01",
+      "mfr": "ADT",
+      "cards": "ADT 48-PORT"
+    },
+    "CRLM": {
+      "node": "ADT01",
+      "mfr": "AdTran 1148 VPX",
+      "cards": "ADT 48-PORT VDSL"
+    },
+    "HHLW": {
+      "node": "ADT01",
+      "mfr": "AdTran",
+      "cards": "ADT 48-Port"
+    },
+    "JSBS": {
+      "node": "N36",
+      "mfr": "Adtran",
+      "cards": "Combo V2/Combo A2+"
+    },
+    "LBFR": {
+      "node": "N28",
+      "mfr": "Adtran 1124P",
+      "cards": "1124P"
+    },
+    "LKWD": {
+      "node": "N44",
+      "mfr": "Calix E5",
+      "cards": "48PT ADSL2+"
+    },
+    "LNSN": {
+      "node": "N21",
+      "mfr": "Adtran",
+      "cards": "Combo A2+/VDSL48PCOMBO"
+    },
+    "LYNX": {
+      "node": "N8",
+      "mfr": "Calix E7",
+      "cards": "VDSL2-48CR2"
+    },
+    "MDLK": {
+      "node": "N26",
+      "mfr": "Adtran",
+      "cards": "Combo A2+/Combo V2"
+    },
+    "MFRD": {
+      "node": "ADT01",
+      "mfr": "AdTran 5006",
+      "cards": "48 Port"
+    },
+    "MGCN": {
+      "node": "N7",
+      "mfr": "Calix E7",
+      "cards": "VDSL2-48CR2"
+    },
+    "MSTN": {
+      "node": "ADT01",
+      "mfr": "ADT",
+      "cards": "48 Port"
+    },
+    "OLDR": {
+      "node": "N42",
+      "mfr": "Calix",
+      "cards": "Combo2-24V/Combo2-24/RPOTS 24"
+    },
+    "PRAT": {
+      "node": "N34",
+      "mfr": "Adtran",
+      "cards": "Combo A2+/Combo V2"
+    },
+    "SCMR": {
+      "node": "N49",
+      "mfr": "Adtran",
+      "cards": "Combo V2"
+    },
+    "SLVR": {
+      "node": "ADT01",
+      "mfr": "AdTran",
+      "cards": "ADT 48-Port"
+    },
+    "SMLL": {
+      "node": "N19",
+      "mfr": "Adtran",
+      "cards": "Combo V2"
+    },
+    "SMNL": {
+      "node": "ADT01",
+      "mfr": "AdTran",
+      "cards": "ADT 48-Port"
+    },
+    "SPHD": {
+      "node": "ADT01",
+      "mfr": "AdTran",
+      "cards": "ADT 48-Port"
+    },
+    "SPRD": {
+      "node": "ADT01",
+      "mfr": "AdTRAN",
+      "cards": "ADT 48 PORT"
+    },
+    "SRHS": {
+      "node": "N41",
+      "mfr": "Adtran",
+      "cards": "Combo A2+/GE 8-PORT"
+    },
+    "SRLM": {
+      "node": "N44",
+      "mfr": "Adtran",
+      "cards": "Combo A2+/VDSL 48-COMBO"
+    },
+    "TLHS": {
+      "node": "N45",
+      "mfr": "Adtran",
+      "cards": "Combo A2+/VDSL48PCOMBO"
+    },
+    "TRMR": {
+      "node": "N37",
+      "mfr": "AdTran TA5006",
+      "cards": "Combo V2/T1 8-PORT"
+    },
+    "TRSP": {
+      "node": "ADT01",
+      "mfr": "AdTran",
+      "cards": "ADT 48-PORT"
+    },
+    "TWNP": {
+      "node": "ADT01",
+      "mfr": "AdTran 1148 VPX",
+      "cards": "ADT 48-PORT VDSL"
+    },
+    "WMLR": {
+      "node": "N43",
+      "mfr": "Adtran",
+      "cards": "Combo A2+/Combo V2"
+    },
+    "WSHH": {
+      "node": "N20",
+      "mfr": "Adtran",
+      "cards": "Combo V2"
+    },
+    "WTVL": {
+      "node": "N38",
+      "mfr": "Adtran",
+      "cards": "Combo V2"
+    },
+    "WTVW": {
+      "node": "N4",
+      "mfr": "Calix E3",
+      "cards": "Combo V"
+    }
+  },
+  "examples": [
+    {
+      "type": "DISCONNECT_QDS",
+      "action": "DISC W/ QDS CONN",
+      "facs": "No FACS Changes",
+      "media": "copper",
+      "bonded": false,
+      "note": "MM.DD.YY - No FACS Changes\nNXX XXXX With DSL OUT\nNXX XXXX QDS IN\n(CSX) FRNT-XXXX-XXXX, (Cable) WWWW, (Pair) NNN, (PED) NNN-N\n(Type) WWWW NNN-N-NN-NN BP, (Binding Post) NNN\n-XX"
+    },
+    {
+      "type": "RECONNECT_QDS",
+      "action": "RECON W/ QDS DISC",
+      "facs": "No FACS Changes",
+      "media": "copper",
+      "bonded": false,
+      "note": "MM.DD.YY - NO FACS Changes\nNXX XXXX QDS OUT\n101 NXX XXXX (NXX XXXX) IN\nFRNT-XXXX-XXXX, WWWW, NN, NNN-N\nWWWW NNN-N-NN-NN BP,NNN\n-XX"
+    },
+    {
+      "type": "VACA_RECONNECT",
+      "action": "VACA RECON",
+      "facs": "No FACS Changes",
+      "media": "fiber",
+      "bonded": false,
+      "note": "MM.DD.YY - No FACS Changes\nNXX XXXX with DSL\nFRNT-XXXX-XXXX WWWW NNN N-N\nWWWW-GPON-N-N-N WWWW\n-XX"
+    },
+    {
+      "type": "CONNECT_BONDED",
+      "action": "CONN TEL & DSL BND",
+      "facs": "FACS Updated",
+      "media": "copper",
+      "bonded": true,
+      "note": "MM.DD.YY - Connect TEL & DSL\nNXX XXXX with DSL NN/N Bonded\n*TEL\nFRNT-WWWW_NN-CLXNN-NN-NN WWWW-N,NNN PIC,NN N-N\nWWWW NN-N-NN-NN\n*DSL\nFRNT-WWWW_NN-CLXNN-NN-NN WWWW-N,NNN PIC,NN N-N\nWWWW NN-N-NN-NN\n-XX"
+    },
+    {
+      "type": "FIBER_UPGRADE",
+      "action": "FIBER UPGRADE",
+      "facs": "No FACS Changed",
+      "media": "fiber",
+      "bonded": false,
+      "note": "MM.DD.YY - No FACS Changed\n101 NXX XXXX (NXX XXXX) INT Upgrade Fiber NNN/NNN\n(CSX) FRNT-XXXX-XXX (Cable) WWWW (Pair) NN (PED) WWNN-N\n(Type) WWWW GPON N-N-N WWWW\n(SPLITTER & PORT) WWWW S-N,P-NN\nFSAN (ONT) CXNKXXXXXXXXXX\n-XX"
+    },
+    {
+      "type": "EDGE_UPGRADE",
+      "action": "EDGE UPGRADE",
+      "facs": "No FACS Changed",
+      "media": "edge",
+      "bonded": false,
+      "note": "MM.DD.YY - No FACS Changed\n125 001 XXXX\nEDGE-WWWW-FTTH NN WWWW-WWWW-NN (Cable Name)(PED)\nGPON: WWWW-NNN-NN-NN Port: GPON-X-N (Path Trace)\nSplitter: WWWW-WWWW Port: X-NN (Path Trace)\nFSAN: ONT-CXNKXXXXXXXXXX (Parent Equipment)\n-XX"
+    },
+    {
+      "type": "MOVE_COPPER_FIBER",
+      "action": "MOVE & UPGRADE",
+      "facs": "FACS Updated",
+      "media": "mixed",
+      "bonded": false,
+      "note": "MM.DD.YY - Move & Upgrade INT - FACS Updated\nFrom ADDRESS:\nNXX XXXX OUT\nNXX XXXX QDS IN\nFRNT-XXXX-XXXX W NNN NNN-N\nWWWW NNN-N-NN-NN\n\nTo ADDRESS:\nNXX XXXX IN - Upgrade to FTTH NNN/NNN\n[CSX] [Type] (LinePacks Status)\n[Splitter] (LinePacks Status)\nDIST FIBER: [cable],[pair] MST Port [N] [PED] (Find in ASBUILT)\nDIST PWR: [cable],[pair] [cabinet] [slot] BP,[N] (ASBUILT & Fiber Book)\nFSAN: CXNKXXXXXXXXXX (Modem # in SO)\n-XX"
+    },
+    {
+      "type": "BOND_SPLICE",
+      "action": "UPGRADE TO BND",
+      "facs": "FACS Update",
+      "media": "copper",
+      "bonded": true,
+      "note": "MM.DD.YY - FACS Update\n(101 NXX XXXX) NXX XXXX NN/N\nFRNT-XXXX-XXXX W NNN NNN-N\nWWWW NNN-N-NN-NN\n\nFRNT-XXXX-XXXX W NNN PIC N, NNN-N\nWWWW NNN-N-NN-NN\nDSL Pair stops at NNN-N, will need to be spliced...\n**** Attention splicer***\n-XX"
+    },
+    {
+      "type": "XCONN",
+      "action": "INT UPGRADE XCONN",
+      "facs": "FACS Updated",
+      "media": "copper",
+      "bonded": true,
+      "note": "MM.DD.YY - INT Upgrade to NN/N, Moved, added pair, XCONN- FACS Updated\nNXX XXXX QDS OUT\nFRNT-XXXX-XXXX WWWW NNN NNW-NN-N\nWWWW NNN-N-NN-NN BP,NN\n\nNXX XXXX (101 NXX XXXX) OUT\n...\nIN\n*TEL\nFRNT-XXXX-XXXX WWWW,NN (CO Pair) NNW,NN (PED Pair) NNW-NN-N\nWWWW NNN-N-NN-NN BP,NN\n*DSL (Cross Connect)\nFRNT-XXXX-XXXX WWWW,NN NNW,NN PIC N NNW-NN-N\nWWWW NNN-N-NN-NN BP,NN\n-XX"
+    }
+  ]
+}

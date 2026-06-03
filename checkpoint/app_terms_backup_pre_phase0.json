@@ -1,0 +1,1346 @@
+{
+ "val": [
+  {
+   "term": "Account / Phone / Agreement",
+   "varKey": "account_phone",
+   "system": "iVUE",
+   "media": "base",
+   "where": "iVUE → Agreement + Account columns. The working agreement number on the service order.",
+   "example": "101 822 5775 IN",
+   "note": "Agreement types by prefix: bare NXX XXXX = phone, 101 NXX XXXX = internet, 125 001 XXXX = EDGE. Trailing IN / OUT / QDS marks the direction. iVUE export cols: Agreement, Account. Exchanges: 822, 841, 855, 868, 877, 893.",
+   "source": "value_location"
+  },
+  {
+   "term": "Line Pack — MGCP name",
+   "varKey": "mgcp_name",
+   "system": "LinePacks",
+   "media": "both",
+   "where": "GET from LinePacks → MGCP endpoint name. PUT in iVUE → Switch Equipment column (or New Switch Equipment on reassignment). Same value as CSX/CRV/GR303 — different protocol names for the same switch-equipment box.",
+   "example": "FRNT-PRSV_GPON-CLX01-01-04-1421-01",
+   "note": "MGCP is the Taqua protocol flavor. Format: FRNT-PRSV_GPON-CLX01-01-04-1421-01. If not populated in iVUE, look it up in LinePacks and update Switch Equipment in iVUE. iVUE export cols: Switch Equipment, New Switch Equipment.",
+   "source": "value_location"
+  },
+  {
+   "term": "Line Pack - CRV Number",
+   "varKey": "gr303",
+   "system": "LinePacks",
+   "media": "both",
+   "where": "GET from LinePacks → GR303 endpoint name. PUT in iVUE → Switch Equipment column. Same value as CSX/MGCP — different protocol names for the same switch-equipment box.",
+   "example": "FRNT-0306-1994",
+   "note": "GR303 is the Taqua protocol flavor (alternate to MGCP). If not populated in iVUE, look it up in LinePacks and update Switch Equipment in iVUE. iVUE export cols: Switch Equipment, New Switch Equipment.",
+   "source": "value_location"
+  },
+  {
+   "term": "Line Pack — Equipment",
+   "varKey": "linepack_equip",
+   "system": "LinePacks",
+   "media": "both",
+   "where": "GET from LinePacks → Equipment, second column. PUT in iVUE → Equipment + Equip Desc columns. The cabinet + card/slot/port identifier.",
+   "example": "PRSV_GPON 01-01-04",
+   "note": "LinePacks is the source; iVUE Equipment col holds the short name (e.g. ADT-N30-1-01), Equip Desc holds the cabinet prefix (e.g. ACRN-ADT). iVUE export cols: Equipment, Equip Desc.",
+   "source": "value_location"
+  },
+  {
+   "term": "Line Pack — Splitter Port",
+   "varKey": "splitter_port",
+   "system": "LinePacks / Splitter",
+   "media": "fiber",
+   "where": "GET from LinePacks → Splitter view. Also in iVUE → Equipment Name on 32X SPLITTER records. Identifies the PON splitter shelf and port the customer rides.",
+   "example": "PRSV — S4, P21",
+   "note": "S = splitter number, P = port number. LinePacks is the working source; iVUE export shows splitter records under Equip Type \"32X SPLITTER\" (e.g. MLTN-E1, MLTN-S1). iVUE export cols: Equipment Name (on SPLITTER type records).",
+   "source": "value_location"
+  },
+  {
+   "term": "Cable Name",
+   "varKey": "cable_name",
+   "system": "iVUE",
+   "media": "base",
+   "where": "GET from iVUE → Cable Name column OR from Fiberbook (G:\\GIS_Projects). On new installs, Fiberbook/as-built may have it before iVUE. On existing service, iVUE is populated.",
+   "example": "PRSV, 44",
+   "note": "Cable identifier (e.g. ABRY-ACRN, BGCK-1). Pair number in adjacent Pair column. Cable Type column shows Copper/Fiber/Hybrid. iVUE export cols: Cable Name, Pair, Cable Type.",
+   "source": "value_location"
+  },
+  {
+   "term": "MST / Pedestal",
+   "varKey": "mst_ped",
+   "system": "Fiberbook / As-Built",
+   "media": "base",
+   "where": "GET from Fiberbook (G:\\GIS_Projects) or as-built drawings. Also in iVUE → Serving Ped Parent Equip Name column. On new fiber installs, Fiberbook/as-built is the source. On existing service, iVUE has it.",
+   "example": "MST 2 / PED — (from as-built)",
+   "note": "MST = Multi-Service Terminal (fiber tail), PED = Pedestal (copper/hybrid housing). iVUE export: Serving Ped Parent Equip Name (e.g. ACRN-109-5), Serv Ped Mstr Equip Cat (PED = pedestal). Cross-check Fiberbook against iVUE when they disagree.",
+   "source": "value_location"
+  },
+  {
+   "term": "iVUE Equip ID",
+   "varKey": "ivue_equip_id",
+   "system": "iVUE",
+   "media": "base",
+   "where": "iVUE → Serving Ped Parent Equip Name column. The pedestal or housing the home is fed from.",
+   "example": "ACRN-109-5",
+   "note": "Format: WIRE_CENTER-ID (e.g. ACRN-109-5). This is the physical equipment feeding the premises. iVUE export cols: Serving Ped Parent Equip Name, Serv Ped Desc (short name).",
+   "source": "value_location"
+  },
+  {
+   "term": "Parent Equipment — Internet line item / ONT SN",
+   "varKey": "fsan",
+   "system": "iVUE",
+   "media": "fiber",
+   "where": "GET from warehouse (new install) or Diana in Customer Care (ONT/modem assignment). PUT in iVUE → Equipment Name on ONT records (ONT-CXNK... prefix). Also in Serial column.",
+   "example": "FSAN: **PENDING**",
+   "note": "FSAN = the ONT serial identifier (e.g. CXNK0028C0E1). Often blank until the ONT is registered. Warehouse or Diana assigns the ONT/Modem and provides the serial. In iVUE export: Wire Center = ONT, Equipment col = the FSAN, Equip Type = Calix 711GE / 803G etc. iVUE export cols: Equipment Name (ONT-prefixed), Equipment, Serial.",
+   "source": "value_location"
+  }
+ ],
+ "sug": [
+  {
+   "term": "SO Number",
+   "varKey": "so_number",
+   "system": "iVUE",
+   "media": "base",
+   "where": "iVUE → Service Order header. The SO# identifying this order.",
+   "example": "142965",
+   "note": "Format: 6-digit number (e.g. 142965). Multiple SO#s appear when orders are bundled. In the note, written as SO# NNNNNN at the top.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Order Date",
+   "varKey": "date",
+   "system": "iVUE",
+   "media": "base",
+   "where": "iVUE → order date. Written at the head of the note.",
+   "example": "08.01.23",
+   "note": "Standard format: MM.DD.YY, zero-padded. Going-forward standard for automation.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Action Phrase",
+   "varKey": "action",
+   "system": "Notes",
+   "media": "base",
+   "where": "Notes → the action phrase at the top of the note after the date. Built from a controlled vocabulary of action codes.",
+   "example": "DISC & QDS RECON",
+   "note": "Drives which workflow/variant applies. Read left to right — each code adds meaning:\n\nDISC — Disconnect (no suffix defaults to TEL)\nDISC TEL — Disconnect telephone\nDISC DSL — Disconnect DSL only\nDISC TEL (CBOL) — Disconnect phone, internet stays (Connected But Only-Online)\nRECON — Reconnect (no suffix defaults to full service)\nCONN — Connect (followed by what: QDS / speed / FTTH)\nQDS — Quick Dial Service (restricted dialing rules, AKA 911-only)\nVACA — Vacation (VACA DISC = leaving, VACA RECON = returning)\nNPD — Non-Pay Disconnect\nINT Upgrade to <speed> — Internet speed upgrade (+ BND/SNGL/ADSL/VDSL/FTTH)\nCBOL — Connected But Only-Online (phone removed, internet stays)\nBilling Correction — Fix billing records\nCorrecting Service Points — Provide 911 with line number and address\n\nExample breakdown: DISC TEL (CBOL), QDS CONN, & Billing Correction = remove phone line (internet stays) + connect 911-only line + fix billing.",
+   "source": "suggestion"
+  },
+  {
+   "term": "FACS Status",
+   "varKey": "facs_status",
+   "system": "FACS",
+   "media": "base",
+   "where": "iVUE → FACS subsystem. After edits, record whether port/pair records were touched. Use one of the standard values — do not append tech initials or context.",
+   "example": "No FACS Changed",
+   "note": "Standard values: No FACS Changed / FACS Updated / FACS Removed / FACS Corrected / No FACS Listed / FACS Reverted / FACS Pending. Bonding issues and context notes go in the note body, not here.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Phone — OUT",
+   "varKey": "phone_out",
+   "system": "iVUE",
+   "media": "base",
+   "where": "iVUE → Agreement column. The phone agreement being disconnected or removed. The outgoing agreement on any DISC, QDS, NPD, or MOVE order.",
+   "example": "877 7077",
+   "note": "Format: NXX XXXX (no area code). Agreement types: bare = phone, 101 = internet, 125 = EDGE. 559 is the area code (omit going forward). Exchanges: 822, 841, 855, 868, 877, 893. iVUE export col: Agreement.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Phone — IN",
+   "varKey": "phone_in",
+   "system": "iVUE",
+   "media": "base",
+   "where": "iVUE → Agreement column. The phone agreement being connected or added. The incoming agreement on any CONN, RECON, MOVE, or new-service order.",
+   "example": "841 8679",
+   "note": "Format: NXX XXXX (no area code). Agreement types: bare = phone, 101 = internet, 125 = EDGE. 559 is the area code (omit going forward). Exchanges: 822, 841, 855, 868, 877, 893. iVUE export col: Agreement.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Phone — QDS",
+   "varKey": "phone_qds",
+   "system": "iVUE",
+   "media": "base",
+   "where": "iVUE → Agreement column. The phone agreement for the QDS (911-only) line. A new phone agreement assigned when connecting QDS — different number from the TEL being removed (OUT).",
+   "example": "893 3293",
+   "note": "Format: NXX XXXX (no area code). In the note: NXX XXXX QDS IN. Agreement types: bare = phone, 101 = internet, 125 = EDGE. Exchanges: 822, 841, 855, 868, 877, 893. iVUE export col: Agreement.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Account — OUT",
+   "varKey": "account_out",
+   "system": "iVUE",
+   "media": "base",
+   "where": "iVUE → Account column. The internet/EDGE agreement being disconnected or removed.",
+   "example": "101 877 3101",
+   "note": "Format: 101 NXX XXXX (internet) or 125 001 XXXX (EDGE). Agreement types: bare = phone, 101 = internet, 125 = EDGE. Exchanges: 822, 841, 855, 868, 877, 893. iVUE export col: Account.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Account — IN",
+   "varKey": "account_in",
+   "system": "iVUE",
+   "media": "base",
+   "where": "iVUE → Account column. The internet/EDGE agreement being connected or staying.",
+   "example": "101 841 7236",
+   "note": "Format: 101 NXX XXXX (internet) or 125 001 XXXX (EDGE). In the note often \"101 NXX XXXX Stays\". Agreement types: bare = phone, 101 = internet, 125 = EDGE. Exchanges: 822, 841, 855, 868, 877, 893. iVUE export col: Account.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Tech Initials",
+   "varKey": "tech",
+   "system": "Notes",
+   "media": "base",
+   "where": "Notes → the tech signature. On its own line at the very end of the note.",
+   "example": "-CT-",
+   "note": "Standard format: -XX- (dash-initials-dash), own line. Known: -CT-, -JF-, -KM-. Each tech's initials also map to their writing style.",
+   "source": "suggestion"
+  },
+  {
+   "term": "TEL Port",
+   "varKey": "tel_port",
+   "system": "LinePacks",
+   "media": "both",
+   "where": "GET from LinePacks → voice port string under *TEL section. Also in iVUE → Equipment Name + Port columns. LinePacks is the provisioning source; iVUE holds the service record.",
+   "example": "FRNT-LASH-ADT01-07-44",
+   "note": "Three formats: FRNT-NNNN-NNNN (copper, 75%), FRNT-xxx-ADTnn (ADSL terminal, 13%), FRNT-xxx-CLXnn (GPON/fiber, 11%). Followed on next line by TEL Location. iVUE export cols: Equipment Name (full), Port (short), Port Status.",
+   "source": "suggestion"
+  },
+  {
+   "term": "DSL Port",
+   "varKey": "dsl_port",
+   "system": "LinePacks",
+   "media": "both",
+   "where": "GET from LinePacks → data port string under *DSL section, first column (Equipment). Also in iVUE → Equipment Name + Port columns.",
+   "example": "FRNT-0306-0776 TFRD 287 105N-3-1",
+   "note": "Same formats as TEL Port. First token after *DSL in the note. iVUE export cols: Equipment Name (full), Port (short), Port Status.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Leg 1",
+   "varKey": "leg1",
+   "system": "LinePacks",
+   "media": "both",
+   "where": "GET from LinePacks → the first bonded leg, labeled \"Leg 1\" in the note. Also in iVUE → Equipment Name + Port columns. On moves/QDS, the OUT/old leg also appears here.",
+   "example": "FRNT-0327-1480 MNRT 43 M6-1-2A",
+   "note": "Bonded service uses two legs (Leg 1 + Leg 2). Each leg has a port line then a location line, same structure as TEL/DSL. iVUE export cols: Equipment Name, Port.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Leg 2",
+   "varKey": "leg2",
+   "system": "LinePacks",
+   "media": "both",
+   "where": "GET from LinePacks → the second bonded leg, labeled \"Leg 2\" in the note. Also in iVUE → Equipment Name + Port columns.",
+   "example": "FRNT-0327-1480 MNRT 43 M6-1-2A",
+   "note": "Bonded service uses two legs. Leg 2 in the note. iVUE export cols: Equipment Name, Port.",
+   "source": "suggestion"
+  },
+  {
+   "term": "TEL Location",
+   "varKey": "tel_location",
+   "system": "FACS",
+   "media": "both",
+   "where": "GET from iVUE → FACS subsystem (cable/pair + binding-post location for the TEL port). Also visible in iVUE → Serving Ped Parent Equip Name + Serv Ped Desc columns.",
+   "example": "TFRD N06-2-02-07 BP,157",
+   "note": "BP = binding post. The line after the TEL port in the note. iVUE export cols: Serving Ped Parent Equip Name, Serv Ped Port, Serv Ped Desc.",
+   "source": "suggestion"
+  },
+  {
+   "term": "DSL Location",
+   "varKey": "dsl_location",
+   "system": "FACS",
+   "media": "both",
+   "where": "GET from iVUE → FACS subsystem (cable/pair + binding-post location for the DSL port). Also visible in iVUE → Serving Ped Parent Equip Name + Serv Ped Desc columns.",
+   "example": "TFRD N06-2-02-08 BP,158",
+   "note": "BP = binding post. The line after the DSL port in the note. iVUE export cols: Serving Ped Parent Equip Name, Serv Ped Port, Serv Ped Desc.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Splicer Note",
+   "varKey": "splicer_note",
+   "system": "ATTN SPLICER",
+   "media": "base",
+   "where": "Notes → the field-splicing instruction block (PIC extend / spliced-through call-outs). References cable/pair from iVUE Cable Name + Pair columns and Fiberbook.",
+   "example": "@ 3-13 Extend PIC 17,317 (25pr) to (6pr) PIC 6 @ 313-2",
+   "note": "Flag for the splicer. Review against Fiberbook. Not stored as a field in iVUE — lives only in the note text.",
+   "source": "suggestion"
+  },
+  {
+   "term": "EDGE Customer ID",
+   "varKey": "edge_id",
+   "system": "EDGE",
+   "media": "edge",
+   "where": "EDGE system → the EDGE (fiber) agreement. Also in iVUE → Account column with 125 prefix.",
+   "example": "125 001 0280",
+   "note": "Format: 125 001 XXXX. Agreement types: bare = phone, 101 = internet, 125 = EDGE. iVUE export col: Account (125-prefixed records).",
+   "source": "suggestion"
+  },
+  {
+   "term": "CSX String",
+   "varKey": "csx",
+   "system": "iVUE",
+   "media": "both",
+   "where": "GET from LinePacks → switch-equipment (CRV) box. PUT in iVUE → Switch Equipment column. Same value as MGCP/GR303 — different names for the same switch-equipment box.",
+   "example": "FRNT-0306-1994",
+   "note": "Sometimes appears short (e.g. 328-1345). If not in iVUE, look it up in LinePacks and update. iVUE export cols: Switch Equipment, New Switch Equipment.",
+   "source": "suggestion"
+  },
+  {
+   "term": "GPON Port",
+   "varKey": "gpon_port",
+   "system": "LinePacks",
+   "media": "fiber",
+   "where": "GET from LinePacks → GPON upstream port. Also in iVUE → Equipment Name + Port on GPON equip type records.",
+   "example": "MLTN-N01-03-02 GPON-B-1",
+   "note": "FTTH only. Format: WLDF-ADT-N52-1-14-GPON-B-1. iVUE export: Equip Type = GPON, Equipment Name = full string, Port = GPON-B-1.",
+   "source": "suggestion"
+  },
+  {
+   "term": "EDGE Port",
+   "varKey": "edge_port",
+   "system": "EDGE",
+   "media": "edge",
+   "where": "EDGE system → the FTTH downstream port + pair. Also in iVUE → Equipment Name on EDGE records.",
+   "example": "EDGE-MLTN-FTTH PORT-D-30 PAIR 30",
+   "note": "EDGE product only; rare. Format: EDGE-MLTN-FTTH PORT-D-30 PAIR 30.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Source Document",
+   "varKey": "source_doc",
+   "system": "Notes",
+   "media": "base",
+   "where": "Notes metadata → which monthly file the note came from.",
+   "example": "September Line Assignments.docx",
+   "note": "\"... Line Assignments\" = a Service Order; \"... Tech Calls\" = a trouble/tech-call note. Not stored in iVUE — metadata from the source document.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Workflow Type",
+   "varKey": "workflow_type",
+   "system": "iVUE",
+   "media": "base",
+   "where": "Derived from the action phrase → the classified workflow pattern.",
+   "example": "GEN_DISCONNECT_QDS_BILLING",
+   "note": "Big buckets: DISC_QDS_RECON, VACA_RECONNECT, DISCONNECT_ONLY, UPGRADE_*, NPD. Not a field in iVUE — derived from the action code combination.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Tech-Call Attribution",
+   "varKey": "tech_attrib",
+   "system": "Notes",
+   "media": "base",
+   "where": "Notes → the \"Per <name>\" tag on tech-call notes, crediting who directed the field change.",
+   "example": "Per Bart, wound up using pr 1613 on cable 2",
+   "note": "Frequent names: SE, Han, Kong, Tammie. Marks a same-SO correction, not a new order. Not stored in iVUE — lives only in the note text.",
+   "source": "suggestion"
+  },
+  {
+   "term": "Port Correction",
+   "varKey": "port_correction",
+   "system": "FACS",
+   "media": "base",
+   "where": "Notes + FACS → tech-call language showing the originally-assigned port was changed in the field. The corrected port then updates iVUE → Switch Equipment and FACS records.",
+   "example": "used PR 1403 instead — FACS Updated",
+   "note": "Signals BAD_PORT_UPDATE: the SO port did not work, FACS was updated to the real one. iVUE and LinePacks can disagree — techs note e.g. \"marked bad in LinePacks but not in iVUE\".",
+   "source": "suggestion"
+  },
+  {
+   "varKey": "ac_vaca",
+   "term": "VACA",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "VACA",
+   "note": "Vacation — customer leaving on, or returning from, vacation.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_disc",
+   "term": "DISC",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "DISC",
+   "note": "Disconnect. Usually followed by what is being disconnected (TEL / DSL / EDGE).",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_conn",
+   "term": "CONN",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "CONN",
+   "note": "Connect. Usually paired with what is connected (QDS / a speed / FTTH).",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_recon",
+   "term": "RECON",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "RECON",
+   "note": "Reconnect.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_qds",
+   "term": "QDS",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "QDS",
+   "note": "Quick Dial Service — the dialing rules layer (controls which numbers are allowed). Pairs with QDT (Quick Dial Tone), the state layer that provides dial tone in a restricted state. QDT = state, QDS = dialing rules; combined they produce a working \"911-only line\" (working nomenclature, not exact spec). Notes only ever write QDS.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_tel",
+   "term": "TEL",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "TEL",
+   "note": "Telephone / voice service.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_dsl",
+   "term": "DSL",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "DSL",
+   "note": "DSL data service.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_adsl",
+   "term": "ADSL",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "ADSL",
+   "note": "Asymmetric DSL.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_vdsl",
+   "term": "VDSL",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "VDSL",
+   "note": "Very-high-bit-rate DSL.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_ftth",
+   "term": "FTTH",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "FTTH",
+   "note": "Fiber to the Home.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_edge",
+   "term": "EDGE",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "EDGE",
+   "note": "EDGE FTTH product.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_int",
+   "term": "INT",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "INT",
+   "note": "Internet.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_upgrade",
+   "term": "UPGRADE",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "UPGRADE",
+   "note": "Increase service tier / speed.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_downgrade",
+   "term": "DOWNGRADE",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "DOWNGRADE",
+   "note": "Decrease service tier.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_bnd",
+   "term": "BND",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "BND",
+   "note": "Bonded — two pairs working together for higher speed (also written BONDED).",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_sngl",
+   "term": "SNGL",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "SNGL",
+   "note": "Single pair (non-bonded).",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_cbol",
+   "term": "CBOL",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "CBOL",
+   "note": "Connected But Only-Online — the telephone line is removed; the customer stays connected to internet. Always paired with a 101 internet account that stays active.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_billing",
+   "term": "BILLING",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "BILLING",
+   "note": "Billing action (usually 'Billing Correction').",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_correction",
+   "term": "CORRECTION",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "CORRECTION",
+   "note": "A correction — billing or service-point.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_npd",
+   "term": "NPD",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "NPD",
+   "note": "Non-Pay Disconnect.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_perm",
+   "term": "PERM",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "PERM",
+   "note": "Permanent (e.g. PERM DISC = permanent disconnect).",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_move",
+   "term": "MOVE",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "MOVE",
+   "note": "Move service to a new location.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_xconn",
+   "term": "XCONN",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "XCONN",
+   "note": "Cross-connect.",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ac_acp",
+   "term": "ACP",
+   "system": "Action Code",
+   "media": "base",
+   "where": "Action line — atomic code used in the action phrase at the top of the note.",
+   "example": "ACP",
+   "note": "TBD — pending confirmation (suspected Affordable Connectivity Program).",
+   "source": "action_code"
+  },
+  {
+   "varKey": "ap_vaca_recon",
+   "term": "VACA RECON",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (1126× in corpus).",
+   "example": "VACA RECON",
+   "note": "Reconnect service — customer back from vacation.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_vaca_disc",
+   "term": "VACA DISC",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (978× in corpus).",
+   "example": "VACA DISC",
+   "note": "Disconnect service — customer leaving on vacation.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_disc_tel_cbol_qds_conn_and_billing_corre",
+   "term": "DISC TEL (CBOL), QDS CONN, & Billing Correction",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (1393× in corpus).",
+   "example": "DISC TEL (CBOL), QDS CONN, & Billing Correction",
+   "note": "Remove the phone line (internet stays), connect the QDS line, and fix billing.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_disc_and_qds_conn",
+   "term": "DISC & QDS CONN",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (766× in corpus).",
+   "example": "DISC & QDS CONN",
+   "note": "Disconnect the phone, connect QDS.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_disc_tel_cbol_and_billing_correction",
+   "term": "DISC TEL (CBOL) & Billing Correction",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (365× in corpus).",
+   "example": "DISC TEL (CBOL) & Billing Correction",
+   "note": "Remove the phone line (internet stays) and fix billing.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_qds_conn",
+   "term": "QDS CONN",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (398× in corpus).",
+   "example": "QDS CONN",
+   "note": "Connect a QDS line.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_disc_dsl",
+   "term": "DISC DSL",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (368× in corpus).",
+   "example": "DISC DSL",
+   "note": "Disconnect DSL data only.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_npd",
+   "term": "NPD",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (320× in corpus).",
+   "example": "NPD",
+   "note": "Non-Pay Disconnect.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_correcting_service_points",
+   "term": "Correcting Service Points",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (250× in corpus).",
+   "example": "Correcting Service Points",
+   "note": "Provide 911 with the line number and address (the dispatch service-point record).",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_disc",
+   "term": "DISC",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (244× in corpus).",
+   "example": "DISC",
+   "note": "Plain disconnect.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_int_upgrade_to_speed_bnd",
+   "term": "INT Upgrade to <speed> BND",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (476× in corpus).",
+   "example": "INT Upgrade to <speed> BND",
+   "note": "Internet speed upgrade, bonded.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_int_upgrade_to_speed_adsl_bnd",
+   "term": "INT Upgrade to <speed> ADSL BND",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (389× in corpus).",
+   "example": "INT Upgrade to <speed> ADSL BND",
+   "note": "Internet upgrade, ADSL bonded.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_int_upgrade_to_speed_sngl",
+   "term": "INT Upgrade to <speed> SNGL",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (182× in corpus).",
+   "example": "INT Upgrade to <speed> SNGL",
+   "note": "Internet upgrade, single pair.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_disc_tel_cbol",
+   "term": "DISC TEL (CBOL)",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (150× in corpus).",
+   "example": "DISC TEL (CBOL)",
+   "note": "Remove the phone line; customer stays connected to internet.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_disc_and_qds_recon",
+   "term": "DISC & QDS RECON",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (144× in corpus).",
+   "example": "DISC & QDS RECON",
+   "note": "Disconnect the phone, reconnect QDS.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_conn_speed_bnd",
+   "term": "CONN <speed> BND",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (101× in corpus).",
+   "example": "CONN <speed> BND",
+   "note": "New connect at the given speed, bonded.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_acp_int_upgrade_to_speed_vdsl_bnd",
+   "term": "ACP INT Upgrade to <speed> VDSL BND",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (94× in corpus).",
+   "example": "ACP INT Upgrade to <speed> VDSL BND",
+   "note": "ACP internet upgrade, VDSL bonded.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_int_upgrade_to_speed_ftth",
+   "term": "INT Upgrade to <speed> FTTH",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (84× in corpus).",
+   "example": "INT Upgrade to <speed> FTTH",
+   "note": "Internet upgrade to fiber.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_qds_recon",
+   "term": "QDS RECON",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (75× in corpus).",
+   "example": "QDS RECON",
+   "note": "Reconnect a QDS line.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_disc_tel",
+   "term": "DISC TEL",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (67× in corpus).",
+   "example": "DISC TEL",
+   "note": "Disconnect the phone line.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_npd_and_qds_conn",
+   "term": "NPD & QDS CONN",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (67× in corpus).",
+   "example": "NPD & QDS CONN",
+   "note": "Non-Pay Disconnect, then connect QDS.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "ap_qds_disc",
+   "term": "QDS DISC",
+   "system": "Action Phrase",
+   "media": "base",
+   "where": "Action line — combination phrase (56× in corpus).",
+   "example": "QDS DISC",
+   "note": "Disconnect a QDS line.",
+   "source": "action_combo"
+  },
+  {
+   "varKey": "gl_so",
+   "term": "SO",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Service Order",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_so#",
+   "term": "SO#",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Service Order Number",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_ivue",
+   "term": "iVue",
+   "system": "Glossary",
+   "media": "base",
+   "where": "iVue System",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_pots",
+   "term": "POTS",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Plain Old Telephone Service",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_gg",
+   "term": "GG",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Gigabit / Fiber Gig Service - Confirm Internal Meaning",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_facs",
+   "term": "FACS",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Facilities Assignment / Control System — the port/pair assignment subsystem inside iVUE",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_cos",
+   "term": "COS",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Class of Service — billing/feature designation",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_co",
+   "term": "CO",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Central Office",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_csr",
+   "term": "CSR",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Customer Service Representative / Customer Service Request Context",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_frnt",
+   "term": "FRNT",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Front (switch prefix used in Quintrex)",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_cima",
+   "term": "CIMA",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Switch prefix variant — used like FRNT for some switches",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_bp",
+   "term": "BP",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Binding Post — the physical termination point on a card",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_pic",
+   "term": "PIC",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Pair In Cable — the pair number within a cable",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_ped",
+   "term": "PED",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Pedestal — physical street-level housing for cable terminations",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_crv",
+   "term": "CRV",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Carrier Route Value — fiber pool assignment (FTTH)",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_ont",
+   "term": "ONT",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Optical Network Terminal — customer-premises fiber unit",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_gpon",
+   "term": "GPON",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Gigabit Passive Optical Network — fiber backbone tech",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_mst",
+   "term": "MST",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Multi-Service Terminal — fiber tail termination",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_ah",
+   "term": "AH",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Aerial Housing — pedestal type for fiber",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_gpon_b_1",
+   "term": "GPON-B-1",
+   "system": "Glossary",
+   "media": "base",
+   "where": "GPON Port B-1 — fiber upstream port",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_pots_d_1",
+   "term": "POTS-D-1",
+   "system": "Glossary",
+   "media": "base",
+   "where": "POTS port Downstream 1 — voice port on ONT",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_ge_d_1",
+   "term": "GE-D-1",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Gigabit Ethernet Downstream 1 — data port on ONT",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_sai",
+   "term": "SAI",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Service Area Interface — cross-connect cabinet in the field",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_qds_in",
+   "term": "QDS IN",
+   "system": "Glossary",
+   "media": "base",
+   "where": "QDS service incoming (replacing the OUT line)",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_qds_out",
+   "term": "QDS OUT",
+   "system": "Glossary",
+   "media": "base",
+   "where": "QDS service outgoing (being replaced)",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_quintrex",
+   "term": "Quintrex",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Service mapping / QDS system",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_linepacks",
+   "term": "LinePacks",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Microsoft Access database of switch equipment / cards / ports",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_taqua",
+   "term": "Taqua",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Switch fabric system (MGCP equipment)",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_newnet_cms",
+   "term": "NewNet CMS",
+   "system": "Glossary",
+   "media": "base",
+   "where": "AutoCAD geographic plant records system",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_calix",
+   "term": "CALIX",
+   "system": "Glossary",
+   "media": "base",
+   "where": "DSL/fiber port management and speed-qualification system",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_dsl_bonded",
+   "term": "DSL_BONDED",
+   "system": "Glossary",
+   "media": "base",
+   "where": "DSL service using two bonded pairs",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_dsl_single",
+   "term": "DSL_SINGLE",
+   "system": "Glossary",
+   "media": "base",
+   "where": "DSL service using a single pair",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_tel_pots",
+   "term": "TEL_POTS",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Telephone POTS service section in a note",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_alpha_cabinet",
+   "term": "ALPHA Cabinet",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Power cabinet for FTTH line-powered service",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_rcf",
+   "term": "RCF",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Remote Call Forward — block 0326-1801–1900 reserved",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_911_ext",
+   "term": "911_EXT",
+   "system": "Glossary",
+   "media": "base",
+   "where": "911 Service Point Extension — special workflow with re-open/edit/re-close",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_attn_splicer",
+   "term": "ATTN SPLICER",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Attention to splicer — the note has instructions for field splicing",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_path_trace",
+   "term": "Path Trace",
+   "system": "Glossary",
+   "media": "base",
+   "where": "iVUE connectivity graph; built upstream/downstream from ONT or switch port",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_fiber_book",
+   "term": "Fiber Book",
+   "system": "Glossary",
+   "media": "base",
+   "where": "G:\\GIS_Projects spreadsheet of fiber/power pair assignments per site",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_perm_disc",
+   "term": "PERM DISC",
+   "system": "Glossary",
+   "media": "base",
+   "where": "Permanent Disconnect — typically follows NPD",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_facs_removed",
+   "term": "FACS Removed",
+   "system": "Glossary",
+   "media": "base",
+   "where": "FACS records were deleted (typically with QDS DISC)",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_facs_updated",
+   "term": "FACS Updated",
+   "system": "Glossary",
+   "media": "base",
+   "where": "FACS records were modified (new port assignments)",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "gl_facs_cleared",
+   "term": "FACS Cleared",
+   "system": "Glossary",
+   "media": "base",
+   "where": "FACS records were blanked",
+   "example": "",
+   "note": "",
+   "source": "glossary"
+  },
+  {
+   "varKey": "tt_number",
+   "term": "Ticket Number",
+   "system": "iVUE",
+   "media": "base",
+   "source": "tt_field",
+   "where": "iVUE → Trouble Ticket system. The unique ticket identifier.",
+   "example": "100440",
+   "note": "Format: 6-digit number. iVUE export col: Ticket Number."
+  },
+  {
+   "varKey": "tt_type",
+   "term": "Ticket Type",
+   "system": "iVUE",
+   "media": "base",
+   "source": "tt_field",
+   "where": "iVUE → Trouble Ticket type classification.",
+   "example": "Service Point",
+   "note": "Values: Service Point (92%), Locate (8%), Cable Cut, Equipment Outage, Maintenance, Out of Network. iVUE export col: Ticket Type."
+  },
+  {
+   "varKey": "tt_subscriber_report",
+   "term": "Subscriber Report",
+   "system": "iVUE",
+   "media": "base",
+   "source": "tt_field",
+   "where": "iVUE → Trouble Ticket. What the customer reported when calling in.",
+   "example": "NO DIAL TONE",
+   "note": "Controlled vocabulary. Top: NO DIAL TONE (26%), ADSL TROUBLE (22%), NOISEY/STATIC/HUM (6%), CAN'T BE CALLED (5%), NO DSL (4%), INTERNET TROUBLE/ALL (3%), NDT/NO DSL All Services Out (3%), CAN'T CALL OUT (3%). 60 distinct values. iVUE export col: Subscriber Report."
+  },
+  {
+   "varKey": "tt_fault",
+   "term": "Fault",
+   "system": "iVUE",
+   "media": "base",
+   "source": "tt_field",
+   "where": "iVUE → Trouble Ticket. What was actually found to be wrong (assigned by tech after investigation).",
+   "example": "CUSTOMER OWNED EQUIPMENT",
+   "note": "Controlled vocabulary. Top: CUSTOMER OWNED EQUIPMENT (17%), CENTRAL OFFICE EQUIPMENT (17%), NO TROUBLE FOUND (14%), BAD MODEM (6%), PROTECTOR/SNI/MODULE (5%), BURIED CABLE (4%), PAIR (1.5%), INSIDE WIRING (1.3%), CUT CABLE (1%), PEDESTAL (1%). 103 distinct values. iVUE export col: Fault."
+  },
+  {
+   "varKey": "tt_cause",
+   "term": "Cause",
+   "system": "iVUE",
+   "media": "base",
+   "source": "tt_field",
+   "where": "iVUE → Trouble Ticket. Root cause of the trouble (why the fault happened).",
+   "example": "NO TROUBLE FOUND",
+   "note": "Controlled vocabulary. Mirrors Fault values closely. Top: CUSTOMER OWNED EQUIPMENT (17%), CENTRAL OFFICE EQUIPMENT (16%), NO TROUBLE FOUND (13%), BAD MODEM (6%), PROTECTOR/SNI/MODULE (4%), BURIED CABLE/DROP (3%), PAIR (2%), INSIDE WIRING (1.5%). 103 distinct values. iVUE export col: Cause."
+  },
+  {
+   "varKey": "tt_resolution",
+   "term": "Resolution",
+   "system": "iVUE",
+   "media": "base",
+   "source": "tt_field",
+   "where": "iVUE → Trouble Ticket. How the ticket was resolved.",
+   "example": "REPAIRED",
+   "note": "Controlled vocabulary. Values: REPAIRED (56%), NO ACTION TAKEN (22%), OTHER (12%), LOCATE DONE (8%), TEMPORARY FIX (1%), CANCELLED (<1%). iVUE export col: Resolution."
+  },
+  {
+   "varKey": "tt_plant",
+   "term": "Plant",
+   "system": "iVUE",
+   "media": "base",
+   "source": "tt_field",
+   "where": "iVUE → Trouble Ticket. Plant disposition — where the trouble was and what type of visit.",
+   "example": "TROUBLE INSIDE CO/RT",
+   "note": "Controlled vocabulary. Top: TROUBLE INSIDE CO/RT (18%), CPE - PREM VISIT (9%), CABLE/PROT/DROP-NO PREM V (9%), DSL/COE-PREM VISIT (7%), NO TROUBLE FOUND (6%), CUSTOMER IW/EQUIPMENT (5%). 35 distinct values. iVUE export col: Plant."
+  },
+  {
+   "varKey": "tt_plant_category",
+   "term": "Plant Category",
+   "system": "iVUE",
+   "media": "base",
+   "source": "tt_field",
+   "where": "iVUE → Trouble Ticket. Broader plant classification category.",
+   "example": "TROUBLE INSIDE CO/RT",
+   "note": "Groups Plant values into categories. Top: TROUBLE INSIDE CO/RT (18%), CPE - PREMISE VISIT (9%), CABLE/PROT/DROP (9%), BROADBAND - PREM VISIT (7%), NO TROUBLE FOUND (6%). 34 distinct values. iVUE export col: Plant Category."
+  },
+  {
+   "varKey": "tt_action",
+   "term": "TT Action",
+   "system": "iVUE",
+   "media": "base",
+   "source": "tt_field",
+   "where": "iVUE → Trouble Ticket. The action taken to resolve.",
+   "example": "New- Replaced Equip/Add additi",
+   "note": "Sparse field (only 135 populated). Values: Replaced Equip, CUSTOMER, Repaired Existing, AUTHORITIES, No action needed, Customer Education, Reset/Reprogrammed. iVUE export col: Action."
+  },
+  {
+   "varKey": "tt_resolve_notes",
+   "term": "Resolve Notes",
+   "system": "iVUE",
+   "media": "base",
+   "source": "tt_field",
+   "where": "iVUE → Trouble Ticket. Free-text notes on how the ticket was resolved.",
+   "example": "(tech notes on resolution)",
+   "note": "Free text field. The tech narrative equivalent of the SO note body. iVUE export col: Resolve Notes."
+  },
+  {
+   "varKey": "tt_trouble_remarks",
+   "term": "Trouble Remarks",
+   "system": "iVUE",
+   "media": "base",
+   "source": "tt_field",
+   "where": "iVUE → Trouble Ticket. Additional remarks about the trouble.",
+   "example": "(additional trouble details)",
+   "note": "Free text field. May contain field tech observations, customer context, history. iVUE export col: Trouble Remarks."
+  }
+ ]
+}

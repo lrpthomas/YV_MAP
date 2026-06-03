@@ -1,0 +1,306 @@
+[
+  {
+    "term": "C&C Code",
+    "system": "iVUE",
+    "where": "iVUE \u2192 Cat Item / C&C Code field on the agreement. The 7-char provisioning code that sets the actual speed profile.",
+    "example": "D000000",
+    "note": "Distinct from the speed-tier ID (D000). Maps 1:1 to a speed tier + monthly cost. Some are restricted by facility group.",
+    "source": "transcript_H07"
+  },
+  {
+    "term": "C&C Cost",
+    "system": "iVUE",
+    "where": "iVUE \u2192 the monthly recurring cost tied to a C&C code.",
+    "example": "$55 / $60 / $65 / $80",
+    "note": "Cost tiers track the speed bucket. Beasore and development-code tiers price differently.",
+    "source": "transcript_H07"
+  },
+  {
+    "term": "Facility Restriction Group",
+    "system": "iVUE",
+    "where": "C&C provisioning rule \u2192 which speed codes can coexist on one agreement.",
+    "example": "Can have 1 of each group; only 1 of these per group",
+    "note": "Governs which tiers are mutually exclusive vs combinable when provisioning. From the C&C reference table.",
+    "source": "transcript_H07"
+  },
+  {
+    "term": "Internal Service Type",
+    "system": "iVUE",
+    "where": "iVUE \u2192 Internal Serv Type column. The speed-bucket classification of the agreement.",
+    "example": "25/3, 50/20, 100/20",
+    "note": "Buckets agreements by speed band; pairs with C&C code. iVUE export col: Internal Serv Type.",
+    "source": "transcript_H07+responses_file"
+  },
+  {
+    "term": "Development Code (L-code)",
+    "system": "iVUE",
+    "where": "C&C reference \u2192 special location/development service codes (L000/L001/L002...).",
+    "example": "L000 = Mira Bella (MRBL)",
+    "note": "Development-specific tiers for FTTH subdivisions: Mira Bella/MRBL, Bella Vista/RNSE-Renaissance, Tesoro Viejo/TSVJ. Tie to GIS Sites folders.",
+    "source": "transcript_H07+image_GISsites"
+  },
+  {
+    "term": "Beasore Tier",
+    "system": "iVUE",
+    "where": "C&C reference \u2192 Beasore-only speed codes (special remote area).",
+    "example": "DBESOR1 / DBESOR2 / DBESOR3",
+    "note": "Beasore Meadows area has its own restricted tier set (BB Beasore Max). Seen on Beasore orders flagged *REFER TO ENGINEERING*.",
+    "source": "transcript_H07+responses_file"
+  },
+  {
+    "term": "Complete By Date",
+    "system": "iVUE",
+    "where": "iVUE \u2192 SO \u2192 Office Information tab \u2192 Complete By Date field. This IS the DUE DATE referenced in requests.",
+    "example": "10/15/2021",
+    "note": "Confirmed on the iVUE SO Office Information tab. Paired with Complete By Time. 'DUE DATE' in the request text = this field.",
+    "source": "image_iVUE_SOscreen"
+  },
+  {
+    "term": "Complete By Time",
+    "system": "iVUE",
+    "where": "iVUE \u2192 SO \u2192 Office Information tab \u2192 Complete By Time field.",
+    "example": "4:30 PM",
+    "note": "Companion to Complete By Date.",
+    "source": "image_iVUE_SOscreen"
+  },
+  {
+    "term": "SO Detail Tabs",
+    "system": "iVUE",
+    "where": "iVUE \u2192 SO record \u2192 the row of tabs on the service order.",
+    "example": "SO | Workflow | Agmt | General | Interfaces | Toll | Dir | Local | Serv Addr | 911 | Tax | Equip | Deposit | P&S",
+    "note": "The full tab set on an iVUE service order. Workflow tab holds the task chain; Serv Addr holds the service point; Equip holds equipment.",
+    "source": "image_iVUE_SOscreen"
+  },
+  {
+    "term": "SO Type",
+    "system": "iVUE",
+    "where": "iVUE \u2192 SO grid \u2192 SO Type column.",
+    "example": "CONN",
+    "note": "Order classification (CONN, DISC, etc). iVUE export/grid col: SO Type.",
+    "source": "image_iVUE_SOscreen"
+  },
+  {
+    "term": "SO Status",
+    "system": "iVUE",
+    "where": "iVUE \u2192 SO grid \u2192 SO Status column.",
+    "example": "Pending",
+    "note": "Lifecycle state of the order. iVUE grid col: SO Status.",
+    "source": "image_iVUE_SOscreen"
+  },
+  {
+    "term": "Hold SO",
+    "system": "iVUE",
+    "where": "iVUE \u2192 SO grid \u2192 Hold SO flag / Office Information \u2192 Hold SO checkbox.",
+    "example": "(checkbox)",
+    "note": "Marks an order on hold (e.g. Beasore order put in hold pending engineering).",
+    "source": "image_iVUE_SOscreen"
+  },
+  {
+    "term": "E.FACS",
+    "system": "iVUE Workflow",
+    "where": "iVUE \u2192 SO \u2192 Workflow tab \u2192 task seq 19.0. The Engineering Facilities task \u2014 the GIS/facility-assignment step.",
+    "example": "E.FACS - FACILITIES (19.00)",
+    "note": "THIS IS CODY'S TASK in the SO workflow chain. Status QUEUE until worked, then COMP. Appears as alert E.FACS(1). Complete via right-click \u2192 Complete or Continue Workflow.",
+    "source": "image_iVUE_Workflow"
+  },
+  {
+    "term": "P.PROG",
+    "system": "iVUE Workflow",
+    "where": "iVUE \u2192 Workflow tab \u2192 task seq 20.0. Programming \u2014 switch provisioning step after E.FACS.",
+    "example": "P.PROG - PROGRAMMING (20.00)",
+    "note": "Next task after E.FACS. Some orders route here (P:PROG) after facilities.",
+    "source": "image_iVUE_Workflow"
+  },
+  {
+    "term": "SO Workflow Task Chain",
+    "system": "iVUE Workflow",
+    "where": "iVUE \u2192 SO \u2192 Workflow tab \u2192 ordered task list (Task / Task Seq / Critical / Priority / Needed / Current Status).",
+    "example": "C.DIRVAL\u2192C.CALLBLK\u2192C.P&S\u2192N.NOC\u2192I.INTERNET\u2192C.MODEM\u2192E.FACS\u2192P.PROG\u2192P.VALCONN\u2192P.SCHEDULE\u2192P.COMPLETE\u2192C.PRORATE\u2192CLOSE_SO\u2192911_EXT\u2192C.DIR ASST",
+    "note": "The full 27-task SO lifecycle. Prefixes: C=Customer Service, N=NOC/Network Ops, I=Internet Dept, E=Engineering(GIS), P=Programming/Provisioning. E.FACS (19) is GIS. Each task has a sequence number and status (COMP/QUEUE).",
+    "source": "image_iVUE_Workflow"
+  },
+  {
+    "term": "Continue Workflow",
+    "system": "iVUE",
+    "where": "iVUE \u2192 SO action bar \u2192 Continue Workflow button. Advances the SO to the next task after completing E.FACS.",
+    "example": "(button)",
+    "note": "How you hand the SO off after finishing facilities. Also Review SO, Validate/Close, Void, Print, Create SO on the same bar.",
+    "source": "image_iVUE_SOscreen"
+  },
+  {
+    "term": "LinePacks Columns",
+    "system": "LinePacks",
+    "where": "LinePacks \u2192 _LinePacks1 table \u2192 the exact column headers.",
+    "example": "Switch | Equipment | Status | Voice Agreement | Data Agreement | Line/BP | Card Type",
+    "note": "Confirmed from the _LinePacks1 Access table. Switch=CSX, Equipment=node/card/port, Line/BP=binding post. Search via Ctrl+F in the relevant column.",
+    "source": "image_LinePacks"
+  },
+  {
+    "term": "Voice Agreement",
+    "system": "LinePacks",
+    "where": "LinePacks \u2192 _LinePacks1 \u2192 Voice Agreement column. The phone agreement tied to a port.",
+    "example": "877 7077",
+    "note": "Pairs the physical port to the voice (TEL) agreement. iVUE side = Agreement.",
+    "source": "image_LinePacks"
+  },
+  {
+    "term": "Data Agreement",
+    "system": "LinePacks",
+    "where": "LinePacks \u2192 _LinePacks1 \u2192 Data Agreement column. The internet agreement tied to a port.",
+    "example": "101 877 3101",
+    "note": "Pairs the physical port to the data (DSL/internet) agreement. iVUE side = Account.",
+    "source": "image_LinePacks"
+  },
+  {
+    "term": "Card Type",
+    "system": "LinePacks",
+    "where": "LinePacks \u2192 _LinePacks1 \u2192 Card Type column (last column). The manufacturer/model of the card the port lives on.",
+    "example": "Combo A2+ / RPOTS24 / VDSL48PCOMBO",
+    "note": "Determines bonding compatibility \u2014 both bonded legs must share card type. Adtran vs Calix rules apply.",
+    "source": "image_LinePacks+transcript_H08"
+  },
+  {
+    "term": "Fiber Path \u2014 FEEDER",
+    "system": "Fiberbook / iVUE",
+    "where": "Splitter turn-up response \u2192 FEEDER section. The backbone leg from GPON cabinet to the FDP.",
+    "example": "@BNDL Cabinet: BNDL-GPON-1-1-7 >> FDP#2X15",
+    "note": "Top section of a splitter turn-up. Cabinet GPON port to Fiber Distribution Point. BNDL = the cabinet/site prefix.",
+    "source": "image_TSVJ_template"
+  },
+  {
+    "term": "Fiber Path \u2014 X-CONNECT",
+    "system": "Fiberbook / iVUE",
+    "where": "Splitter turn-up response \u2192 the FDP cross-connect (FDP-IN >> FDP-OUT).",
+    "example": "@BNDX X-Connect: FDP-IN,15 >> FDP-OUT,133 (BNDL_CKSD,133)",
+    "note": "Middle leg: the FDP cross-connect mapping in to out. BNDX = cross-connect point.",
+    "source": "image_TSVJ_template"
+  },
+  {
+    "term": "Fiber Path \u2014 DISTRIBUTION",
+    "system": "Fiberbook / iVUE",
+    "where": "Splitter turn-up response \u2192 DISTRIBUTION section. Splitter port out to the MST port at the pedestal.",
+    "example": "CKSD SPLT-1,P1 >> CKSD,140 AH,1939 MST-PORT,12 (3X5)",
+    "note": "Bottom leg: splitter port to distribution cable/pair to MST port + AH pedestal. (3X5) = splitter ratio context.",
+    "source": "image_TSVJ_template"
+  },
+  {
+    "term": "FDP",
+    "system": "Fiberbook",
+    "where": "Fiber Distribution Point \u2014 the cross-connect housing between feeder and distribution fiber.",
+    "example": "FDP#2X15 / FDP-IN,15 / FDP-OUT,133",
+    "note": "Where feeder fiber cross-connects to distribution. Has IN and OUT pair positions.",
+    "source": "image_TSVJ_template"
+  },
+  {
+    "term": "BNDL / Cabinet Prefix",
+    "system": "Fiberbook / LinePacks",
+    "where": "The GPON cabinet/site prefix in fiber strings (e.g. BNDL = Bandit/site cabinet).",
+    "example": "BNDL-GPON-1-1-7",
+    "note": "Site-cabinet identifier prefixing GPON and splitter strings. Pairs with a wire-center splitter (e.g. CKSD).",
+    "source": "image_TSVJ_template"
+  },
+  {
+    "term": "Splitter Turn-up",
+    "system": "Fiberbook / iVUE",
+    "where": "The procedure + response for bringing a new fiber splitter into service (new FTTH area).",
+    "example": "Corning Dual 1X16 splitter, SFP 100-05148, UPCSC/SC SM DX 2M",
+    "note": "Documents equipment installed (splitter, SFP, jumpers) plus the full FEEDER/X-CONNECT/DISTRIBUTION fiber path. Picked up from warehouse, logged in note.",
+    "source": "image_TSVJ_template"
+  },
+  {
+    "term": "GIS Sites Directory",
+    "system": "Fiberbook / GIS",
+    "where": "\\\\ptc27\\Drawings\\DataPortal\\LinkedDocs\\GIS\\Sites\\ \u2014 per-site folder index mapping wire center \u2192 site name \u2192 exchange.",
+    "example": "(FRNT) TSVJ - Tesoro Viejo",
+    "note": "Maps codes to FTTH developments: TSVJ=Tesoro Viejo, MRBL=Mira Bella, PRSV=Friant Preserve, RNSE=Renaissance, CRES/LCRS=Cressman, SNRK=Sunrock, WLDF=Wildflower, DTON=Downtown O'Neals, etc. Also holds PTC FiberBook.xlsx, FRNT CLX ONT CRV Pool.txt, Calix_MGCP_PON_Construction.png.",
+    "source": "image_GISsites"
+  },
+  {
+    "term": "Query Builder",
+    "system": "iVUE",
+    "where": "iVUE \u2192 Query Builder \u2192 Category=Service Points, View='Service Point - Facilities with Serv Addr Status'. Filter to find subscribers/facilities.",
+    "example": "Cable Name contains EXCH",
+    "note": "How to pull all service points on a cable or in an area. Configure Columns / Load / Save / View SQL / Max Rows. Returns Serv Address City, Service Address, Tax Zone, Wire Center, SP Description, SP Remarks.",
+    "source": "image_subscriberquery"
+  },
+  {
+    "term": "Tax Zone",
+    "system": "iVUE",
+    "where": "iVUE \u2192 Query Builder / Service Point result \u2192 Tax Zone column.",
+    "example": "FRESNO ...",
+    "note": "Tax jurisdiction for the service point. Appears in subscriber query results.",
+    "source": "image_subscriberquery"
+  },
+  {
+    "term": "Wire Center",
+    "system": "iVUE",
+    "where": "iVUE \u2192 Service Point \u2192 Wire Center column. The serving wire-center code.",
+    "example": "EXCH / SVLK",
+    "note": "4-letter wire-center/CLLI code identifying the serving office. Drives equipment lookup.",
+    "source": "image_subscriberquery"
+  },
+  {
+    "term": "NewNetCMS Copper View",
+    "system": "NewNet CMS",
+    "where": "NewNet CMS \u2192 SQL view [NewNetCMS].[dbo].[IVUE_CablePair_Facs_Copper]. The copper cable/pair/facility join used for cutsheets.",
+    "example": "SELECT ... FROM IVUE_CablePair_Facs_Copper",
+    "note": "47-column view joining cable pair to facility/cross-connect/binding-post. Cols include XConn Cable Nm, MinSvPt_BP, Port_BP, bnd_pair, xconpair, CBOL, Cat Item, SubDown/SubUp. Used to build cutsheets.",
+    "source": "transcript_H16"
+  },
+  {
+    "term": "RECAP",
+    "system": "Notes / Switch",
+    "where": "Request \u2192 RECAP section. The switch-feature summary for the programming team (blocking, PIC, publish status).",
+    "example": "RECAP: ALL BLOCKS, NO PIC, NON PUBLISHED",
+    "note": "Recapture of switch features. Handled by P.PROG (programming), not E.FACS \u2014 but read it to understand the order. Common: NO PIC, COMPLETE/SELECTIVE block, NP (non-published), 900/COLLECT/3RD/INT'L blocks.",
+    "source": "transcript_H19+responses_file"
+  },
+  {
+    "term": "NO PIC",
+    "system": "Switch",
+    "where": "RECAP \u2192 no Preferred Interexchange Carrier (no long-distance carrier).",
+    "example": "NO PIC",
+    "note": "Customer has no toll/long-distance carrier. Opposite of a PIC assignment.",
+    "source": "transcript_H19"
+  },
+  {
+    "term": "Non-Published (NP)",
+    "system": "Switch",
+    "where": "RECAP \u2192 number not listed in the directory.",
+    "example": "NON PUBLISHED / NP",
+    "note": "Directory suppression. Shows as Nonpublish on the iVUE SO header.",
+    "source": "transcript_H19+image_iVUE_SOscreen"
+  },
+  {
+    "term": "Complete Block",
+    "system": "Switch",
+    "where": "RECAP \u2192 complete caller-ID blocking (number always shows PRIVATE).",
+    "example": "COMPLETE BLOCK",
+    "note": "vs Selective (SEL) where the number does appear. Caller-ID presentation control.",
+    "source": "transcript_H19"
+  },
+  {
+    "term": "REFER TO ENGINEERING",
+    "system": "Notes",
+    "where": "Request flag \u2192 order needs engineering/GIS design before facilities (drop placement, field meet).",
+    "example": "*REFER TO ENGINEERING* BEASORE ORDER",
+    "note": "Triggers a field meet / drawing / WO before the SO can be completed. Common on Beasore and new-area orders. Order often put in Hold.",
+    "source": "responses_file"
+  },
+  {
+    "term": "APN",
+    "system": "Notes / ParcelQuest",
+    "where": "Request \u2192 Assessor's Parcel Number for the property (used for vicinity maps / drop placement).",
+    "example": "APN: 059-042-025-000",
+    "note": "Parcel identifier. Looked up in ParcelQuest for EDGE/new-service inquiries and drop placement.",
+    "source": "responses_file"
+  },
+  {
+    "term": "Work Order (WO#)",
+    "system": "Notes",
+    "where": "Response \u2192 field work order number for drop placement / construction.",
+    "example": "WO#N22101-04",
+    "note": "Construction/field WO referenced in the response when a drop or plant work is dispatched.",
+    "source": "responses_file+image_iVUE_SOscreen"
+  }
+]
