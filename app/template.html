@@ -506,29 +506,41 @@ const App = {
 };
 
 /* ======================================================================
-   IndexedDB STORE — issues + screenshots (localStorage too small for base64)
+   ISSUE STORE — IndexedDB (issues + base64 screenshots), with a localStorage
+   fallback for file:// in Firefox/Safari so the app needs no local server.
    ====================================================================== */
 const DB = (()=>{
-  const NAME='so_trainer', STORE='issues'; let db=null;
-  function open(){return new Promise((res,rej)=>{
-    const r=indexedDB.open(NAME,1);
+  const NAME='so_trainer', STORE='issues', LS='so_trainer_issues';
+  let db=null, mode=null;   // 'idb' (IndexedDB) | 'ls' (localStorage fallback)
+  function openIDB(){return new Promise((res,rej)=>{
+    let r; try{ r=indexedDB.open(NAME,1); }catch(e){ return rej(e); }
     r.onupgradeneeded=e=>{const d=e.target.result; if(!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE,{keyPath:'id'});};
-    r.onsuccess=e=>{db=e.target.result;res(db)}; r.onerror=e=>rej(e);
+    r.onsuccess=e=>res(e.target.result); r.onerror=()=>rej(r.error||new Error('idb error')); r.onblocked=()=>rej(new Error('idb blocked'));
   });}
-  async function ready(){ if(!db) await open(); return db; }
-  async function all(){ await ready(); return new Promise((res,rej)=>{
-    const tx=db.transaction(STORE,'readonly').objectStore(STORE).getAll();
-    tx.onsuccess=()=>res(tx.result||[]); tx.onerror=rej; });}
-  async function put(rec){ await ready(); return new Promise((res,rej)=>{
-    const tx=db.transaction(STORE,'readwrite').objectStore(STORE).put(rec);
-    tx.onsuccess=()=>res(); tx.onerror=rej; });}
-  async function del(id){ await ready(); return new Promise((res,rej)=>{
-    const tx=db.transaction(STORE,'readwrite').objectStore(STORE).delete(id);
-    tx.onsuccess=()=>res(); tx.onerror=rej; });}
-  async function clear(){ await ready(); return new Promise((res,rej)=>{
-    const tx=db.transaction(STORE,'readwrite').objectStore(STORE).clear();
-    tx.onsuccess=()=>res(); tx.onerror=rej; });}
-  return {all,put,del,clear,ready};
+  // Decide the backend once. IndexedDB works on http(s) and on file:// in
+  // Chromium; Firefox/Safari block it on file://, so we fall back to
+  // localStorage there — which keeps the app fully usable with NO local server.
+  async function ready(){
+    if(mode) return;
+    try{ if(typeof indexedDB!=='undefined' && indexedDB){ db=await openIDB(); mode='idb'; return; } }catch(e){ /* fall through */ }
+    mode='ls';
+  }
+  function lsAll(){ try{ return JSON.parse(localStorage.getItem(LS)||'[]'); }catch(e){ return []; } }
+  function lsWrite(arr){ localStorage.setItem(LS, JSON.stringify(arr)); }   // may throw QuotaExceededError (caught by callers)
+  async function all(){ await ready();
+    if(mode==='idb') return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readonly').objectStore(STORE).getAll(); tx.onsuccess=()=>res(tx.result||[]); tx.onerror=rej; });
+    return lsAll(); }
+  async function put(rec){ await ready();
+    if(mode==='idb') return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readwrite').objectStore(STORE).put(rec); tx.onsuccess=()=>res(); tx.onerror=rej; });
+    const arr=lsAll(); const i=arr.findIndex(x=>x.id===rec.id); if(i>=0) arr[i]=rec; else arr.push(rec); lsWrite(arr); }
+  async function del(id){ await ready();
+    if(mode==='idb') return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readwrite').objectStore(STORE).delete(id); tx.onsuccess=()=>res(); tx.onerror=rej; });
+    lsWrite(lsAll().filter(x=>x.id!==id)); }
+  async function clear(){ await ready();
+    if(mode==='idb') return new Promise((res,rej)=>{ const tx=db.transaction(STORE,'readwrite').objectStore(STORE).clear(); tx.onsuccess=()=>res(); tx.onerror=rej; });
+    lsWrite([]); }
+  function storageMode(){ return mode; }
+  return {all,put,del,clear,ready,storageMode};
 })();
 
 /* ======================================================================
@@ -543,7 +555,7 @@ const el=(t,a={},...kids)=>{const n=document.createElement(t);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function todayMDYY(){const d=new Date();return `${d.getMonth()+1}.${d.getDate()}.${String(d.getFullYear()).slice(2)}`;}
 function maskLast4(v){const digits=String(v).replace(/\D/g,''); if(!digits)return ''; return '****'+digits.slice(-4);}
-function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200);}
+function toast(msg,ms){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),ms||2200);}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function fmtWhen(ts){const d=new Date(ts);return d.toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
 
@@ -1294,8 +1306,13 @@ document.addEventListener('keydown',e=>{
    ====================================================================== */
 (async function boot(){
   $('#sbKb').textContent=`KB v${KB.version} · ${KB.generated}`;
-  try{ await DB.ready(); await loadIssues(); $('#sbStore').textContent='IndexedDB ✓'; }
-  catch(e){ $('#sbStore').textContent='local (no IDB)'; }
+  try{
+    await DB.ready(); await loadIssues();
+    if(DB.storageMode()==='idb'){ $('#sbStore').textContent='IndexedDB ✓'; }
+    else { $('#sbStore').textContent='Local store ✓';
+      toast('Local-file mode: issues save in this browser. Use Export for backups; very large screenshots may not fit.', 6000); }
+  }
+  catch(e){ $('#sbStore').textContent='storage unavailable'; }
   startScreen();
 })();
 </script>
