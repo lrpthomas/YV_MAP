@@ -408,6 +408,11 @@ const KB = /*__KB_JSON__*/;
 const SPECS = /*__SPECS_JSON__*/;
 function spec(){ return (App.member && SPECS[App.member.corpus_workflow]) || null; }
 
+/* Extra reference data folded in from the v3 KB + build_data.json (equipment
+   inventory, cable-book status, agreements, card rules, physical plant, switch
+   features, exchanges, tech styles, field guide, systems detail, full examples). */
+const REFX = /*__REFX_JSON__*/;
+
 /* ----------------------------------------------------------------------
    REFERENCE CONSTANTS — lifted from checkpoint/DATA_REVIEW_FINDINGS.md
    (reference knowledge, not corpus/customer data → safe to embed)
@@ -1108,8 +1113,11 @@ $('#importFile')&&($('#importFile').onchange=async e=>{
    ====================================================================== */
 const REF_SECTIONS=[
   ['note','Note format'],['flows','Flows & workflows'],['actions','Action codes'],
-  ['terms','Glossary'],['speeds','Speed tiers'],['decoder','Port decoder'],
-  ['rcf','RCF'],['systems','Systems'],['procedures','Procedures'],['routing','People & routing'],['legacy','Legacy map'],
+  ['terms','Glossary'],['speeds','Speed tiers'],['equipment','Equipment'],['cards','Card rules'],
+  ['cables','Cable book & plant'],['agreements','Agreements'],['switch','Switch features'],
+  ['exchanges','Exchanges'],['decoder','Port decoder'],['rcf','RCF'],['systems','Systems'],
+  ['techs','Tech styles'],['guide','Field guide'],['procedures','Procedures'],
+  ['routing','People & routing'],['legacy','Legacy map'],
 ];
 let refSection='note';
 function renderReference(){
@@ -1118,8 +1126,14 @@ function renderReference(){
     onclick:()=>{refSection=k;renderReference();}},label)));
   const b=$('#refBody'); b.innerHTML='';
   ({note:refNote,flows:refFlows,actions:refActions,terms:refTerms,speeds:refSpeeds,
+    equipment:refEquipment,cards:refCards,cables:refCables,agreements:refAgreements,switch:refSwitch,
+    exchanges:refExchanges,techs:refTechs,guide:refGuide,
     decoder:refDecoder,rcf:refRcf,systems:refSystems,procedures:refProcedures,routing:refRouting,legacy:refLegacy}[refSection])(b);
 }
+/* small helpers for the folded-in reference data */
+function kvRows(obj){ return Object.entries(obj||{}).map(([k,v])=>[esc(k), esc(typeof v==='string'?v:JSON.stringify(v))]); }
+function refKV(b,title,obj,head,note){ const c=refCard(title); if(note) c.append(el('div',{class:'muted',style:'margin-bottom:8px;font-size:12px'},note));
+  c.append(refTable(head||['Key','Meaning'], kvRows(obj))); b.append(c); }
 function refCard(title,...body){ const c=el('div',{class:'card'}); c.append(el('h3',{},title)); body.forEach(x=>c.append(x)); return c; }
 function refTable(head,rows){ const t=el('table',{class:'ref'});
   t.append(el('tr',{},...head.map(h=>el('th',{},h))));
@@ -1194,7 +1208,78 @@ function refRcf(b){
     RCF_CODES.map(r=>r.map(esc)))));
   b.append(refCard('RCF rule',el('p',{style:'font-size:12.5px'},RCF_RULE)));
 }
-function refSystems(b){ b.append(refCard('Systems & where to look',refTable(['System','What it holds'],SYSTEMS.map(s=>s.map(esc))))); }
+function refSystems(b){
+  b.append(refCard('Systems & where to look',refTable(['System','What it holds'],SYSTEMS.map(s=>s.map(esc)))));
+  // folded-in iVUE detail (nav tree + SO screen tabs) from the v3 KB
+  const iv=(REFX.systems_detail||{}).ivue;
+  if(iv){
+    const c=refCard('iVUE — navigation & SO screen ('+esc(iv.vendor||'NISC')+')');
+    if(iv.nav_tree) c.append(el('div',{style:'font-size:12.5px;margin-bottom:6px'},el('b',{},'Nav tree: '),esc(iv.nav_tree.join('  ›  '))));
+    const so=iv.so_screen||{};
+    if(so.search) c.append(el('div',{style:'font-size:12.5px;margin-bottom:6px'},el('b',{},'Find an SO: '),esc(so.search)));
+    if(so.tabs) c.append(el('div',{style:'font-size:12.5px;margin-bottom:6px'},el('b',{},'SO tabs: '),esc(so.tabs.join(' · '))));
+    if(so.request_box) c.append(el('div',{style:'font-size:12.5px'},el('b',{},'Request box: '),esc(so.request_box)));
+    if(so.response_box) c.append(el('div',{style:'font-size:12.5px'},el('b',{},'Response box: '),esc(so.response_box)));
+    b.append(c);
+  }
+}
+function refEquipment(b){
+  const inv=REFX.equipment_inventory||{};
+  const rows=Object.entries(inv).map(([wc,d])=>[esc(wc),esc(d.node||''),esc(d.mfr||''),esc(d.cards||'')]);
+  const c=refCard('Equipment inventory · '+rows.length+' wirecenters');
+  c.append(el('div',{class:'muted',style:'margin-bottom:8px;font-size:12px'},'Auberry exchange. Wirecenter → parent Node, manufacturer, and card complement (Calix / Adtran). Filter:'));
+  const inp=el('input',{class:'search',placeholder:'Filter by wirecenter, node, mfr, or card…',style:'margin-bottom:8px'});
+  const tbl=el('div');
+  const draw=q=>{ tbl.innerHTML=''; const f=rows.filter(r=>!q||r.join(' ').toLowerCase().includes(q));
+    tbl.append(refTable(['Wirecenter','Node','Mfr','Cards'],f)); };
+  inp.addEventListener('input',e=>draw(e.target.value.toLowerCase())); c.append(inp,tbl); draw(''); b.append(c);
+}
+function refCards(b){
+  refKV(b,'Card rules',REFX.card_rules,['Card / type','Rule'],
+    'How to pick and pair line cards. Adtran vs Calix behavior, and which card to use for bonding vs single pair.');
+}
+function refCables(b){
+  refKV(b,'Cable Book status codes',REFX.cable_book_status,['Status','Meaning'],
+    'What each status in the Cable Book means when reading pairs.');
+  const pp=REFX.physical_plant||{};
+  refKV(b,'Pedestal types',pp.pedestal_types,['Type','Capacity']);
+  refKV(b,'Cable naming',pp.cable_naming,['Name','Means']);
+  refKV(b,'Binder / pair color codes',pp.color_codes,['Color','Direction / use']);
+  refKV(b,'Plant marking',pp.marking,['Mark','Means']);
+}
+function refAgreements(b){
+  const a=Object.assign({},REFX.agreement_types); const ex=a.exchanges; delete a.exchanges;
+  refKV(b,'Agreement number types',a,['Prefix','Service'],
+    'How the agreement number tells you the service. 559 area code is dropped going forward.');
+  if(ex) b.append(refCard('Exchange prefixes',el('div',{style:'font-size:13px;font-family:var(--mono)'},esc(ex.join('   ')))));
+}
+function refSwitch(b){
+  const sf=REFX.switch_features||{};
+  if(sf.RECAP){ const c=refCard('RECAP'); Object.entries(sf.RECAP).forEach(([k,v])=>
+    c.append(el('div',{style:'font-size:12.5px;margin-bottom:4px'},el('b',{},esc(k)+': '),esc(v)))); b.append(c); }
+  refKV(b,'Blocking & feature codes',sf.blocking_codes,['Code','Meaning'],
+    'Switch features/blocks seen on orders (handled by Programming/CS, but you read them).');
+  if(sf.example) b.append(refCard('Example',el('div',{class:'muted',style:'font-size:12.5px'},esc(sf.example))));
+}
+function refExchanges(b){
+  const ex=REFX.exchanges||{};
+  const c=refCard('Exchanges'+(ex.count?(' · '+ex.count):''));
+  if(ex.names) c.append(el('div',{style:'font-size:13px;margin-bottom:6px'},esc(ex.names.join('  ·  '))));
+  if(ex.note) c.append(el('div',{class:'muted',style:'font-size:12px'},esc(ex.note)));
+  b.append(c);
+}
+function refTechs(b){
+  const t=REFX.tech_styles||{};
+  const rows=Object.entries(t).map(([code,d])=>[esc(code),esc(d.name||''),esc(d.role||''),esc(String(d.count??''))]);
+  b.append(refCard('Tech styles / authorship',
+    el('div',{class:'muted',style:'margin-bottom:8px;font-size:12px'},'Who wrote the corpus notes (note-style varies by author).'),
+    refTable(['Code','Name','Role','SOs'],rows)));
+}
+function refGuide(b){
+  const g=REFX.field_guide||{};
+  b.append(refCard('Field guide',el('div',{class:'muted',style:'font-size:12px'},'Answers to common "where/what is…" questions while working an order.')));
+  Object.entries(g).forEach(([k,v])=>b.append(refCard(k,el('div',{style:'font-size:12.5px'},esc(v)))));
+}
 function refProcedures(b){ PROCEDURES.forEach(([t,body])=>b.append(refCard(t,el('p',{style:'font-size:12.5px'},body)))); }
 function refRouting(b){
   b.append(refCard('People',refTable(['Who','Role'],PEOPLE.map(p=>p.map(esc)))));
@@ -1236,9 +1321,17 @@ const EXAMPLES=[
   ['MOVE — new + old address','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN\n6.3.26 -MOVE- FACS CHANGED\nNEW ADDRESS\n***-**** QDS OUT\n*TEL / *DSL …\nOLD ADDRESS\n***-**** OUT\n***-**** QDS IN\n*TEL / *DSL …\n-DS'],
   ['RCF — switch to RCFA','RCF agreement (SO#167391)','6.3.26 SWITCH TO RCFA ONLY FACS CHANGED\n855-**** SWITCH TO RCFA ONLY\nFRNT-0326-1809\n-TDF'],
 ];
+function allExamples(){
+  // curated, labeled examples + the full real-note examples folded in from build_data.json
+  const extra=(REFX.examples_full||[]).map(e=>{
+    const tags=[e.media,e.bonded?'bonded':null,e.facs].filter(Boolean).join(' · ');
+    return [e.type||e.action||'Example', (e.action||'')+(tags?'  ('+tags+')':''), e.note||''];
+  });
+  return EXAMPLES.concat(extra);
+}
 function renderExamples(){
   const b=$('#exBody'); b.innerHTML=''; const q=($('#exSearch').value||'').toLowerCase();
-  EXAMPLES.filter(e=>!q||e.join(' ').toLowerCase().includes(q)).forEach(([title,label,note])=>{
+  allExamples().filter(e=>!q||e.join(' ').toLowerCase().includes(q)).forEach(([title,label,note])=>{
     b.append(el('div',{class:'card'},
       el('h3',{},title,' ',el('span',{class:'pill'},esc(label))),
       el('pre',{style:'font-family:var(--mono);font-size:12.5px;background:var(--inset);padding:12px;border-radius:8px;white-space:pre-wrap'},note),
