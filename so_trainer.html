@@ -314,7 +314,7 @@ footer .sb-spacer{flex:1}
   <section class="view" id="view-examples">
     <div class="content">
       <h2 class="page">Worked Examples</h2>
-      <p class="lede">One labeled real example per workflow (scrubbed). From PTCGIS_ServiceOrders.docx — the canonical how-to.</p>
+      <p class="lede">Real labeled notes (scrubbed, from PTCGIS_ServiceOrders.docx + build data) plus one illustrative example for every workflow. Filter below.</p>
       <input class="search" id="exSearch" placeholder="Filter examples (e.g. bonded, vaca, xconn, move)…">
       <div id="exBody"></div>
     </div>
@@ -930,16 +930,17 @@ function buildNoteLines(){
   if(footer) body.push(footer);
   return body;
 }
-function deriveAction(){
-  // pull the workflow's own work desc from template line 1. Handles ASCII hyphen
+function actionOf(tpl){
+  // pull a workflow's work desc from template line 1. Handles ASCII hyphen
   // AND en-dash, plus dash-less headers like "{date} CONNECT SERVICE".
-  const l1=App.template.split('\n')[0];
+  const l1=(tpl||'').split('\n')[0];
   const m=l1.match(/[-–]\s*(.+?)\s*[-–]/);                 // between two dashes
   if(m) return m[1].trim();
   // dash-less / single-dash: strip date + FACS tokens, then trim stray dashes
   return l1.replace(/\{date\}/g,'').replace(/\{facs_status\}/g,'')
            .replace(/FACS (UN)?CHANGED/g,'').replace(/^[-–\s]+|[-–\s]+$/g,'').trim();
 }
+function deriveAction(){ return actionOf(App.template); }
 function renderNote(){
   const box=$('#notePreview'); box.innerHTML='';
   if(!App.member){ box.append(el('span',{class:'muted'},'Pick a flow and workflow — the note builds here as you fill fields.')); return; }
@@ -1321,19 +1322,69 @@ const EXAMPLES=[
   ['MOVE — new + old address','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN\n6.3.26 -MOVE- FACS CHANGED\nNEW ADDRESS\n***-**** QDS OUT\n*TEL / *DSL …\nOLD ADDRESS\n***-**** OUT\n***-**** QDS IN\n*TEL / *DSL …\n-DS'],
   ['RCF — switch to RCFA','RCF agreement (SO#167391)','6.3.26 SWITCH TO RCFA ONLY FACS CHANGED\n855-**** SWITCH TO RCFA ONLY\nFRNT-0326-1809\n-TDF'],
 ];
-function allExamples(){
-  // curated, labeled examples + the full real-note examples folded in from build_data.json
-  const extra=(REFX.examples_full||[]).map(e=>{
-    const tags=[e.media,e.bonded?'bonded':null,e.facs].filter(Boolean).join(' · ');
-    return [e.type||e.action||'Example', (e.action||'')+(tags?'  ('+tags+')':''), e.note||''];
+/* Illustrative example per workflow — the verified template rendered with safe
+   synthetic values (no customer data), so all 31 workflows have an example.
+   Clearly tagged 'illustrative' and filterable so they don't dilute the real ones. */
+const SAMPLE={
+  tech:'KM',
+  phone_out:'***-**** OUT', phone_in:'***-****', phone_qds:'***-****',
+  account_out:'****4321', account_in:'****4321',
+  port:'FRNT-0321-0157 5,736 605d-4',
+  port1:'FRNT-0321-0157 5,736 605d-4', port2:'FRNT-0321-0158 5,737 605d-5',
+  tel_port:'FRNT-0321-0157 5,736 605d-4', tel_port1:'FRNT-0321-0157 5,736 605d-4', tel_port2:'FRNT-0321-0159 5,738 605d-6',
+  dsl_port:'FRNT-0321-0158 5,737 PIC,37', dsl_port1:'FRNT-0321-0158 5,737 PIC,37', dsl_port2:'FRNT-0321-0160 5,739 PIC,39',
+  tel_location:'FRNT 1-3-6-4 BP,4', tel_location1:'FRNT 1-3-6-4 BP,4', tel_location2:'FRNT 1-3-6-6 BP,6',
+  dsl_location:'FRNT 1-3-6-5 BP,5', dsl_location1:'FRNT 1-3-6-5 BP,5', dsl_location2:'FRNT 1-3-6-7 BP,7',
+  edge_id:'125-001-0042', fsan:'CXNK01234567',
+  // port3..port16 intentionally absent -> omitted by the N/A rule (realistic)
+};
+function renderSample(tpl){
+  const body=[]; let footer=null;
+  tpl.split('\n').forEach(raw=>{
+    if(/^-\s*\{?tech\}?\s*-?$/.test(raw.trim())){ footer='-'+SAMPLE.tech; return; }
+    let line=raw.replace(/\{facs_status\}/g,'FACS UNCHANGED');
+    let had=false, any=false;
+    line=line.replace(/\{([a-z0-9_]+)\}/gi,(m,p)=>{ had=true; const v=(p==='date')?todayMDYY():(SAMPLE[p]||''); if(v) any=true; return v; });
+    if(had && !any) return;               // line's placeholders all empty -> drop
+    body.push(line.replace(/\s+$/,''));
   });
-  return EXAMPLES.concat(extra);
+  if(footer) body.push(footer);
+  return body.join('\n');
 }
+function illustrativeExamples(){
+  const out=[];
+  Object.entries(KB.flows).forEach(([fk,f])=>f.members.forEach(m=>{
+    const action=actionOf(m.template);
+    const note=('135464 '+(action||'')).trim()+'\n'+renderSample(m.template);
+    out.push({title:m.corpus_workflow, label:fk.replace(/_/g,' / '), note, kind:'illustrative'});
+  }));
+  return out;
+}
+function allExamples(){
+  // real labeled examples (from ServiceOrders.docx) + the 9 full notes from
+  // build_data.json + one illustrative example for every workflow.
+  const real=EXAMPLES.map(([title,label,note])=>({title,label,note,kind:'real'}));
+  const full=(REFX.examples_full||[]).map(e=>{
+    const tags=[e.media,e.bonded?'bonded':null,e.facs].filter(Boolean).join(' · ');
+    return {title:e.type||e.action||'Example', label:(e.action||'')+(tags?'  ('+tags+')':''), note:e.note||'', kind:'real'};
+  });
+  return real.concat(full).concat(illustrativeExamples());
+}
+let exFilter='all';
 function renderExamples(){
   const b=$('#exBody'); b.innerHTML=''; const q=($('#exSearch').value||'').toLowerCase();
-  allExamples().filter(e=>!q||e.join(' ').toLowerCase().includes(q)).forEach(([title,label,note])=>{
+  let list=allExamples().filter(e=>exFilter==='all'||e.kind===exFilter);
+  if(q) list=list.filter(e=>(e.title+' '+e.label+' '+e.note).toLowerCase().includes(q));
+  const real=allExamples().filter(e=>e.kind==='real').length, illus=allExamples().length-real;
+  const bar=el('div',{style:'display:flex;gap:6px;align-items:center;margin-bottom:12px;flex-wrap:wrap'});
+  [['all','All ('+(real+illus)+')'],['real','Real ('+real+')'],['illustrative','Illustrative ('+illus+')']]
+    .forEach(([k,lab])=>bar.append(el('button',{class:'btn sm'+(exFilter===k?' primary':''),onclick:()=>{exFilter=k;renderExamples();}},lab)));
+  if(exFilter==='illustrative') bar.append(el('span',{class:'muted',style:'font-size:11.5px'},'Generated from the verified template with sample values — format reference, not real orders.'));
+  b.append(bar);
+  list.forEach(({title,label,note,kind})=>{
     b.append(el('div',{class:'card'},
-      el('h3',{},title,' ',el('span',{class:'pill'},esc(label))),
+      el('h3',{},title,' ',el('span',{class:'pill'},esc(label)),
+        kind==='illustrative'?el('span',{class:'pc-derived',style:'margin-left:6px'},'illustrative'):''),
       el('pre',{style:'font-family:var(--mono);font-size:12.5px;background:var(--inset);padding:12px;border-radius:8px;white-space:pre-wrap'},note),
       el('button',{class:'btn sm',onclick:()=>navigator.clipboard.writeText(note).then(()=>toast('Copied'))},'Copy')));
   });
