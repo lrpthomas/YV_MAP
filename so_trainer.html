@@ -1397,19 +1397,62 @@ $('#exSearch')&&$('#exSearch').addEventListener('input',renderExamples);
 let corpusData=null;
 function handleCorpus(file){
   const r=new FileReader();
-  r.onload=()=>{ try{ corpusData=JSON.parse(r.result); renderCorpus(file.name); }
-    catch(e){ toast('Not valid JSON: '+e.message); } };
+  r.onload=()=>{
+    const text=r.result;
+    try{ corpusData=JSON.parse(text); }
+    catch(e){
+      // not a single JSON value — try NDJSON / JSONL (one JSON object per line)
+      const lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+      const recs=[]; let okLines=0;
+      for(const ln of lines){ try{ recs.push(JSON.parse(ln)); okLines++; }catch(_){} }
+      if(okLines && okLines>=lines.length*0.5){ corpusData=recs; }
+      else { toast('Not valid JSON or NDJSON: '+e.message); return; }
+    }
+    renderCorpus(file.name);
+  };
   r.readAsText(file);
+}
+/* Find the real records inside an uploaded file, wherever they live: a bare
+   array, a known key (records/rows/data/…), the largest array-of-objects found
+   anywhere in the structure, or an id-keyed dict of records. */
+function extractRecords(data){
+  if(Array.isArray(data)) return {arr:data, path:'(array)'};
+  if(!data || typeof data!=='object') return {arr:[], path:''};
+  for(const k of ['records','rows','data','items','results','sos','orders','entries','examples','corpus']){
+    if(Array.isArray(data[k])) return {arr:data[k], path:k};
+  }
+  // recursive: largest array whose elements are objects
+  let best=[], bestPath='';
+  (function walk(x,path,depth){
+    if(depth>6||x==null) return;
+    if(Array.isArray(x)){
+      if(x.length>best.length && x.some(e=>e&&typeof e==='object'&&!Array.isArray(e))){ best=x; bestPath=path||'(array)'; }
+      return; // don't descend into array elements hunting for sub-arrays
+    }
+    if(typeof x==='object') for(const [k,v] of Object.entries(x)) walk(v, path?path+'.'+k:k, depth+1);
+  })(data,'',0);
+  if(best.length) return {arr:best, path:bestPath};
+  // id-keyed dict of record objects (e.g. {"135464":{...}, ...})
+  const vals=Object.values(data);
+  if(vals.length && vals.every(x=>x&&typeof x==='object'&&!Array.isArray(x))) return {arr:vals, path:'(keyed object)'};
+  return {arr:[], path:''};
 }
 function renderCorpus(name){
   const b=$('#corpusBody'); b.innerHTML='';
-  const rows=Array.isArray(corpusData)?corpusData:(corpusData.rows||corpusData.data||Object.values(corpusData));
-  const arr=Array.isArray(rows)?rows:[];
+  const {arr,path}=extractRecords(corpusData);
   b.append(el('div',{class:'card'},el('h3',{},'Loaded ',el('span',{class:'pill'},esc(name))),
-    el('p',{class:'muted'},`${arr.length.toLocaleString()} records · stays on this machine.`)));
-  if(!arr.length){ b.append(el('div',{class:'empty'},'No tabular records detected — showing raw keys: '+esc(Object.keys(corpusData).join(', ')))); return; }
+    el('p',{class:'muted'},`${arr.length.toLocaleString()} records`+(path&&path!=='(array)'?` (from "${esc(path)}")`:'')+` · stays on this machine.`)));
+  if(!arr.length){
+    // help the user (and me) see the shape so we can fix it fast
+    const top=corpusData&&typeof corpusData==='object'?corpusData:{};
+    const shape=Object.entries(top).map(([k,v])=>`${k}: ${Array.isArray(v)?('array['+v.length+']'):typeof v}`);
+    b.append(el('div',{class:'empty'},'No record array detected.'),
+      el('div',{class:'card'},el('h3',{},'File structure (top level)'),
+        el('pre',{style:'font-family:var(--mono);font-size:12px;white-space:pre-wrap'},shape.join('\n')||'(not an object)')));
+    return;
+  }
   const cols=[...new Set(arr.slice(0,50).flatMap(r=>Object.keys(r||{})))].slice(0,8);
-  const search=el('input',{class:'search',placeholder:`Search ${arr.length} records…`,oninput:e=>draw(e.target.value)});
+  const search=el('input',{class:'search',placeholder:`Search ${arr.length.toLocaleString()} records…`,oninput:e=>draw(e.target.value)});
   b.append(search); const host=el('div',{class:'card',style:'overflow:auto;max-height:60vh'}); b.append(host);
   function draw(q=''){
     host.innerHTML='';
@@ -1419,7 +1462,7 @@ function renderCorpus(name){
     t.append(el('tr',{},...cols.map(c=>el('th',{},c))));
     filt.forEach(r=>t.append(el('tr',{},...cols.map(c=>el('td',{},String(r?.[c]??'').slice(0,60))))));
     host.append(t);
-    host.append(el('div',{class:'muted',style:'padding:8px'},`showing ${filt.length} of ${arr.length}`));
+    host.append(el('div',{class:'muted',style:'padding:8px'},`showing ${filt.length} of ${arr.length.toLocaleString()}`));
   }
   draw();
 }
