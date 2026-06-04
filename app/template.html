@@ -135,6 +135,13 @@ main{flex:1 1 auto;overflow:hidden;position:relative}
 .seg button.on{background:var(--navy);color:#fff}
 .seg button.on.changed{background:var(--orange)}
 .wizard-nav{display:flex;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border-soft)}
+.pointer-card{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--navy);border-radius:8px;padding:12px 14px;margin-bottom:16px}
+.pointer-card .pc-h{font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--navy);display:flex;align-items:center;gap:8px}
+.pointer-card .pc-derived{font-size:9.5px;background:var(--orange-soft);color:var(--orange-dark);border-radius:20px;padding:1px 7px;font-weight:700;text-transform:uppercase}
+.pointer-card .pc-branch{font-weight:700;color:var(--navy-dark);font-size:13px;margin-top:6px}
+.pointer-card .pc-guide{font-size:12.5px;color:var(--text-mid);margin-top:4px}
+.pointer-card .pc-steps{margin:8px 0 0;padding-left:20px;font-size:12.5px;color:var(--text)}
+.pointer-card .pc-steps li{margin-bottom:3px}
 
 /* flow picker cards */
 .flow-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:6px}
@@ -396,6 +403,11 @@ footer .sb-spacer{flex:1}
    ====================================================================== */
 const KB = /*__KB_JSON__*/;
 
+/* Full-depth per-workflow enrichment (POINTER, guidance, options, field notes).
+   Generated from checkpoint/workflow_specs.json — grounded in DATA_REVIEW_FINDINGS.md. */
+const SPECS = /*__SPECS_JSON__*/;
+function spec(){ return (App.member && SPECS[App.member.corpus_workflow]) || null; }
+
 /* ----------------------------------------------------------------------
    REFERENCE CONSTANTS — lifted from checkpoint/DATA_REVIEW_FINDINGS.md
    (reference knowledge, not corpus/customer data → safe to embed)
@@ -488,7 +500,7 @@ function fieldDef(ph){
 const App = {
   tab:'workflow',
   flowKey:null, member:null, template:null, placeholders:[],
-  values:{}, facs:'UNCHANGED', stepIndex:0,
+  values:{}, facs:'UNCHANGED', stepIndex:0, options:{splice:false,xconn:false},
   issues:[], issueFilter:'all',
   capture:{ctx:null, tag:'Wrong', shots:[]},
 };
@@ -657,10 +669,13 @@ function chooseWorkflow(key,member,parsed){
   App.flowKey=key; App.member=member; App.template=member.template;
   App.placeholders=placeholdersOf(member.template);
   App.values={}; App.stepIndex=0;
+  const sp=SPECS[member.corpus_workflow]||null;
+  // special note constructs this workflow can use (splice / xconn jumper); xconn defaults on for XCONN
+  App.options={ splice:false, xconn: !!(sp&&sp.options&&sp.options.xconn) };
   // sensible defaults
   App.values.date=todayMDYY();
   App.values.action=deriveAction();   // line-1 work summary seeded from the workflow desc
-  App.facs = /facs_status/.test(member.template)?'UNCHANGED':'CHANGED';
+  App.facs = (sp&&sp.facs_default) || (/facs_status/.test(member.template)?'UNCHANGED':'CHANGED');
   // prime from parser
   if(parsed){
     if(parsed.so) App.values.so=parsed.so;
@@ -677,6 +692,8 @@ function stepDefs(){
   // one step per template placeholder (tech handled by the explicit footer step below)
   App.placeholders.forEach(ph=>{ if(ph==='date'||ph==='action'||ph==='tech')return;
     steps.push({id:ph,label:fieldDef(ph).label, fields:[ph]}); });
+  const sp=spec();
+  if(sp&&sp.options&&(sp.options.splice||sp.options.xconn)) steps.push({id:'options',label:'Splice / X-Conn',fields:[]});
   steps.push({id:'tech',label:'Tech footer', fields:['tech']});
   steps.push({id:'review',label:'Review & copy', fields:[]});
   return steps;
@@ -701,13 +718,28 @@ function stepComplete(s){
   return s.fields.every(f=> f==='facs_status' ? true : (f==='action'? true : (App.values[f]||'').trim()!==''));
 }
 
+function renderPointer(){
+  const sp=spec(); if(!sp) return null;
+  const card=el('div',{class:'pointer-card'});
+  card.append(el('div',{class:'pc-h'},'POINTER · '+(App.member.corpus_workflow),
+    flagBtn('pointer:'+App.member.corpus_workflow,{where:App.member.corpus_workflow,field:'pointer'}),
+    sp.derived?el('span',{class:'pc-derived'},'derived'):''));
+  if(sp.branch) card.append(el('div',{class:'pc-branch'},sp.branch));
+  if(sp.guidance) card.append(el('div',{class:'pc-guide'},sp.guidance));
+  if(sp.pointer&&sp.pointer.length){
+    const ol=el('ol',{class:'pc-steps'}); sp.pointer.forEach(p=>ol.append(el('li',{},p))); card.append(ol);
+  }
+  return card;
+}
 function renderWizardStep(){
   const steps=stepDefs(); if(!steps.length){startScreen();return;}
   const s=steps[App.stepIndex]; const w=$('#wizard'); w.innerHTML='';
   if(s.id==='review'){ renderReview(w); return; }
   w.append(el('h2',{},s.label));
   w.append(el('div',{class:'sub'},App.flowKey.replace(/_/g,' / ')+' · '+App.member.corpus_workflow+'  ·  step '+(App.stepIndex+1)+' of '+steps.length));
-  s.fields.forEach(f=>{
+  const pc=renderPointer(); if(pc) w.append(pc);
+  if(s.id==='options'){ renderOptions(w); }
+  else s.fields.forEach(f=>{
     if(f==='facs_status'){ w.append(facsField()); return; }
     w.append(buildField(f));
   });
@@ -718,6 +750,51 @@ function renderWizardStep(){
     App.stepIndex<steps.length-1?'Next →':'Review →'));
   nav.append(el('button',{class:'btn ghost',onclick:()=>chooseFlow(App.flowKey)},'Change workflow'));
   w.append(nav);
+}
+
+function renderOptions(w){
+  const sp=spec()||{}; const o=sp.options||{};
+  w.append(el('div',{class:'sub',style:'margin-top:-6px'},'Optional note constructs for this workflow. Toggle on only what the SO needs.'));
+  if(o.splice){
+    const on=App.options.splice;
+    const lbl=el('label',{},'Splice — ***ATTN SPLICER***  '); lbl.append(flagBtn('field:splice',{field:'splice'}));
+    const seg=el('div',{class:'seg'});
+    seg.append(el('button',{class:on?'':'on',onclick:()=>{App.options.splice=false;renderWizardStep();renderNote();}},'No splice'),
+               el('button',{class:on?'on changed':'',onclick:()=>{App.options.splice=true;renderWizardStep();renderNote();}},'Add splice'));
+    const wrap2=el('div',{class:'field'}); wrap2.append(lbl,seg);
+    wrap2.append(el('div',{class:'hint'},'Adds a ***ATTN SPLICER*** line and a reminder to email Dispatch (subject = ***ATTN SPLICER*** + SO#).'));
+    w.append(wrap2);
+    if(on){
+      const f=el('div',{class:'field'});
+      f.append(el('label',{},'Splice instructions'));
+      f.append(el('textarea',{rows:2,placeholder:'@PED 1-8 SPLICE (100PR INCOMING) PIC,28 TO PIC,28 …',
+        value:App.values.splice_instructions||'',oninput:e=>{App.values.splice_instructions=e.target.value;renderNote();}}));
+      w.append(f);
+      w.append(el('div',{style:'padding:8px 10px;background:var(--red-soft);border-radius:7px;color:var(--red);font-size:12px'},
+        '✉ Reminder: email Dispatch as a heads-up — subject ***ATTN SPLICER*** + this SO#.'));
+    }
+  }
+  if(o.xconn){
+    const on=App.options.xconn;
+    const lbl=el('label',{},'X-Conn jumper move  '); lbl.append(flagBtn('field:xconn',{field:'xconn'}));
+    const seg=el('div',{class:'seg'});
+    seg.append(el('button',{class:on?'':'on',onclick:()=>{App.options.xconn=false;renderWizardStep();renderNote();}},'No jumper note'),
+               el('button',{class:on?'on changed':'',onclick:()=>{App.options.xconn=true;renderWizardStep();renderNote();}},'Add jumper note'));
+    const wrap=el('div',{class:'field'}); wrap.append(lbl,seg);
+    wrap.append(el('div',{class:'hint'},'The DSL port line carries XCONN,n PIC,n; this adds the **remove/re-jump** instruction line.'));
+    w.append(wrap);
+    if(on){
+      const f=el('div',{class:'field'});
+      f.append(el('label',{},'Jumper-move instruction'));
+      f.append(el('textarea',{rows:2,placeholder:'Remove jumper SVLK-5,731 Pic,31 from its xconn jumper. Jump svlk-5,731 to 605_1,19 pic,19',
+        value:App.values.jumper_instructions||'',oninput:e=>{App.values.jumper_instructions=e.target.value;renderNote();}}));
+      w.append(f);
+    }
+  }
+  if(sp.options&&sp.options.twoAddress){
+    w.append(el('div',{style:'padding:8px 10px;background:var(--orange-soft);border-radius:7px;color:var(--orange-dark);font-size:12px'},
+      '⌂ Two-address move: write BOTH a NEW ADDRESS block (connect side) and an OLD ADDRESS block (disconnect side). Label them in the port fields.'));
+  }
 }
 
 function facsField(){
@@ -745,7 +822,9 @@ function buildField(ph){
       updateFieldState(wrap,ph); renderNote(); }});
   wrap.append(input);
   if(d.hint) wrap.append(el('div',{class:'hint'},d.hint));
-  if(d.src) wrap.append(el('div',{class:'src'},'source: '+d.src));
+  const sp=spec(); const note=sp&&sp.field_notes&&sp.field_notes[ph];
+  if(note) wrap.append(el('div',{class:'src'},note));
+  else if(d.src) wrap.append(el('div',{class:'src'},'source: '+d.src));
   wrap.append(el('div',{class:'vmsg'},d.vmsg||'Check this value'));
   wrap.append(el('div',{class:'vmsg ok'},'looks valid'));
   return wrap;
@@ -793,10 +872,10 @@ function buildNoteLines(){
   if(!App.member) return [];
   const so=App.values.so||(($('#soRequest')||{}).value? '' : '');
   const action=App.values.action||deriveAction();
-  const lines=[];
+  const body=[]; let footer=null;
   // line 1: {SO#} {action}  (only if we have either)
   const l1=[App.values.so, action].filter(Boolean).join(' ').trim();
-  if(l1) lines.push({t:l1, cls:'hdr'});
+  if(l1) body.push({t:l1, cls:'hdr'});
   // body from template, substitute + omit empty
   App.template.split('\n').forEach(raw=>{
     let line=raw;
@@ -808,18 +887,25 @@ function buildNoteLines(){
       if(ph==='tech') return App.values.tech||'';
       const v=(App.values[ph]||'').trim(); if(!v) dropped=true; return v;
     });
+    const isFooter=/^-\s*\{?tech\}?\s*-?$/.test(raw.trim());
+    if(isFooter){ if((App.values.tech||'').trim()) footer={t:line.replace(/\s+$/,''), cls:'foot'}; return; }
     // a line whose only content was an empty placeholder → omit (N/A rule)
     const stripped=line.replace(/FACS (UN)?CHANGED/,'').replace(/[-*\s]/g,'');
     if(dropped && stripped==='') return;            // fully empty → drop
-    if(/^-\{?tech\}?-?$/.test(raw) && !(App.values.tech||'').trim()) return; // tech footer empty
     let cls='';
     if(/FACS CHANGED/.test(line)) cls='facs-changed';
     else if(/FACS UNCHANGED/.test(line)) cls='facs-unchanged';
     else if(/ATTN SPLICER/i.test(line)) cls='splicer';
     else if(/^-/.test(raw.trim())) cls='foot';
-    lines.push({t:line.replace(/\s+$/,''), cls});
+    body.push({t:line.replace(/\s+$/,''), cls});
   });
-  return lines;
+  // special constructs inject just before the -tech footer
+  if(App.options.splice && (App.values.splice_instructions||'').trim())
+    body.push({t:'***ATTN SPLICER*** '+App.values.splice_instructions.trim(), cls:'splicer'});
+  if(App.options.xconn && (App.values.jumper_instructions||'').trim())
+    body.push({t:'**'+App.values.jumper_instructions.trim()+'**', cls:'splicer'});
+  if(footer) body.push(footer);
+  return body;
 }
 function deriveAction(){
   // pull the workflow's own header desc from the template line 1 (between the dashes)
@@ -1005,9 +1091,21 @@ function refFlows(b){
   flowMeta().forEach(f=>{
     b.append(refCard(f.name+'  ',
       el('span',{class:'pill'},f.count.toLocaleString()+' SOs'),
-      refTable(['Workflow','SOs','Template (line 1)'],
-        f.members.map(m=>[esc(m.corpus_workflow),(m.count||0).toLocaleString(),'<code>'+esc(m.template.split('\n')[0])+'</code>']))));
+      refTable(['Workflow','SOs','Branch / what it is','FACS'],
+        f.members.map(m=>{ const s=SPECS[m.corpus_workflow]||{};
+          return [esc(m.corpus_workflow)+(s.derived?' <span class="pc-derived">derived</span>':''),
+                  (m.count||0).toLocaleString(), esc(s.branch||''), esc(s.facs_default||'')]; }))));
   });
+  // a full POINTER reference — system-touch order per workflow
+  const ptr=el('div',{class:'card'}); ptr.append(el('h3',{},'POINTER — system-touch order per workflow'));
+  Object.entries(SPECS).filter(([k])=>!k.startsWith('_')).forEach(([k,s])=>{
+    const d=el('details',{style:'margin-bottom:6px'});
+    d.append(el('summary',{style:'cursor:pointer;font-weight:700;color:var(--navy);font-family:var(--mono);font-size:12.5px'},k));
+    if(s.guidance) d.append(el('div',{class:'muted',style:'font-size:12px;margin:4px 0'},s.guidance));
+    if(s.pointer){ const ol=el('ol',{style:'font-size:12.5px;margin:4px 0;padding-left:20px'}); s.pointer.forEach(p=>ol.append(el('li',{},p))); d.append(ol); }
+    ptr.append(d);
+  });
+  b.append(ptr);
 }
 function refActions(b){
   b.append(refCard('Atomic action codes',
