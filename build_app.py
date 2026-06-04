@@ -25,8 +25,11 @@ SPECS_PLACEHOLDER = "/*__SPECS_JSON__*/"
 
 
 def _inject(template: str, placeholder: str, data) -> str:
-    if placeholder not in template:
-        raise SystemExit(f"placeholder {placeholder!r} not found in template")
+    count = template.count(placeholder)
+    if count != 1:
+        raise SystemExit(
+            f"expected exactly 1 occurrence of placeholder {placeholder!r}, found {count}"
+        )
     # compact JSON so the placeholder substitution stays one line
     return template.replace(placeholder, json.dumps(data, ensure_ascii=False, separators=(",", ":")))
 

@@ -466,7 +466,7 @@ const FACILITIES_CARD_RULE = "ADTRAN = shorter/faster, good odd/odd & even/even.
 const FIELD_DEFS = {
   so:      {label:"SO #", hint:"6-digit service order number (line 1)", src:"From the SO request",
             validate:v=>/^\d{4,7}([,&/ ].*)?$/.test(v.trim()), vmsg:"Expect a 6-digit SO# (multiples allowed: 135464 & 135466)"},
-  date:    {label:"Date", hint:"Format M.D.YY", src:"", mono:true,
+  date:    {label:"Date", hint:"Format M.D.YY", src:"",
             validate:v=>/^\d{1,2}\.\d{1,2}\.\d{2}$/.test(v.trim()), vmsg:"Use M.D.YY (e.g. 6.3.26)"},
   tech:    {label:"Tech initials", hint:"Your initials for the -footer", src:"", upper:true,
             validate:v=>/^[A-Z]{2,4}$/.test(v.trim().toUpperCase()), vmsg:"2–4 letters"},
@@ -599,8 +599,10 @@ function parseRequest(text){
   const out=$('#parseOut'); if(!text.trim()){out.innerHTML='';return;}
   const t=text.replace(/\s+/g,' ');
   const parsed={
-    so: (text.match(/\b(\d{6})\b/)||[])[1]||null,
-    phone: (text.match(/\b(\d{3}[-.\s]?\d{4})\b/)||[])[1]||null,
+    // 6-digit SO#, capturing a run of them ("135464 & 135466")
+    so: (text.match(/\b\d{6}(?:\s*[&,/]\s*\d{6})*/)||[])[0]||null,
+    // 10-digit (3-3-4) preferred, else 7-digit (3-4); masking takes the last 4
+    phone: (text.match(/\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/)||text.match(/\b\d{3}[-.\s]?\d{4}\b/)||[])[0]||null,
     speed: (text.match(/\b(\d{1,3}\/\d{1,3})\b/)||[])[1]||null,
     flags:[],
   };
@@ -693,7 +695,10 @@ function stepDefs(){
   App.placeholders.forEach(ph=>{ if(ph==='date'||ph==='action'||ph==='tech')return;
     steps.push({id:ph,label:fieldDef(ph).label, fields:[ph]}); });
   const sp=spec();
-  if(sp&&sp.options&&(sp.options.splice||sp.options.xconn)) steps.push({id:'options',label:'Splice / X-Conn',fields:[]});
+  if(sp&&sp.options&&Object.keys(sp.options).length){
+    const o=sp.options; const lbl=(o.splice||o.xconn)?'Splice / X-Conn':'Address blocks';
+    steps.push({id:'options',label:lbl,fields:[]});
+  }
   steps.push({id:'tech',label:'Tech footer', fields:['tech']});
   steps.push({id:'review',label:'Review & copy', fields:[]});
   return steps;
@@ -870,28 +875,29 @@ function renderReview(w){
 /* ---- live note builder (omit-N/A rule) ---- */
 function buildNoteLines(){
   if(!App.member) return [];
-  const so=App.values.so||(($('#soRequest')||{}).value? '' : '');
   const action=App.values.action||deriveAction();
   const body=[]; let footer=null;
-  // line 1: {SO#} {action}  (only if we have either)
+  // line 1: {SO#} {action}  (omit if both empty, per the N/A rule)
   const l1=[App.values.so, action].filter(Boolean).join(' ').trim();
   if(l1) body.push({t:l1, cls:'hdr'});
   // body from template, substitute + omit empty
   App.template.split('\n').forEach(raw=>{
     let line=raw;
     line=line.replace(/\{facs_status\}/g, 'FACS '+App.facs);
-    // substitute placeholders
-    let dropped=false;
+    // substitute placeholders; track whether this line carried any data placeholder
+    // and whether any of them got a value (date counts as data so headers survive).
+    let hadPlaceholder=false, anyFilled=false;
     line=line.replace(/\{([a-z0-9_]+)\}/gi,(m,ph)=>{
-      if(ph==='date') return App.values.date||todayMDYY();
-      if(ph==='tech') return App.values.tech||'';
-      const v=(App.values[ph]||'').trim(); if(!v) dropped=true; return v;
+      if(ph==='tech') return App.values.tech||'';       // footer handled separately
+      hadPlaceholder=true;
+      const v= ph==='date' ? (App.values.date||todayMDYY()) : (App.values[ph]||'').trim();
+      if(v) anyFilled=true; return v;
     });
     const isFooter=/^-\s*\{?tech\}?\s*-?$/.test(raw.trim());
     if(isFooter){ if((App.values.tech||'').trim()) footer={t:line.replace(/\s+$/,''), cls:'foot'}; return; }
-    // a line whose only content was an empty placeholder → omit (N/A rule)
-    const stripped=line.replace(/FACS (UN)?CHANGED/,'').replace(/[-*\s]/g,'');
-    if(dropped && stripped==='') return;            // fully empty → drop
+    // N/A rule: a line that HAD placeholders but none got a value is dropped —
+    // its decoration (OUT / QDS IN / *TEL:) goes with it. Constant lines (*TEL) stay.
+    if(hadPlaceholder && !anyFilled) return;
     let cls='';
     if(/FACS CHANGED/.test(line)) cls='facs-changed';
     else if(/FACS UNCHANGED/.test(line)) cls='facs-unchanged';
@@ -908,9 +914,14 @@ function buildNoteLines(){
   return body;
 }
 function deriveAction(){
-  // pull the workflow's own header desc from the template line 1 (between the dashes)
-  const m=App.template.split('\n')[0].match(/-\s*(.+?)\s*-/);
-  return m?m[1]:'';
+  // pull the workflow's own work desc from template line 1. Handles ASCII hyphen
+  // AND en-dash, plus dash-less headers like "{date} CONNECT SERVICE".
+  const l1=App.template.split('\n')[0];
+  const m=l1.match(/[-–]\s*(.+?)\s*[-–]/);                 // between two dashes
+  if(m) return m[1].trim();
+  // dash-less / single-dash: strip date + FACS tokens, then trim stray dashes
+  return l1.replace(/\{date\}/g,'').replace(/\{facs_status\}/g,'')
+           .replace(/FACS (UN)?CHANGED/g,'').replace(/^[-–\s]+|[-–\s]+$/g,'').trim();
 }
 function renderNote(){
   const box=$('#notePreview'); box.innerHTML='';
@@ -960,8 +971,9 @@ $('#captureClose').onclick=closeCapture; $('#capCancel').onclick=closeCapture; $
 $('#tagPick').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b)return;
   App.capture.tag=b.dataset.tag; $$('#tagPick button').forEach(x=>x.classList.toggle('on',x===b));});
 
-/* screenshots: paste / file / drop */
-function addShot(dataURL){ App.capture.shots.push(dataURL); renderShots(); }
+/* screenshots: paste / file / drop. `cap` binds the capture the read started in,
+   so a late FileReader can't attach a shot to a different (re-opened) capture. */
+function addShot(dataURL, cap){ if(cap && cap!==App.capture) return; App.capture.shots.push(dataURL); renderShots(); }
 function renderShots(){
   const box=$('#shotList'); box.innerHTML='';
   App.capture.shots.forEach((s,i)=>{
@@ -973,23 +985,34 @@ function renderShots(){
 }
 function fileToDataURL(file){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file);});}
 $('#shotDrop').onclick=()=>$('#shotFile').click();
-$('#shotFile').onchange=async e=>{ for(const f of e.target.files){ addShot(await fileToDataURL(f)); } e.target.value=''; };
+$('#shotFile').onchange=async e=>{ const cap=App.capture; for(const f of e.target.files){ addShot(await fileToDataURL(f),cap); } e.target.value=''; };
 $('#shotDrop').addEventListener('dragover',e=>{e.preventDefault();$('#shotDrop').classList.add('over');});
 $('#shotDrop').addEventListener('dragleave',()=>$('#shotDrop').classList.remove('over'));
 $('#shotDrop').addEventListener('drop',async e=>{e.preventDefault();$('#shotDrop').classList.remove('over');
-  for(const f of e.dataTransfer.files){ if(f.type.startsWith('image/')) addShot(await fileToDataURL(f)); }});
+  const cap=App.capture; for(const f of e.dataTransfer.files){ if(f.type.startsWith('image/')) addShot(await fileToDataURL(f),cap); }});
 document.addEventListener('paste',async e=>{ if(!$('#capture').classList.contains('show'))return;
-  for(const it of e.clipboardData.items){ if(it.type.startsWith('image/')){ addShot(await fileToDataURL(it.getAsFile())); } }});
+  const cap=App.capture; for(const it of e.clipboardData.items){ if(it.type.startsWith('image/')){ addShot(await fileToDataURL(it.getAsFile()),cap); } }});
 
 $('#capSave').onclick=async ()=>{
   const c=App.capture.meta;
   const rec={ id:uid(), ts:Date.now(), status:'open', tag:App.capture.tag, target:c.target,
     context:{flow:c.flow,workflow:c.workflow,step:c.step,field:c.field,input:c.input,output:c.output},
     correction:$('#capCorrection').value.trim(), text:$('#capText').value.trim(), shots:[...App.capture.shots] };
-  App.issues.unshift(rec); await DB.put(rec);
+  App.issues.unshift(rec);
+  try{ await DB.put(rec); }
+  catch(err){ App.issues.shift(); toast('Could not save issue: '+(err.message||err)); return; }
   closeCapture(); refreshIssueUI(); toast('Issue logged');
-  renderSteps(); renderWizardStep&&($('#view-workflow').classList.contains('active')&&renderWizardStep());
+  refreshWorkflowView();
 };
+
+/* Re-render the workflow pane after an issue's open/resolved state changes, so the
+   ⚑ flag icons on steps, fields, and the pointer card reflect the new state. This
+   runs even when the workflow view is hidden (e.g. resolving from the Issues tab),
+   so the state is correct the moment the user switches back. */
+function refreshWorkflowView(){
+  renderSteps();
+  if(App.member) renderWizardStep();
+}
 
 async function loadIssues(){ App.issues=(await DB.all()).sort((a,b)=>b.ts-a.ts); refreshIssueUI(); }
 function openCount(){ return App.issues.filter(i=>i.status==='open').length; }
@@ -999,8 +1022,8 @@ function refreshIssueUI(){
   if(App.tab==='issues') renderIssues();
 }
 async function resolveIssue(id){ const i=App.issues.find(x=>x.id===id); if(!i)return;
-  i.status=i.status==='open'?'resolved':'open'; await DB.put(i); refreshIssueUI(); renderSteps(); }
-async function deleteIssue(id){ App.issues=App.issues.filter(x=>x.id!==id); await DB.del(id); refreshIssueUI(); renderSteps(); }
+  i.status=i.status==='open'?'resolved':'open'; await DB.put(i); refreshIssueUI(); refreshWorkflowView(); }
+async function deleteIssue(id){ App.issues=App.issues.filter(x=>x.id!==id); await DB.del(id); refreshIssueUI(); refreshWorkflowView(); }
 
 function renderIssues(){
   const box=$('#issueBody'); box.innerHTML='';
@@ -1019,7 +1042,7 @@ function renderIssues(){
       (i.context.input?`\ninput: ${i.context.input}`:'')+(i.context.output?`\noutput: ${i.context.output}`:'')));
     if(i.correction) card.append(el('div',{class:'corr'},el('b',{},'should be: '),i.correction));
     if(i.text) card.append(el('div',{style:'font-size:12.5px;margin-top:4px'},i.text));
-    if(i.shots&&i.shots.length){ const s=el('div',{class:'shots'}); i.shots.forEach(d=>s.append(el('img',{class:'shot',src:d,onclick:()=>window.open().document.write('<img src="'+d+'">')}))); card.append(s); }
+    if(i.shots&&i.shots.length){ const s=el('div',{class:'shots'}); i.shots.forEach(d=>s.append(el('img',{class:'shot',src:d,onclick:()=>{const w=window.open(); if(w){w.document.write('<img src="'+d+'" style="max-width:100%">');} else {toast('Allow pop-ups to view full size');}}}))); card.append(s); }
     const act=el('div',{class:'issue-actions'});
     act.append(el('button',{class:'btn sm '+(i.status==='open'?'primary':''),onclick:()=>resolveIssue(i.id)},i.status==='open'?'Mark resolved':'Reopen'));
     act.append(el('button',{class:'btn sm danger',onclick:()=>{if(confirm('Delete this issue?'))deleteIssue(i.id);}},'Delete'));
@@ -1037,16 +1060,22 @@ $('#btnExportIssues').onclick=async ()=>{
   const blob=new Blob([JSON.stringify({app:'ponderosa-so-trainer',exported:new Date().toISOString(),
     kb_version:KB.version, issues:App.issues},null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob); const a=el('a',{href:url,download:`so-issues-${todayMDYY()}.json`}); a.click();
-  URL.revokeObjectURL(url);
-  setTimeout(async ()=>{ if(confirm(`Exported ${App.issues.length} issue(s). Remove them from the app now?`)){
-    await DB.clear(); App.issues=[]; refreshIssueUI(); renderSteps(); toast('Cleared exported issues'); }},300);
+  // revoke only after the prompt resolves, so the download stream isn't cut short
+  setTimeout(async ()=>{ const cleared=confirm(`Exported ${App.issues.length} issue(s). Remove them from the app now?`);
+    if(cleared){ await DB.clear(); App.issues=[]; refreshIssueUI(); refreshWorkflowView(); toast('Cleared exported issues'); }
+    URL.revokeObjectURL(url); },400);
 };
 $('#btnImportIssues')&&($('#btnImportIssues').onclick=()=>$('#importFile').click());
 $('#importFile')&&($('#importFile').onchange=async e=>{
   const f=e.target.files[0]; if(!f)return; try{
-    const data=JSON.parse(await f.text()); const incoming=data.issues||data;
-    let added=0; for(const rec of incoming){ if(!App.issues.some(x=>x.id===rec.id)){ rec.id=rec.id||uid(); App.issues.push(rec); await DB.put(rec); added++; } }
-    App.issues.sort((a,b)=>b.ts-a.ts); refreshIssueUI(); toast(`Imported ${added} issue(s)`);
+    const data=JSON.parse(await f.text());
+    const incoming=Array.isArray(data)?data:(Array.isArray(data.issues)?data.issues:null);
+    if(!incoming){ toast('No issues array found in file'); e.target.value=''; return; }
+    let added=0,skipped=0; for(const rec of incoming){
+      if(rec.id && App.issues.some(x=>x.id===rec.id)){ skipped++; continue; }
+      rec.id=rec.id||uid(); App.issues.push(rec); await DB.put(rec); added++; }
+    App.issues.sort((a,b)=>b.ts-a.ts); refreshIssueUI();
+    toast(`Imported ${added} issue(s)`+(skipped?`, skipped ${skipped} duplicate(s)`:''));
   }catch(err){ toast('Import failed: '+err.message); } e.target.value='';
 });
 
