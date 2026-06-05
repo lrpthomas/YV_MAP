@@ -384,7 +384,6 @@ body.fs-l{font-size:15.5px}
   <h3>Keyboard shortcuts</h3>
   <table class="kbd-table">
     <tr><td><kbd>Enter</kbd></td><td>Next step (from a field)</td></tr>
-    <tr><td><kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>→</kbd></td><td>Previous / next step</td></tr>
     <tr><td><kbd>Ctrl/⌘</kbd>+<kbd>Enter</kbd></td><td>Copy the note</td></tr>
     <tr><td><kbd>Ctrl/⌘</kbd>+<kbd>K</kbd></td><td>Flag an issue here</td></tr>
     <tr><td><kbd>Ctrl/⌘</kbd>+<kbd>P</kbd></td><td>Command palette — jump anywhere</td></tr>
@@ -764,6 +763,7 @@ function flowMeta(){
 }
 function startScreen(){
   App.flowKey=null; App.member=null; App.template=null; App.placeholders=[]; App.values={}; App.stepIndex=0;
+  if(App.bulk) App.bulk.idx=-1;        // leaving the wizard deactivates the active batch item (queue is kept)
   renderSteps(); renderNote();
   const w=$('#wizard'); w.innerHTML='';
   w.append(el('h2',{},'Start a service order'));
@@ -869,7 +869,7 @@ function parseRequest(text){
   if(up.includes('FTTH')||up.includes('FIBER')||up.includes('EDGE')) suggest='FIBER_FTTH';
   else if(up.includes('XCONN')) suggest='CROSS_CONNECT';
   else if(up.includes('MOVE')) suggest='MOVE';
-  else if(up.includes('UPGRADE')||up.includes('BOND')||up.includes('ADSL')||up.includes('VDSL')) suggest='UPGRADE';
+  else if(up.includes('UPGRADE')||up.includes('BND')||up.includes('BOND')||up.includes('ADSL')||up.includes('VDSL')) suggest='UPGRADE';
   else if(up.includes('RECON')||up.includes('CONN')||up.includes('QDS')) suggest='CONNECT_RECONNECT';
   else if(up.includes('DISC')||up.includes('NPD')||up.includes('VACA')) suggest='DISCONNECT';
 
@@ -958,9 +958,9 @@ function showBatchNotes(){
       const a=el('a',{href:u,download:'batch-notes-'+todayMDYY()+'.txt'}); a.click(); setTimeout(()=>URL.revokeObjectURL(u),400); }},'Export .txt'),
     el('button',{class:'btn sm primary',onclick:closeBatch},'Close'));
   m.append(nav);
-  m.classList.add('show'); $('#palScrim').classList.add('show');
+  m.classList.add('show'); syncOverlay();
 }
-function closeBatch(){ $('#batchModal').classList.remove('show'); $('#palScrim').classList.remove('show'); }
+function closeBatch(){ $('#batchModal').classList.remove('show'); syncOverlay(); }
 /* best-guess specific workflow within a flow, from the request keywords */
 function guessWorkflow(flowKey, up){
   const f=KB.flows[flowKey]; if(!f) return null;
@@ -1269,10 +1269,11 @@ function validateField(ph){
   const d=fieldDef(ph); const v=(App.values[ph]||'').trim();
   if(d.validate) return d.validate(v);
   if(d.mask){ const dg=v.replace(/\D/g,''); return dg.length>=4 && dg.length<=11; }   // phone/agreement-ish
-  // port lines are switch-cable-pair strings: hyphen-structured (FRNT-LASH-ADT01-07-44)
-  // and/or carry a comma pair (…5,736…). Accept either; reject trivial input.
-  if(d.port) return (/[-,]/.test(v)) && v.replace(/\s/g,'').length>=6;
-  if(d.loc) return /BP/i.test(v) || (/-/.test(v) && v.length>4);   // location: BP or node-shelf-card-port
+  // port line = switch-cable-pair: needs a letter (wirecenter/CSX), a hyphen or comma, length >=6
+  // (rejects bare phone-like "559-5558" and "------"; accepts FRNT-LASH-ADT01-07-44 / …5,736…)
+  if(d.port) return /[A-Za-z]/.test(v) && /[-,]/.test(v) && v.replace(/\s/g,'').length>=6;
+  // location = node/BP: needs a digit AND (a "BP" or a hyphen), length >=6 (rejects "BP", "subpar")
+  if(d.loc) return /\d/.test(v) && (/BP/i.test(v) || /-/.test(v)) && v.length>=6;
   return v.length>0;
 }
 function updateFieldState(wrap,ph){
@@ -1359,10 +1360,14 @@ function actionOf(tpl){
 function deriveAction(){ return actionOf(App.template); }
 function renderNote(){
   const box=$('#notePreview');
-  if(App.noteEdit!=null){ if(!box._editing){ box.innerHTML=''; box._editing=true;
-      const ta=el('textarea',{class:'note-edit',oninput:e=>{App.noteEdit=e.target.value;saveDraft();}}, App.noteEdit);
+  if(App.noteEdit!=null){
+    let ta=box.querySelector('textarea.note-edit');
+    if(!ta){ box.innerHTML=''; box._editing=true;
+      ta=el('textarea',{class:'note-edit',oninput:e=>{App.noteEdit=e.target.value;saveDraft();}}, App.noteEdit);
       box.append(ta); ta.style.height=Math.max(140,ta.scrollHeight)+'px'; setTimeout(()=>ta.focus(),0);
-    } saveDraft(); return; }
+    } else if(ta.value!==App.noteEdit){ ta.value=App.noteEdit; }   // content changed (e.g. bulk re-work) → sync
+    if($('#btnEditNote')) $('#btnEditNote').textContent='↺ Regenerate';
+    saveDraft(); return; }
   box._editing=false; box.innerHTML='';
   const eb=$('#btnEditNote'); if(eb) eb.textContent='✎ Edit';
   if(!App.member){ box.append(el('span',{class:'muted'},'Pick a flow and workflow — the note builds here as you fill fields.')); return; }
@@ -1387,7 +1392,8 @@ function copyNote(){ const t=noteText(); pushRecent();
 const DRAFT_KEY='so_trainer_draft', RECENT_KEY='so_trainer_recent';
 let _draftT;
 function draftSnapshot(){ return App.member?{flowKey:App.flowKey, workflow:App.member.corpus_workflow,
-  values:App.values, facs:App.facs, facsValue:App.facsValue, options:App.options, stepIndex:App.stepIndex, training:App.training, ts:Date.now()}:null; }
+  values:App.values, facs:App.facs, facsValue:App.facsValue, options:App.options, stepIndex:App.stepIndex,
+  noteEdit:App.noteEdit, training:App.training, ts:Date.now()}:null; }
 function saveDraft(){ clearTimeout(_draftT); _draftT=setTimeout(()=>{
   const d=draftSnapshot(); if(!d) return;
   try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); }catch(e){} },350); }
@@ -1401,6 +1407,7 @@ function applyState(d){
   if(d.facs) App.facs=d.facs; App.facsValue=d.facsValue||'';
   if(d.options) App.options=d.options;
   App.training=d.training||null;
+  App.noteEdit = (d.noteEdit!=null) ? d.noteEdit : null;   // restore a hand-edited note if there was one
   const steps=stepDefs(); App.stepIndex=Math.min(d.stepIndex||0, Math.max(0,steps.length-1));
   setTab('workflow'); renderSteps(); renderWizardStep(); renderNote();
   return true;
@@ -1408,7 +1415,7 @@ function applyState(d){
 /* ---- per-field value history (autocomplete suggestions) ---- */
 const HIST_KEY='so_field_hist';
 function rememberValue(ph, v){
-  if(['so','date','phone_out','phone_in','phone_qds','account_out','account_in'].includes(ph)) return; // don't suggest PII / per-order ids
+  if(['so','date','phone_out','phone_in','phone_qds','account_out','account_in','fsan','edge_id'].includes(ph)) return; // don't suggest PII / per-order ids
   const h=readJSON(HIST_KEY)||{}; const base=ph.replace(/\d+$/,'');
   const arr=(h[base]||[]).filter(x=>x!==v); arr.unshift(v); h[base]=arr.slice(0,8);
   try{ localStorage.setItem(HIST_KEY, JSON.stringify(h)); }catch(e){}
@@ -2238,9 +2245,10 @@ function renderPalette(q){
   if(!_palItems.length) list.append(el('div',{class:'pal-empty'},'No matches'));
 }
 let _palAll=[];
-function openPalette(){ _palAll=paletteIndex(); $('#palette').classList.add('show'); $('#palScrim').classList.add('show');
+function syncOverlay(){ const on=$('#palette').classList.contains('show')||$('#batchModal').classList.contains('show'); $('#palScrim').classList.toggle('show',on); }
+function openPalette(){ _palAll=paletteIndex(); $('#palette').classList.add('show'); syncOverlay();
   const inp=$('#palInput'); inp.value=''; renderPalette(''); setTimeout(()=>inp.focus(),0); }
-function closePalette(){ $('#palette').classList.remove('show'); $('#palScrim').classList.remove('show'); }
+function closePalette(){ $('#palette').classList.remove('show'); syncOverlay(); }
 function runPalette(i){ const it=_palItems[i]; if(!it) return; closePalette(); it.run(); }
 function palMove(d){ if(!_palItems.length)return; _palIdx=(_palIdx+d+_palItems.length)%_palItems.length;
   $$('#palList .pal-item').forEach((e,i)=>e.classList.toggle('active',i===_palIdx));
@@ -2308,6 +2316,7 @@ $('#palScrim').onclick=()=>{closePalette();closeBatch();};
 function activeModal(){ return ($('#palette').classList.contains('show')&&$('#palette'))
   || ($('#helpModal').classList.contains('show')&&$('#helpModal'))
   || ($('#welcomeModal').classList.contains('show')&&$('#welcomeModal'))
+  || ($('#batchModal').classList.contains('show')&&$('#batchModal'))
   || ($('#capture').classList.contains('show')&&$('#capture')) || null; }
 $('#palInput').addEventListener('input',e=>renderPalette(e.target.value));
 $('#palInput').addEventListener('keydown',e=>{
@@ -2329,11 +2338,7 @@ document.addEventListener('keydown',e=>{
     openCapture({where:App.member?App.member.corpus_workflow:'app',field:'general'}); }
   if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&App.member){ e.preventDefault(); copyNote(); }
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='p'){ e.preventDefault(); openPalette(); }
-  if(e.key==='?'&&!(e.target&&e.target.tagName==='TEXTAREA')){ e.preventDefault(); toggleHelp(); }
-  if(e.altKey&&App.member&&App.tab==='workflow'){
-    if(e.key==='ArrowRight'){ e.preventDefault(); nextStep(); }
-    if(e.key==='ArrowLeft'){ e.preventDefault(); prevStep(); }
-  }
+  if(e.key==='?'&&!inField(e)){ e.preventDefault(); toggleHelp(); }   // don't hijack '?' typed in inputs/textareas
 });
 
 /* ======================================================================
