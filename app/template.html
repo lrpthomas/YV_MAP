@@ -142,6 +142,13 @@ main{flex:1 1 auto;overflow:hidden;position:relative}
 .kbd-table td:first-child{white-space:nowrap;text-align:right;color:var(--text)}
 kbd{font-family:var(--mono);font-size:11px;background:var(--inset);border:1px solid var(--border);
   border-bottom-width:2px;border-radius:4px;padding:1px 6px;color:var(--navy-dark)}
+.recent-list{display:flex;flex-direction:column;gap:4px}
+.recent-item{display:flex;align-items:center;gap:10px;text-align:left;background:var(--inset);border:1px solid var(--border-soft);
+  border-radius:7px;padding:7px 10px;cursor:pointer;font-size:12.5px;transition:background .12s}
+.recent-item:hover{background:var(--green-soft);border-color:var(--green)}
+.recent-item .ri-so{font-family:var(--mono);font-weight:700;color:var(--navy-dark);min-width:64px}
+.recent-item .ri-wf{flex:1;color:var(--text-mid)}
+.recent-item .ri-when{color:var(--text-light);font-size:11px}
 .field .eg code{font-family:var(--mono);background:var(--green-soft);color:var(--navy-dark);padding:1px 5px;border-radius:4px}
 .field .src{font-size:10.5px;color:var(--slate);margin-top:2px;font-style:italic}
 .field input,.field select,.field textarea{
@@ -657,6 +664,36 @@ function startScreen(){
   w.append(el('div',{class:'sub'},'Paste the SO request to auto-route, or pick a flow.'));
   const tb=trainingBanner(); if(tb) w.append(tb);
 
+  // --- resume an unfinished SO ---
+  const draft=readJSON(DRAFT_KEY);
+  if(draft && draft.workflow && KB.flows[draft.flowKey]){
+    const card=el('div',{class:'pointer-card',style:'border-left-color:var(--orange)'});
+    const filled=Object.values(draft.values||{}).filter(v=>(v||'').trim()).length;
+    card.append(el('div',{class:'pc-h',style:'color:var(--orange-dark)'},'⤺ RESUME UNFINISHED SO'));
+    card.append(el('div',{class:'pc-branch'},draft.workflow+(draft.values&&draft.values.so?(' · SO '+draft.values.so):'')));
+    card.append(el('div',{class:'pc-guide'},filled+' field'+(filled!==1?'s':'')+' filled · '+fmtWhen(draft.ts)));
+    const row=el('div',{style:'margin-top:8px;display:flex;gap:8px'});
+    row.append(el('button',{class:'btn sm primary',onclick:()=>applyState(draft)},'Resume'),
+      el('button',{class:'btn sm ghost',onclick:()=>{clearDraft();startScreen();}},'Discard'));
+    card.append(row); w.append(card);
+  }
+  // --- recent SOs ---
+  const recent=readJSON(RECENT_KEY)||[];
+  if(recent.length){
+    const rc=el('div',{class:'card',style:'margin-bottom:14px'});
+    rc.append(el('h3',{},'Recent SOs'));
+    const list=el('div',{class:'recent-list'});
+    recent.slice(0,8).forEach(r=>{
+      list.append(el('button',{class:'recent-item',onclick:()=>applyState(r)},
+        el('span',{class:'ri-so'},r.so||'—'),
+        el('span',{class:'ri-wf'},r.workflow),
+        el('span',{class:'ri-when'},fmtWhen(r.ts))));
+    });
+    rc.append(list);
+    rc.append(el('button',{class:'btn sm ghost',style:'margin-top:8px',onclick:()=>{localStorage.removeItem(RECENT_KEY);startScreen();}},'Clear recent'));
+    w.append(rc);
+  }
+
   // --- SO request parser ---
   const ta=el('textarea',{rows:4,id:'soRequest',placeholder:'Paste the raw SO request here (SO#, action, phone, speed, address)…',
     value:(App.training&&App.training.request)||'',
@@ -807,7 +844,7 @@ function stepComplete(s){
 }
 /* step navigation (shared by buttons + keyboard) */
 function gotoStep(i){ const steps=stepDefs(); if(!steps.length)return;
-  App.stepIndex=Math.max(0,Math.min(i,steps.length-1)); renderWizardStep(); renderSteps(); }
+  App.stepIndex=Math.max(0,Math.min(i,steps.length-1)); renderWizardStep(); renderSteps(); saveDraft(); }
 function nextStep(){ gotoStep(App.stepIndex+1); }
 function prevStep(){ gotoStep(App.stepIndex-1); }
 function firstEmptyStepIndex(){
@@ -932,7 +969,7 @@ function buildField(ph){
   if(d.facs){ return facsField(); }
   input=el('input',{type:'text',value:App.values[ph]||'',placeholder:d.hint||'',
     oninput:e=>{ let v=e.target.value; if(d.upper)v=v.toUpperCase(); App.values[ph]=v;
-      updateFieldState(wrap,ph); renderNote(); },
+      updateFieldState(wrap,ph); renderNote(); saveDraft(); },
     onkeydown:e=>{ if(e.key==='Enter'){ e.preventDefault(); nextStep(); } }});  // Enter → next step
   wrap.append(input);
   if(d.hint) wrap.append(el('div',{class:'hint'},d.hint));
@@ -979,7 +1016,7 @@ function renderReview(w){
   nav.append(el('button',{class:'btn',onclick:()=>{App.stepIndex--;renderWizardStep();renderSteps();}},'← Back'));
   nav.append(el('button',{class:'btn primary',onclick:copyNote},'Copy note'));
   nav.append(el('button',{class:'btn orange',onclick:()=>$('#btnFlagNote').click()},'⚑ Flag note'));
-  nav.append(el('button',{class:'btn ghost',onclick:startScreen},'New SO'));
+  nav.append(el('button',{class:'btn ghost',onclick:()=>{clearDraft();startScreen();}},'New SO'));
   w.append(nav);
 }
 
@@ -1044,7 +1081,41 @@ function renderNote(){
   });
 }
 function noteText(){ return buildNoteLines().map(l=>l.t).join('\n'); }
-function copyNote(){ navigator.clipboard.writeText(noteText()).then(()=>toast('Note copied')); }
+function copyNote(){ const t=noteText(); pushRecent();
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(()=>toast('Note copied')).catch(()=>toast('Press Ctrl/⌘+C — clipboard blocked'));
+  } else { toast('Press Ctrl/⌘+C to copy'); } }
+
+/* ---- autosave the in-progress SO + a recent-SOs list (localStorage) ---- */
+const DRAFT_KEY='so_trainer_draft', RECENT_KEY='so_trainer_recent';
+let _draftT;
+function draftSnapshot(){ return App.member?{flowKey:App.flowKey, workflow:App.member.corpus_workflow,
+  values:App.values, facs:App.facs, options:App.options, stepIndex:App.stepIndex, training:App.training, ts:Date.now()}:null; }
+function saveDraft(){ clearTimeout(_draftT); _draftT=setTimeout(()=>{
+  const d=draftSnapshot(); if(!d) return;
+  try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); }catch(e){} },350); }
+function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+function readJSON(k){ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } }
+function applyState(d){
+  const f=KB.flows[d.flowKey]; if(!f) return false;
+  const m=f.members.find(x=>x.corpus_workflow===d.workflow); if(!m) return false;
+  chooseWorkflow(d.flowKey, m, {});
+  if(d.values) App.values=d.values;
+  if(d.facs) App.facs=d.facs;
+  if(d.options) App.options=d.options;
+  App.training=d.training||null;
+  const steps=stepDefs(); App.stepIndex=Math.min(d.stepIndex||0, Math.max(0,steps.length-1));
+  setTab('workflow'); renderSteps(); renderWizardStep(); renderNote();
+  return true;
+}
+function pushRecent(){
+  const d=draftSnapshot(); if(!d) return;
+  d.so=(App.values.so||'').trim(); d.action=App.values.action||deriveAction();
+  let list=readJSON(RECENT_KEY)||[];
+  list=list.filter(x=>!(x.workflow===d.workflow && x.so===d.so));   // dedupe
+  list.unshift(d); list=list.slice(0,12);
+  try{ localStorage.setItem(RECENT_KEY, JSON.stringify(list)); }catch(e){}
+}
 
 /* ======================================================================
    ISSUE SPINE — capture, flag icons, lifecycle, export/import
@@ -1721,7 +1792,7 @@ $('#corpusFile').onchange=e=>{ if(e.target.files[0]) handleCorpus(e.target.files
 /* ======================================================================
    GLOBAL UI WIRING
    ====================================================================== */
-$('#btnRestart').onclick=startScreen;
+$('#btnRestart').onclick=()=>{clearDraft();startScreen();};
 $('#btnCopyNote').onclick=copyNote;
 $('#btnFlagNote').onclick=()=>openCapture({where:App.member?App.member.corpus_workflow:'note',field:'note',
   output:App.member?noteText():'', target:'note'});
