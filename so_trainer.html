@@ -125,6 +125,23 @@ main{flex:1 1 auto;overflow:hidden;position:relative}
 .field label{display:block;font-weight:700;font-size:12px;color:var(--navy);margin-bottom:4px;letter-spacing:.2px}
 .field .hint{font-size:11px;color:var(--text-light);margin-top:3px}
 .field .eg{font-size:11.5px;color:var(--green);margin-top:3px}
+.progress-row{display:flex;align-items:center;gap:10px;margin:2px 0 14px}
+.progress{flex:1;height:6px;background:var(--border-soft);border-radius:6px;overflow:hidden}
+.progress-fill{height:100%;background:var(--green);transition:width .2s}
+.progress-num{font-size:11.5px;color:var(--text-light);white-space:nowrap}
+.btn.icon{font-size:14px;line-height:1;padding:5px 8px}
+.modal-scrim{position:fixed;inset:0;background:rgba(20,30,45,.45);opacity:0;pointer-events:none;transition:opacity .15s;z-index:60}
+.modal-scrim.show{opacity:1;pointer-events:auto}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%);background:var(--panel);border:1px solid var(--border);
+  border-radius:12px;box-shadow:0 20px 60px rgba(20,30,45,.3);padding:20px 22px;z-index:61;opacity:0;pointer-events:none;
+  transition:opacity .15s,transform .15s;max-width:90vw;max-height:84vh;overflow:auto}
+.modal.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.modal h3{margin:0 0 12px;color:var(--navy-dark)}
+.kbd-table{border-collapse:collapse;margin-bottom:14px}
+.kbd-table td{padding:5px 14px 5px 0;font-size:13px;color:var(--text-mid)}
+.kbd-table td:first-child{white-space:nowrap;text-align:right;color:var(--text)}
+kbd{font-family:var(--mono);font-size:11px;background:var(--inset);border:1px solid var(--border);
+  border-bottom-width:2px;border-radius:4px;padding:1px 6px;color:var(--navy-dark)}
 .field .eg code{font-family:var(--mono);background:var(--green-soft);color:var(--navy-dark);padding:1px 5px;border-radius:4px}
 .field .src{font-size:10.5px;color:var(--slate);margin-top:2px;font-style:italic}
 .field input,.field select,.field textarea{
@@ -280,8 +297,25 @@ footer .sb-spacer{flex:1}
   <div class="top-actions">
     <button class="btn sm ghost" id="btnRestart" title="Start a new SO">New SO</button>
     <button class="btn sm" id="btnExportIssues" title="Export all issues + screenshots to a file">Export Issues</button>
+    <button class="btn sm ghost icon" id="btnHelp" title="Keyboard shortcuts (?)">⌨</button>
   </div>
 </header>
+
+<!-- keyboard shortcuts overlay -->
+<div class="modal-scrim" id="helpScrim"></div>
+<div class="modal" id="helpModal" role="dialog" aria-label="Keyboard shortcuts">
+  <h3>Keyboard shortcuts</h3>
+  <table class="kbd-table">
+    <tr><td><kbd>Enter</kbd></td><td>Next step (from a field)</td></tr>
+    <tr><td><kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>→</kbd></td><td>Previous / next step</td></tr>
+    <tr><td><kbd>Ctrl/⌘</kbd>+<kbd>Enter</kbd></td><td>Copy the note</td></tr>
+    <tr><td><kbd>Ctrl/⌘</kbd>+<kbd>K</kbd></td><td>Flag an issue here</td></tr>
+    <tr><td><kbd>Ctrl/⌘</kbd>+<kbd>P</kbd></td><td>Command palette — jump anywhere</td></tr>
+    <tr><td><kbd>?</kbd></td><td>This help</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Close dialogs</td></tr>
+  </table>
+  <button class="btn sm" onclick="toggleHelp(false)">Close</button>
+</div>
 
 <main>
   <!-- ===================== WORKFLOW (three-pane) ===================== -->
@@ -771,6 +805,21 @@ function stepComplete(s){
   if(s.id==='review') return false;
   return s.fields.every(f=> f==='facs_status' ? true : (f==='action'? true : (App.values[f]||'').trim()!==''));
 }
+/* step navigation (shared by buttons + keyboard) */
+function gotoStep(i){ const steps=stepDefs(); if(!steps.length)return;
+  App.stepIndex=Math.max(0,Math.min(i,steps.length-1)); renderWizardStep(); renderSteps(); }
+function nextStep(){ gotoStep(App.stepIndex+1); }
+function prevStep(){ gotoStep(App.stepIndex-1); }
+function firstEmptyStepIndex(){
+  const steps=stepDefs();
+  return steps.findIndex(s=> s.id!=='review' && s.fields.some(f=> f!=='facs_status' && f!=='action' && !(App.values[f]||'').trim()));
+}
+function jumpNextEmpty(){ const i=firstEmptyStepIndex(); gotoStep(i<0? stepDefs().length-1 : i); }
+function progressOf(){
+  const ph=App.placeholders.filter(p=>p!=='date'&&p!=='action');
+  const done=ph.filter(p=>(App.values[p]||'').trim()).length;
+  return {done, total:ph.length};
+}
 
 function renderPointer(){
   const sp=spec(); if(!sp) return null;
@@ -791,6 +840,15 @@ function renderWizardStep(){
   if(s.id==='review'){ renderReview(w); return; }
   w.append(el('h2',{},s.label));
   w.append(el('div',{class:'sub'},App.flowKey.replace(/_/g,' / ')+' · '+App.member.corpus_workflow+'  ·  step '+(App.stepIndex+1)+' of '+steps.length));
+  // progress meter + jump-to-next-empty
+  const pr=progressOf();
+  if(pr.total){
+    const bar=el('div',{class:'progress'}); bar.append(el('div',{class:'progress-fill',style:`width:${Math.round(pr.done/pr.total*100)}%`}));
+    const row=el('div',{class:'progress-row'});
+    row.append(bar, el('span',{class:'progress-num'},`${pr.done}/${pr.total} fields`));
+    if(pr.done<pr.total) row.append(el('button',{class:'btn sm ghost',onclick:jumpNextEmpty,title:'Go to the next empty field'},'→ next empty'));
+    w.append(row);
+  }
   const tb=trainingBanner(); if(tb) w.append(tb);
   const pc=renderPointer(); if(pc) w.append(pc);
   if(s.id==='options'){ renderOptions(w); }
@@ -800,11 +858,13 @@ function renderWizardStep(){
   });
   // nav
   const nav=el('div',{class:'wizard-nav'});
-  if(App.stepIndex>0) nav.append(el('button',{class:'btn',onclick:()=>{App.stepIndex--;renderWizardStep();renderSteps();}},'← Back'));
-  nav.append(el('button',{class:'btn primary',onclick:()=>{App.stepIndex++;renderWizardStep();renderSteps();}},
+  if(App.stepIndex>0) nav.append(el('button',{class:'btn',onclick:prevStep},'← Back'));
+  nav.append(el('button',{class:'btn primary',onclick:nextStep},
     App.stepIndex<steps.length-1?'Next →':'Review →'));
   nav.append(el('button',{class:'btn ghost',onclick:()=>chooseFlow(App.flowKey)},'Change workflow'));
   w.append(nav);
+  // auto-focus the first field input so you can type immediately / press Enter to advance
+  setTimeout(()=>{ const inp=w.querySelector('.field input:not([readonly]), .field textarea'); if(inp) inp.focus(); },0);
 }
 
 function renderOptions(w){
@@ -872,7 +932,8 @@ function buildField(ph){
   if(d.facs){ return facsField(); }
   input=el('input',{type:'text',value:App.values[ph]||'',placeholder:d.hint||'',
     oninput:e=>{ let v=e.target.value; if(d.upper)v=v.toUpperCase(); App.values[ph]=v;
-      updateFieldState(wrap,ph); renderNote(); }});
+      updateFieldState(wrap,ph); renderNote(); },
+    onkeydown:e=>{ if(e.key==='Enter'){ e.preventDefault(); nextStep(); } }});  // Enter → next step
   wrap.append(input);
   if(d.hint) wrap.append(el('div',{class:'hint'},d.hint));
   const ex=exampleFor(ph); if(ex) wrap.append(el('div',{class:'eg'},'Example: ',el('code',{},ex)));
@@ -1666,11 +1727,25 @@ $('#btnFlagNote').onclick=()=>openCapture({where:App.member?App.member.corpus_wo
   output:App.member?noteText():'', target:'note'});
 function setStatus(s){ $('#sbState').textContent=s; }
 
+function openPalette(){}   /* defined in Phase 4 */
+function closePalette(){}
+function toggleHelp(on){ const show = on===undefined ? !$('#helpModal').classList.contains('show') : on;
+  $('#helpModal').classList.toggle('show',show); $('#helpScrim').classList.toggle('show',show); }
+$('#btnHelp').onclick=()=>toggleHelp();
+$('#helpScrim').onclick=()=>toggleHelp(false);
+function inField(e){ const t=e.target; return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'); }
+
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape') closeCapture();
+  if(e.key==='Escape'){ closeCapture(); toggleHelp(false); closePalette(); }
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){ e.preventDefault();
     openCapture({where:App.member?App.member.corpus_workflow:'app',field:'general'}); }
   if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&App.member){ e.preventDefault(); copyNote(); }
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='p'){ e.preventDefault(); openPalette(); }
+  if(e.key==='?'&&!(e.target&&e.target.tagName==='TEXTAREA')){ e.preventDefault(); toggleHelp(); }
+  if(e.altKey&&App.member&&App.tab==='workflow'){
+    if(e.key==='ArrowRight'){ e.preventDefault(); nextStep(); }
+    if(e.key==='ArrowLeft'){ e.preventDefault(); prevStep(); }
+  }
 });
 
 /* ======================================================================
