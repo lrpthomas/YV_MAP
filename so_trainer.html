@@ -329,7 +329,7 @@ footer .sb-spacer{flex:1}
   <section class="view" id="view-corpus">
     <div class="content">
       <h2 class="page">Corpus Explorer</h2>
-      <p class="lede">Corpus + real-customer data are never embedded — upload an export to explore it here. Nothing leaves this machine.</p>
+      <p class="lede">Corpus + real-customer data are never embedded — upload an export to explore it here (search, filter, sort, paginate) and <b>load any record into the trainer to practice</b>. Nothing leaves this machine.</p>
       <div class="upload-zone" id="corpusDrop">
         <p><b>Drop a corpus / equipment / Sili export here</b> (JSON), or</p>
         <button class="btn primary" id="corpusPick">Choose file…</button>
@@ -511,7 +511,7 @@ const App = {
   tab:'workflow',
   flowKey:null, member:null, template:null, placeholders:[],
   values:{}, facs:'UNCHANGED', stepIndex:0, options:{splice:false,xconn:false},
-  issues:[], issueFilter:'all',
+  issues:[], issueFilter:'all', training:null,
   capture:{ctx:null, tag:'Wrong', shots:[]},
 };
 
@@ -596,9 +596,11 @@ function startScreen(){
   const w=$('#wizard'); w.innerHTML='';
   w.append(el('h2',{},'Start a service order'));
   w.append(el('div',{class:'sub'},'Paste the SO request to auto-route, or pick a flow.'));
+  const tb=trainingBanner(); if(tb) w.append(tb);
 
   // --- SO request parser ---
   const ta=el('textarea',{rows:4,id:'soRequest',placeholder:'Paste the raw SO request here (SO#, action, phone, speed, address)…',
+    value:(App.training&&App.training.request)||'',
     style:'width:100%;font-family:var(--mono);font-size:12.5px;padding:10px;border:1px solid var(--border);border-radius:8px'});
   const parseBtn=el('button',{class:'btn primary',style:'margin-top:8px',onclick:()=>parseRequest(ta.value)},'Parse & route');
   const parseOut=el('div',{id:'parseOut',style:'margin-top:10px'});
@@ -764,6 +766,7 @@ function renderWizardStep(){
   if(s.id==='review'){ renderReview(w); return; }
   w.append(el('h2',{},s.label));
   w.append(el('div',{class:'sub'},App.flowKey.replace(/_/g,' / ')+' · '+App.member.corpus_workflow+'  ·  step '+(App.stepIndex+1)+' of '+steps.length));
+  const tb=trainingBanner(); if(tb) w.append(tb);
   const pc=renderPointer(); if(pc) w.append(pc);
   if(s.id==='options'){ renderOptions(w); }
   else s.fields.forEach(f=>{
@@ -1442,34 +1445,177 @@ function extractRecords(data){
   if(vals.length && vals.every(x=>x&&typeof x==='object'&&!Array.isArray(x))) return {arr:vals, path:'(keyed object)'};
   return {arr:[], path:''};
 }
+/* ---- field-role detection (works with any corpus schema) ---- */
+function pickKey(keys, names){
+  const low=keys.map(k=>[k,k.toLowerCase()]);
+  for(const n of names){ const hit=low.find(([,l])=>l===n); if(hit) return hit[0]; }
+  for(const n of names){ const hit=low.find(([,l])=>l.includes(n)); if(hit) return hit[0]; }
+  return null;
+}
+function fieldVal(rec, key){ return key && rec[key]!=null ? String(rec[key]) : ''; }
+
+let corpusRecs=[], corpusName='', corpusPath='', corpusKeys={};
+const CP={ q:'', wf:'', sortKey:null, sortDir:1, page:0, size:50, expanded:new Set() };
+
 function renderCorpus(name){
   const b=$('#corpusBody'); b.innerHTML='';
   const {arr,path}=extractRecords(corpusData);
-  b.append(el('div',{class:'card'},el('h3',{},'Loaded ',el('span',{class:'pill'},esc(name))),
-    el('p',{class:'muted'},`${arr.length.toLocaleString()} records`+(path&&path!=='(array)'?` (from "${esc(path)}")`:'')+` · stays on this machine.`)));
+  corpusRecs=arr; corpusName=name; corpusPath=path;
   if(!arr.length){
-    // help the user (and me) see the shape so we can fix it fast
     const top=corpusData&&typeof corpusData==='object'?corpusData:{};
     const shape=Object.entries(top).map(([k,v])=>`${k}: ${Array.isArray(v)?('array['+v.length+']'):typeof v}`);
-    b.append(el('div',{class:'empty'},'No record array detected.'),
+    b.append(el('div',{class:'card'},el('h3',{},'Loaded ',el('span',{class:'pill'},esc(name))),el('p',{class:'muted'},'0 records.')),
+      el('div',{class:'empty'},'No record array detected.'),
       el('div',{class:'card'},el('h3',{},'File structure (top level)'),
         el('pre',{style:'font-family:var(--mono);font-size:12px;white-space:pre-wrap'},shape.join('\n')||'(not an object)')));
     return;
   }
-  const cols=[...new Set(arr.slice(0,50).flatMap(r=>Object.keys(r||{})))].slice(0,8);
-  const search=el('input',{class:'search',placeholder:`Search ${arr.length.toLocaleString()} records…`,oninput:e=>draw(e.target.value)});
-  b.append(search); const host=el('div',{class:'card',style:'overflow:auto;max-height:60vh'}); b.append(host);
-  function draw(q=''){
-    host.innerHTML='';
-    const ql=q.toLowerCase();
-    const filt=arr.filter(r=>!ql||JSON.stringify(r).toLowerCase().includes(ql)).slice(0,300);
-    const t=el('table',{class:'ref'});
-    t.append(el('tr',{},...cols.map(c=>el('th',{},c))));
-    filt.forEach(r=>t.append(el('tr',{},...cols.map(c=>el('td',{},String(r?.[c]??'').slice(0,60))))));
-    host.append(t);
-    host.append(el('div',{class:'muted',style:'padding:8px'},`showing ${filt.length} of ${arr.length.toLocaleString()}`));
+  const allKeys=[...new Set(arr.slice(0,200).flatMap(r=>Object.keys(r||{})))];
+  corpusKeys={
+    all:allKeys,
+    wf:  pickKey(allKeys,['corpus_workflow','workflow','wf','type','flow','class','category','action']),
+    so:  pickKey(allKeys,['so_number','sonum','so#','so','order','ticket','order_number']),
+    phone:pickKey(allKeys,['phone_out','phone','tn','telephone','number','phone_number']),
+    note:pickKey(allKeys,['note','response','writeup','write_up','facs_note','answer','expected','response_text']),
+    req: pickKey(allKeys,['request','so_request','order_text','request_text','description','desc','summary']),
+  };
+  // columns to show: prefer the meaningful detected ones, then fill from the rest
+  const pref=[corpusKeys.so,corpusKeys.wf,corpusKeys.phone,corpusKeys.req,corpusKeys.note].filter(Boolean);
+  CP.cols=[...new Set([...pref, ...allKeys])].slice(0,6);
+  CP.q=''; CP.wf=''; CP.sortKey=null; CP.sortDir=1; CP.page=0; CP.expanded=new Set();
+  drawCorpus();
+}
+
+function corpusView(){
+  let v=corpusRecs;
+  if(CP.wf && corpusKeys.wf) v=v.filter(r=>String(r[corpusKeys.wf]??'')===CP.wf);
+  if(CP.q){ const ql=CP.q.toLowerCase(); v=v.filter(r=>JSON.stringify(r).toLowerCase().includes(ql)); }
+  if(CP.sortKey){ v=[...v].sort((a,b)=>{ let x=a[CP.sortKey],y=b[CP.sortKey];
+    const nx=parseFloat(x),ny=parseFloat(y); if(!isNaN(nx)&&!isNaN(ny)){x=nx;y=ny;} else {x=String(x??'');y=String(y??'');}
+    return (x>y?1:x<y?-1:0)*CP.sortDir; }); }
+  return v;
+}
+function drawCorpus(){
+  const b=$('#corpusBody'); b.innerHTML='';
+  const total=corpusRecs.length, view=corpusView(), N=view.length;
+  const pages=Math.max(1,Math.ceil(N/CP.size)); if(CP.page>=pages) CP.page=pages-1; if(CP.page<0)CP.page=0;
+  const start=CP.page*CP.size, slice=view.slice(start, start+CP.size);
+
+  // header + stats
+  const head=el('div',{class:'card'});
+  head.append(el('h3',{},'Loaded ',el('span',{class:'pill'},esc(corpusName)),' ',
+    el('span',{class:'muted',style:'font-size:12px;font-weight:400'},`${total.toLocaleString()} records`+(corpusPath&&corpusPath!=='(array)'?` (from "${esc(corpusPath)}")`:'')+' · stays on this machine')));
+  if(corpusKeys.wf){
+    const dist={}; corpusRecs.forEach(r=>{const k=String(r[corpusKeys.wf]??'—'); dist[k]=(dist[k]||0)+1;});
+    const top=Object.entries(dist).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,n])=>`${k}: ${n.toLocaleString()}`);
+    head.append(el('div',{class:'muted',style:'font-size:12px;margin-top:4px'},'By '+corpusKeys.wf+' — '+top.join('  ·  ')+(Object.keys(dist).length>6?'  …':'')));
   }
-  draw();
+  b.append(head);
+
+  // controls
+  const ctl=el('div',{style:'display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px'});
+  const search=el('input',{class:'search',style:'flex:1;min-width:200px;margin:0',placeholder:`Search ${total.toLocaleString()} records…`,value:CP.q});
+  let deb; search.addEventListener('input',e=>{clearTimeout(deb); deb=setTimeout(()=>{CP.q=e.target.value;CP.page=0;drawCorpus();},180);});
+  ctl.append(search);
+  if(corpusKeys.wf){
+    const vals=[...new Set(corpusRecs.map(r=>String(r[corpusKeys.wf]??'')))].filter(Boolean).sort();
+    const sel=el('select',{class:'search',style:'margin:0;max-width:220px',onchange:e=>{CP.wf=e.target.value;CP.page=0;drawCorpus();}});
+    sel.append(el('option',{value:''},`All ${corpusKeys.wf} (${vals.length})`));
+    vals.forEach(v=>{const o=el('option',{value:v},v); if(v===CP.wf)o.selected=true; sel.append(o);});
+    ctl.append(sel);
+  }
+  const sz=el('select',{class:'search',style:'margin:0;max-width:120px',onchange:e=>{CP.size=+e.target.value;CP.page=0;drawCorpus();}});
+  [25,50,100,250,500].forEach(n=>{const o=el('option',{value:n},n+' / page'); if(n===CP.size)o.selected=true; sz.append(o);});
+  ctl.append(sz);
+  ctl.append(el('button',{class:'btn sm',onclick:exportCorpusView},'Export view'));
+  b.append(ctl);
+
+  // table
+  const host=el('div',{class:'card',style:'overflow:auto;max-height:62vh;padding:0'});
+  const t=el('table',{class:'ref'});
+  const hr=el('tr',{});
+  hr.append(el('th',{},''));                       // expand
+  CP.cols.forEach(c=>{ const th=el('th',{style:'cursor:pointer;user-select:none',title:'Sort',
+    onclick:()=>{ if(CP.sortKey===c)CP.sortDir*=-1; else {CP.sortKey=c;CP.sortDir=1;} drawCorpus(); }},
+    c+(CP.sortKey===c?(CP.sortDir>0?' ▲':' ▼'):'')); hr.append(th); });
+  hr.append(el('th',{},'Train'));
+  t.append(hr);
+  slice.forEach((r,i)=>{
+    const idx=start+i;
+    const tr=el('tr',{});
+    tr.append(el('td',{style:'cursor:pointer;color:var(--navy);font-weight:700',title:'Show all fields',
+      onclick:()=>{ CP.expanded.has(idx)?CP.expanded.delete(idx):CP.expanded.add(idx); drawCorpus(); }},
+      CP.expanded.has(idx)?'▾':'▸'));
+    CP.cols.forEach(c=>tr.append(el('td',{title:String(r?.[c]??'')},String(r?.[c]??'').slice(0,80))));
+    tr.append(el('td',{},el('button',{class:'btn sm primary',onclick:()=>loadForTraining(r)},'Train ▶')));
+    t.append(tr);
+    if(CP.expanded.has(idx)){
+      const dr=el('tr',{}); const td=el('td',{colspan:CP.cols.length+2,style:'background:var(--inset)'});
+      const tbl=el('table',{class:'ref',style:'margin:0'});
+      Object.entries(r).forEach(([k,v])=>tbl.append(el('tr',{},
+        el('td',{style:'font-weight:700;white-space:nowrap;vertical-align:top'},esc(k)),
+        el('td',{},el('pre',{style:'white-space:pre-wrap;margin:0;font-family:var(--mono);font-size:12px'},
+          typeof v==='string'?v:JSON.stringify(v,null,1))))));
+      td.append(tbl); dr.append(td); t.append(dr);
+    }
+  });
+  host.append(t); b.append(host);
+
+  // pager
+  const pager=el('div',{style:'display:flex;gap:6px;align-items:center;justify-content:center;margin-top:10px;flex-wrap:wrap'});
+  const nav=(lab,to,dis)=>{ const btn=el('button',{class:'btn sm',onclick:()=>{CP.page=to;drawCorpus();}},lab); btn.disabled=!!dis; return btn; };
+  pager.append(nav('« First',0,CP.page===0), nav('‹ Prev',CP.page-1,CP.page===0));
+  pager.append(el('span',{class:'muted',style:'font-size:12.5px'},`Page ${CP.page+1} of ${pages}`));
+  pager.append(nav('Next ›',CP.page+1,CP.page>=pages-1), nav('Last »',pages-1,CP.page>=pages-1));
+  pager.append(el('span',{class:'muted',style:'font-size:12px;margin-left:8px'},
+    N? `showing ${(start+1).toLocaleString()}–${Math.min(start+CP.size,N).toLocaleString()} of ${N.toLocaleString()}`+(N!==total?` (filtered from ${total.toLocaleString()})`:'') : 'no matches'));
+  b.append(pager);
+}
+function exportCorpusView(){
+  const view=corpusView();
+  const blob=new Blob([JSON.stringify(view,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob); const a=el('a',{href:url,download:`corpus-view-${view.length}.json`}); a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),400); toast(`Exported ${view.length} records`);
+}
+
+/* ---- load a corpus record INTO the workflow for training ---- */
+function loadForTraining(rec){
+  const wfVal=fieldVal(rec,corpusKeys.wf);
+  const so=fieldVal(rec,corpusKeys.so), phone=fieldVal(rec,corpusKeys.phone);
+  const note=fieldVal(rec,corpusKeys.note), req=fieldVal(rec,corpusKeys.req);
+  // match the workflow by value against the KB
+  let foundKey=null, found=null;
+  Object.entries(KB.flows).forEach(([fk,f])=>f.members.forEach(m=>{
+    if(found) return;
+    const cw=m.corpus_workflow.toLowerCase(), wv=(wfVal||'').toLowerCase();
+    if(wv && (cw===wv || cw.replace(/_/g,'')===wv.replace(/[_\s]/g,''))){ found=m; foundKey=fk; }
+  }));
+  App.training={ answer:note, source:rec, request:req, so, reveal:false };
+  setTab('workflow');
+  if($('#soRequest')) $('#soRequest').value = req || [so,wfVal,phone].filter(Boolean).join(' ');
+  const parsed={}; if(so)parsed.so=so; if(phone)parsed.phone=phone.replace(/\D/g,'').slice(-10);
+  if(found){
+    chooseWorkflow(foundKey, found, parsed);
+    toast('Training: '+found.corpus_workflow+(so?` · SO ${so}`:''), 4000);
+  } else {
+    startScreen();
+    toast('Loaded for training — pick the flow'+(wfVal?` (couldn't auto-match "${wfVal}")`:''), 5000);
+  }
+}
+/* training banner shown above the wizard / start screen while a record is loaded */
+function trainingBanner(){
+  if(!App.training) return null;
+  const t=App.training; const c=el('div',{class:'pointer-card',style:'border-left-color:var(--orange)'});
+  const h=el('div',{class:'pc-h',style:'color:var(--orange-dark);display:flex;justify-content:space-between;align-items:center'});
+  h.append(el('span',{},'🎓 TRAINING'+(t.so?' · SO '+esc(t.so):'')));
+  const btns=el('span',{});
+  if(t.answer) btns.append(el('button',{class:'btn sm',style:'margin-right:6px',onclick:()=>{t.reveal=!t.reveal; (App.member?renderWizardStep():startScreen());}}, t.reveal?'Hide expected':'Reveal expected note'));
+  btns.append(el('button',{class:'btn sm ghost',onclick:()=>{App.training=null; (App.member?renderWizardStep():startScreen());}},'Exit training'));
+  h.append(btns); c.append(h);
+  c.append(el('div',{class:'pc-guide'},'Build the note from this real order, then reveal the expected note to check yourself.'+(t.answer?'':' (No expected note in this record.)')));
+  if(t.request) c.append(el('div',{style:'font-size:12px;margin-top:6px'},el('b',{},'Request: '),esc(t.request)));
+  if(t.reveal&&t.answer) c.append(el('pre',{style:'font-family:var(--mono);font-size:12.5px;background:var(--inset);padding:10px;border-radius:8px;white-space:pre-wrap;margin-top:8px'},t.answer));
+  return c;
 }
 $('#corpusPick').onclick=()=>$('#corpusFile').click();
 $('#corpusFile').onchange=e=>{ if(e.target.files[0]) handleCorpus(e.target.files[0]); };
