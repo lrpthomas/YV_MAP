@@ -420,6 +420,12 @@ function spec(){ return (App.member && SPECS[App.member.corpus_workflow]) || nul
    features, exchanges, tech styles, field guide, systems detail, full examples). */
 const REFX = /*__REFX_JSON__*/;
 
+/* Authoritative per-field data (where to find it / real example / note / system),
+   keyed by varKey, straight from the knowledge base's terms — the source files. */
+const TERM={}; [...(KB.terms&&KB.terms.validated||[]),...(KB.terms&&KB.terms.suggested||[])].forEach(t=>{ if(t&&t.varKey) TERM[t.varKey]=t; });
+const PH_ALIAS={ so:'so_number', port:'dsl_port', splice_instructions:'splicer_note', jumper_instructions:'splicer_note' };
+function termFor(ph){ const base=ph.replace(/\d+$/,''); return TERM[PH_ALIAS[base]||base]||null; }
+
 /* ----------------------------------------------------------------------
    REFERENCE CONSTANTS — lifted from checkpoint/DATA_REVIEW_FINDINGS.md
    (reference knowledge, not corpus/customer data → safe to embed)
@@ -569,6 +575,14 @@ function todayMDYY(){const d=new Date();return `${d.getMonth()+1}.${d.getDate()}
 /* Generic, fictitious example numbers (555 convention) used in examples + training,
    so nothing real is shown. Agreement numbers use their service prefix (101=internet,
    125=EDGE); phones vary in format on purpose to show what real ones look like. */
+/* swap masked example numbers (101 822 ****, 877 ****) for the generic 555
+   convention, keeping the 101/125 agreement prefix; leaves non-numeric like
+   "**PENDING**" untouched. */
+function demaskExample(s){
+  return String(s||'')
+    .replace(/\b(101|125)\s+\d{3}\s*\*{2,}/g,'$1 555 8989')
+    .replace(/\b\d{3}\s*\*{2,}/g,'555 8989');
+}
 function exampleFor(ph){
   if(ph==='date') return todayMDYY();
   if(ph==='action') return App.template?actionOf(App.template):'';
@@ -864,7 +878,8 @@ function buildField(ph){
   const ex=exampleFor(ph); if(ex) wrap.append(el('div',{class:'eg'},'Example: ',el('code',{},ex)));
   const sp=spec(); let note=sp&&sp.field_notes&&sp.field_notes[ph];
   if(note){ note=note.replace(/\s*\(masked\)\.?/ig,'').trim(); if(note) wrap.append(el('div',{class:'src'},note)); }
-  if(d.src) wrap.append(el('div',{class:'src'},'Where to find it: '+d.src));
+  const t=termFor(ph); const where=(t&&t.where)||d.src;   // authoritative "where" from the source files
+  if(where) wrap.append(el('div',{class:'src'},'Where to find it: '+where));
   wrap.append(el('div',{class:'vmsg'},d.vmsg||'Check this value'));
   wrap.append(el('div',{class:'vmsg ok'},'looks valid'));
   return wrap;
@@ -1201,16 +1216,26 @@ function refActions(b){
 }
 function refTerms(b){
   const all=[...(KB.terms.validated||[]).map(t=>({...t,v:true})),...(KB.terms.suggested||[]).map(t=>({...t,v:false}))];
+  b.append(el('div',{class:'muted',style:'font-size:12px;margin-bottom:8px'},
+    all.length+' terms · each with where to find it, a real example, and notes. ✓ = data-confirmed.'));
   const search=el('input',{class:'search',placeholder:`Search ${all.length} terms…`,
     oninput:e=>{const q=e.target.value.toLowerCase();
       $$('#termRows tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none');}});
   b.append(search);
   const t=el('table',{class:'ref',id:'termTbl'});
-  t.append(el('tr',{},el('th',{},'Term'),el('th',{},'System'),el('th',{},'Where / meaning'),el('th',{},'✓')));
+  t.append(el('tr',{},el('th',{},'Term'),el('th',{},'System'),el('th',{},'Where to find it'),el('th',{},'Example'),el('th',{},'✓')));
   const body=el('tbody',{id:'termRows'});
-  all.forEach(tm=>body.append(el('tr',{},el('td',{},el('b',{},tm.term||tm.varKey||'')),
-    el('td',{},tm.system||''),el('td',{html:esc((tm.where||tm.meaning||'').slice(0,220))}),
-    el('td',{},tm.v?'✓':''))));
+  all.forEach(tm=>{
+    const whereCell=el('td',{});
+    whereCell.append(el('div',{},esc(tm.where||tm.meaning||'')));
+    if(tm.note) whereCell.append(el('div',{class:'muted',style:'font-size:11px;margin-top:3px'},esc(tm.note)));
+    body.append(el('tr',{},
+      el('td',{},el('b',{},tm.term||tm.varKey||'')),
+      el('td',{style:'white-space:nowrap'},tm.system||''),
+      whereCell,
+      el('td',{},tm.example?el('code',{style:'font-family:var(--mono);font-size:11.5px'},demaskExample(tm.example)):''),
+      el('td',{},tm.v?'✓':'')));
+  });
   t.append(body); b.append(el('div',{class:'card'},t));
 }
 function refSpeeds(b){
@@ -1348,13 +1373,14 @@ const SAMPLE={
   // fictitious 555 numbers — varied formats on purpose; bare (templates add OUT/IN labels)
   phone_out:'559-555-8989', phone_in:'559 555 8989', phone_qds:'555-8989',
   account_out:'101 555 8989', account_in:'125 555 8989',
-  port:'FRNT-0321-0157 5,736 605d-4',
-  port1:'FRNT-0321-0157 5,736 605d-4', port2:'FRNT-0321-0158 5,737 605d-5',
-  tel_port:'FRNT-0321-0157 5,736 605d-4', tel_port1:'FRNT-0321-0157 5,736 605d-4', tel_port2:'FRNT-0321-0159 5,738 605d-6',
-  dsl_port:'FRNT-0321-0158 5,737 PIC,37', dsl_port1:'FRNT-0321-0158 5,737 PIC,37', dsl_port2:'FRNT-0321-0160 5,739 PIC,39',
-  tel_location:'FRNT 1-3-6-4 BP,4', tel_location1:'FRNT 1-3-6-4 BP,4', tel_location2:'FRNT 1-3-6-6 BP,6',
-  dsl_location:'FRNT 1-3-6-5 BP,5', dsl_location1:'FRNT 1-3-6-5 BP,5', dsl_location2:'FRNT 1-3-6-7 BP,7',
-  edge_id:'125-001-0042', fsan:'CXNK01234567',
+  // real port/location formats from the source files (terms data)
+  port:'FRNT-0306-0776 TFRD 287 105N-3-1',
+  port1:'FRNT-0306-0776 TFRD 287 105N-3-1', port2:'FRNT-0327-1481 MNRT 44 M6-1-2B',
+  tel_port:'FRNT-LASH-ADT01-07-44', tel_port1:'FRNT-LASH-ADT01-07-44', tel_port2:'FRNT-LASH-ADT01-07-45',
+  dsl_port:'FRNT-0306-0776 TFRD 287 105N-3-1', dsl_port1:'FRNT-0306-0776 TFRD 287 105N-3-1', dsl_port2:'FRNT-0327-1481 MNRT 44 M6-1-2B',
+  tel_location:'TFRD N06-2-02-07 BP,157', tel_location1:'TFRD N06-2-02-07 BP,157', tel_location2:'TFRD N06-2-02-09 BP,159',
+  dsl_location:'TFRD N06-2-02-08 BP,158', dsl_location1:'TFRD N06-2-02-08 BP,158', dsl_location2:'TFRD N06-2-02-10 BP,160',
+  edge_id:'125 001 8989', fsan:'CXNK01234567',
   // port3..port16 intentionally absent -> omitted by the N/A rule (realistic)
 };
 function renderSample(tpl){
@@ -1385,7 +1411,7 @@ function allExamples(){
   const real=EXAMPLES.map(([title,label,note])=>({title,label,note,kind:'real'}));
   const full=(REFX.examples_full||[]).map(e=>{
     const tags=[e.media,e.bonded?'bonded':null,e.facs].filter(Boolean).join(' · ');
-    return {title:e.type||e.action||'Example', label:(e.action||'')+(tags?'  ('+tags+')':''), note:e.note||'', kind:'real'};
+    return {title:e.type||e.action||'Example', label:(e.action||'')+(tags?'  ('+tags+')':''), note:demaskExample(e.note||''), kind:'real'};
   });
   return real.concat(full).concat(illustrativeExamples());
 }
