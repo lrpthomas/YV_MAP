@@ -1145,7 +1145,7 @@ function buildField(ph){
   if(note){ note=note.replace(/\s*\(masked\)\.?/ig,'').trim(); if(note) wrap.append(el('div',{class:'src'},note)); }
   const t=termFor(ph); const where=(t&&t.where)||d.src;   // authoritative "where" from the source files
   if(where) wrap.append(el('div',{class:'src'},'Where to find it: '+where));
-  wrap.append(el('div',{class:'vmsg'},d.vmsg||'Check this value'));
+  const exMsg=exampleFor(ph); wrap.append(el('div',{class:'vmsg'}, d.vmsg || (exMsg?('Doesn\'t look right — expected like '+exMsg):'Check this value')));
   wrap.append(el('div',{class:'vmsg ok'},'looks valid'));
   return wrap;
 }
@@ -1153,8 +1153,10 @@ function validateField(ph){
   const d=fieldDef(ph); const v=(App.values[ph]||'').trim();
   if(d.validate) return d.validate(v);
   if(d.mask){ const dg=v.replace(/\D/g,''); return dg.length>=4 && dg.length<=11; }   // phone/agreement-ish
-  if(d.port) return v.includes(',');               // {cable},{pair}
-  if(d.loc) return /BP,/i.test(v) || v.length>3;    // location w/ binding post
+  // port lines are switch-cable-pair strings: hyphen-structured (FRNT-LASH-ADT01-07-44)
+  // and/or carry a comma pair (…5,736…). Accept either; reject trivial input.
+  if(d.port) return (/[-,]/.test(v)) && v.replace(/\s/g,'').length>=6;
+  if(d.loc) return /BP/i.test(v) || (/-/.test(v) && v.length>4);   // location: BP or node-shelf-card-port
   return v.length>0;
 }
 function updateFieldState(wrap,ph){
