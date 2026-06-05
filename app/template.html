@@ -166,6 +166,13 @@ abbr.gloss{text-decoration:underline dotted;text-underline-offset:2px;cursor:hel
 .diff-ok{color:var(--green)} .diff-miss{background:var(--orange-soft);color:var(--orange-dark)}
 .note-edit{width:100%;min-height:140px;background:var(--card);color:var(--text);border:1px solid var(--navy);border-radius:6px;
   font-family:var(--mono);font-size:12.5px;padding:10px;resize:vertical;line-height:1.5}
+#tourSpot{position:fixed;border-radius:8px;box-shadow:0 0 0 9999px rgba(15,23,35,.58);z-index:70;pointer-events:none;display:none;transition:all .2s}
+#tourTip{position:fixed;z-index:71;background:var(--card);border:1px solid var(--border);border-radius:11px;
+  box-shadow:0 18px 55px rgba(0,0,0,.35);padding:14px 16px;max-width:330px;display:none}
+#tourTip .tt-step{font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--orange-dark);text-transform:uppercase}
+#tourTip h4{margin:4px 0 6px;font-size:15px;color:var(--navy-dark)}
+#tourTip p{margin:0 0 12px;font-size:12.5px;color:var(--text-mid);line-height:1.5}
+#tourTip .tt-nav{display:flex;gap:8px;justify-content:flex-end}
 .field .eg code{font-family:var(--mono);background:var(--green-soft);color:var(--navy-dark);padding:1px 5px;border-radius:4px}
 .field .src{font-size:10.5px;color:var(--slate);margin-top:2px;font-style:italic}
 .field input,.field select,.field textarea{
@@ -392,7 +399,12 @@ body.fs-l{font-size:15.5px}
     </ul>
   </div>
   <button class="btn sm primary" onclick="dismissWelcome()">Get started</button>
+  <button class="btn sm" onclick="dismissWelcome();startTour()">Take a quick tour</button>
 </div>
+
+<!-- guided tour spotlight + tooltip -->
+<div id="tourSpot"></div>
+<div id="tourTip"></div>
 
 <!-- printable cheat-sheet (shown only when printing) -->
 <div id="cheatSheet"></div>
@@ -2050,6 +2062,7 @@ function paletteIndex(){
   items.push({label:'Copy the note', kind:'Action', run:()=>{ if(App.member) copyNote(); }});
   items.push({label:'Export issues', kind:'Action', run:()=>$('#btnExportIssues').click()});
   items.push({label:'Toggle dark theme', kind:'Action', run:()=>$('#btnTheme').click()});
+  items.push({label:'Take the guided tour', kind:'Action', run:()=>startTour()});
   // workflows
   Object.entries(KB.flows).forEach(([fk,f])=>f.members.forEach(m=>
     items.push({label:m.corpus_workflow, kind:'Workflow ('+fk.replace(/_/g,'/')+')', run:()=>{setTab('workflow');chooseWorkflow(fk,m,{});}})));
@@ -2100,6 +2113,45 @@ function toggleHelp(on){ const show = on===undefined ? !$('#helpModal').classLis
   $('#helpModal').classList.toggle('show',show); $('#helpScrim').classList.toggle('show',show); }
 function dismissWelcome(){ $('#welcomeModal').classList.remove('show'); $('#welcomeScrim').classList.remove('show');
   try{ localStorage.setItem('so_onboarded','1'); }catch(e){} }
+
+/* ---- guided tour with element highlights ---- */
+const TOUR=[
+  ['#tabs','The five views','Workflow builds a note · Reference has all the data · Examples shows worked notes · Corpus loads your real SOs · Issues tracks anything wrong.','below'],
+  ['#soRequest','Start from a paste','Paste the raw SO request here and Parse & route auto-detects the workflow and pre-fills what it can.','below'],
+  ['.flow-grid','…or pick a flow','No request handy? Choose a flow, then the specific workflow.','above'],
+  ['.pane.left','Your steps','Each field becomes a step here, with a progress meter and a ✓ as you complete it.','right'],
+  ['.pane.right','The note builds live','As you fill fields, the note assembles here — then Copy. ✎ Edit lets you hand-tweak it.','left'],
+  ['#btnHelp','Shortcuts & more','⌨ shortcuts · 🌙 dark mode · A text size. And Ctrl/⌘+P jumps to any workflow, term, or section. ? shows all keys.','below'],
+];
+let _tourI=0;
+function startTour(){ if(App.member||App.tab!=='workflow'){ setTab('workflow'); startScreen(); } _tourI=0; tourStep(0); }
+function endTour(){ $('#tourSpot').style.display='none'; $('#tourTip').style.display='none'; }
+function tourStep(i){
+  _tourI=i; const step=TOUR[i]; if(!step){ endTour(); return; }
+  const tgt=$(step[0]); if(!tgt){ tourStep(i+1); return; }
+  const r=tgt.getBoundingClientRect(), pad=6;
+  const spot=$('#tourSpot');
+  spot.style.display='block';
+  spot.style.left=(r.left-pad)+'px'; spot.style.top=(r.top-pad)+'px';
+  spot.style.width=(r.width+pad*2)+'px'; spot.style.height=(r.height+pad*2)+'px';
+  const tip=$('#tourTip'); tip.innerHTML='';
+  tip.append(el('div',{class:'tt-step'},`Step ${i+1} of ${TOUR.length}`));
+  tip.append(el('h4',{},step[1]));
+  tip.append(el('p',{},step[2]));
+  const nav=el('div',{class:'tt-nav'});
+  nav.append(el('button',{class:'btn sm ghost',onclick:endTour},'Skip'));
+  if(i>0) nav.append(el('button',{class:'btn sm',onclick:()=>tourStep(i-1)},'Back'));
+  nav.append(el('button',{class:'btn sm primary',onclick:()=> i<TOUR.length-1?tourStep(i+1):endTour()}, i<TOUR.length-1?'Next':'Done'));
+  tip.append(nav);
+  tip.style.display='block';
+  // position the tooltip relative to the target
+  const tr=tip.getBoundingClientRect(); const pos=step[3]; let tl, tt;
+  if(pos==='below'){ tt=r.bottom+12; tl=Math.min(Math.max(8,r.left), window.innerWidth-tr.width-8); }
+  else if(pos==='above'){ tt=r.top-tr.height-12; tl=Math.min(Math.max(8,r.left), window.innerWidth-tr.width-8); }
+  else if(pos==='right'){ tl=r.right+12; tt=Math.min(Math.max(8,r.top), window.innerHeight-tr.height-8); }
+  else { tl=r.left-tr.width-12; tt=Math.min(Math.max(8,r.top), window.innerHeight-tr.height-8); }
+  tip.style.left=Math.max(8,tl)+'px'; tip.style.top=Math.max(8,tt)+'px';
+}
 function maybeWelcome(){ if(!localStorage.getItem('so_onboarded')){ $('#welcomeModal').classList.add('show'); $('#welcomeScrim').classList.add('show'); } }
 $('#welcomeScrim').onclick=dismissWelcome;
 $('#btnHelp').onclick=()=>toggleHelp();
