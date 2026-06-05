@@ -124,6 +124,8 @@ main{flex:1 1 auto;overflow:hidden;position:relative}
 .field{margin-bottom:14px;position:relative}
 .field label{display:block;font-weight:700;font-size:12px;color:var(--navy);margin-bottom:4px;letter-spacing:.2px}
 .field .hint{font-size:11px;color:var(--text-light);margin-top:3px}
+.field .eg{font-size:11.5px;color:var(--green);margin-top:3px}
+.field .eg code{font-family:var(--mono);background:var(--green-soft);color:var(--navy-dark);padding:1px 5px;border-radius:4px}
 .field .src{font-size:10.5px;color:var(--slate);margin-top:2px;font-style:italic}
 .field input,.field select,.field textarea{
   width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;
@@ -476,24 +478,24 @@ const FACILITIES_CARD_RULE = "ADTRAN = shorter/faster, good odd/odd & even/even.
 const FIELD_DEFS = {
   so:      {label:"SO #", hint:"6-digit service order number (line 1)", src:"From the SO request",
             validate:v=>/^\d{4,7}([,&/ ].*)?$/.test(v.trim()), vmsg:"Expect a 6-digit SO# (multiples allowed: 135464 & 135466)"},
-  date:    {label:"Date", hint:"Format M.D.YY", src:"",
+  date:    {label:"Date", hint:"Format M.D.YY", src:"Today's date / the SO date (M.D.YY)",
             validate:v=>/^\d{1,2}\.\d{1,2}\.\d{2}$/.test(v.trim()), vmsg:"Use M.D.YY (e.g. 6.3.26)"},
-  tech:    {label:"Tech initials", hint:"Your initials for the -footer", src:"", upper:true,
+  tech:    {label:"Tech initials", hint:"Your initials for the -footer", src:"Your initials", upper:true,
             validate:v=>/^[A-Z]{2,4}$/.test(v.trim().toUpperCase()), vmsg:"2–4 letters"},
   facs_status:{label:"FACS status", facs:true},
-  action:  {label:"Action / work summary", hint:"Line-1 work description (e.g. DISC DSL, INT UPGRADE)", src:"From the SO request"},
-  phone_out:{label:"Phone OUT", hint:"Disconnecting number — masked to last 4", src:"iVUE account header", mask:true},
-  phone_in: {label:"Phone IN", hint:"Connecting number — masked to last 4", src:"iVUE account header", mask:true},
-  phone_qds:{label:"Phone QDS IN", hint:"QDS number — masked to last 4", src:"iVUE account header", mask:true},
-  account_out:{label:"Account OUT", hint:"Account/agreement — masked to last 4", src:"iVUE", mask:true},
-  account_in:{label:"Account IN", hint:"Account/agreement — masked to last 4", src:"iVUE", mask:true},
+  action:  {label:"Action / work summary", hint:"Line-1 work description (e.g. DISC DSL, INT UPGRADE)", src:"From the SO request (the work being done)"},
+  phone_out:{label:"Phone OUT", hint:"Disconnecting number", src:"iVUE account header / the SO request", mask:true},
+  phone_in: {label:"Phone IN", hint:"Connecting number", src:"iVUE account header / the SO request", mask:true},
+  phone_qds:{label:"Phone QDS IN", hint:"QDS number", src:"iVUE account header / the SO request", mask:true},
+  account_out:{label:"Account OUT", hint:"Account / agreement number", src:"iVUE — agreement prefix tells the service (101=internet, 125=EDGE)", mask:true},
+  account_in:{label:"Account IN", hint:"Account / agreement number", src:"iVUE — agreement prefix (101=internet, 125=EDGE)", mask:true},
   port:    {label:"Port line", hint:"{switch} {cable},{pair} {route}", src:"Switch=LinePacks CSX · Cable=Cable Book", port:true},
   tel_port:{label:"*TEL port line", hint:"{switch} {cable},{pair} {route}", src:"LinePacks CSX + Cable Book", port:true},
   dsl_port:{label:"*DSL port line", hint:"{switch} {cable},{pair} [PIC,n] [XCONN,n] {route}", src:"LinePacks + Cable Book + X-Connect report", port:true},
   tel_location:{label:"*TEL location", hint:"{wirecenter} {node-shelf-card-port} BP,{bp}", src:"Node/Shelf/Card/Port=LinePacks Type · BP=LinePacks LN", loc:true},
   dsl_location:{label:"*DSL location", hint:"{wirecenter} {node-shelf-card-port} BP,{bp}", src:"LinePacks Type + LN", loc:true},
-  edge_id: {label:"EDGE id", hint:"EDGE service identifier", src:""},
-  fsan:    {label:"FSAN", hint:"ONT FSAN", src:""},
+  edge_id: {label:"EDGE id", hint:"EDGE service identifier", src:"iVUE EDGE agreement (125-prefixed)"},
+  fsan:    {label:"FSAN", hint:"ONT FSAN", src:"ONT label / Calix CMS"},
 };
 function fieldDef(ph){
   const m = ph.match(/^(.*?)(\d+)$/);                 // port1 → base "port", n "1"
@@ -564,7 +566,16 @@ const el=(t,a={},...kids)=>{const n=document.createElement(t);
   kids.flat().forEach(c=>n.append(c?.nodeType?c:document.createTextNode(c))); return n;};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function todayMDYY(){const d=new Date();return `${d.getMonth()+1}.${d.getDate()}.${String(d.getFullYear()).slice(2)}`;}
-function maskLast4(v){const digits=String(v).replace(/\D/g,''); if(!digits)return ''; return '****'+digits.slice(-4);}
+/* Generic, fictitious example numbers (555 convention) used in examples + training,
+   so nothing real is shown. Agreement numbers use their service prefix (101=internet,
+   125=EDGE); phones vary in format on purpose to show what real ones look like. */
+function exampleFor(ph){
+  if(ph==='date') return todayMDYY();
+  if(ph==='action') return App.template?actionOf(App.template):'';
+  if(SAMPLE[ph]!=null) return SAMPLE[ph];
+  const base=ph.replace(/\d+$/,'');                    // port1/tel_port2 → base
+  return SAMPLE[base]!=null?SAMPLE[base]:'';
+}
 function toast(msg,ms){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),ms||2200);}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function fmtWhen(ts){const d=new Date(ts);return d.toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
@@ -652,7 +663,7 @@ function parseRequest(text){
     onclick:()=>openCapture({where:'parser',field:'parse',input:text.slice(0,120),output:JSON.stringify(parsed)})},'⚑')));
   const tbl=el('table',{class:'ref'});
   tbl.append(el('tr',{},el('td',{},el('b',{},'SO #')),el('td',{},parsed.so||el('span',{class:'muted'},'— not found'))));
-  tbl.append(el('tr',{},el('td',{},el('b',{},'Phone')),el('td',{},parsed.phone?maskLast4(parsed.phone)+' (masked)':el('span',{class:'muted'},'—'))));
+  tbl.append(el('tr',{},el('td',{},el('b',{},'Phone')),el('td',{},parsed.phone?parsed.phone:el('span',{class:'muted'},'—'))));
   tbl.append(el('tr',{},el('td',{},el('b',{},'Speed')),el('td',{},parsed.speed||el('span',{class:'muted'},'—'))));
   tbl.append(el('tr',{},el('td',{},el('b',{},'Signals')),el('td',{},parsed.flags.length?parsed.flags.join(', '):el('span',{class:'muted'},'none detected'))));
   box.append(tbl);
@@ -705,7 +716,7 @@ function chooseWorkflow(key,member,parsed){
   // prime from parser
   if(parsed){
     if(parsed.so) App.values.so=parsed.so;
-    if(parsed.phone){ ['phone_out','phone_qds','phone_in'].forEach(p=>{ if(App.placeholders.includes(p)&&!App.values[p]) App.values[p]=maskLast4(parsed.phone); }); }
+    if(parsed.phone){ ['phone_out','phone_qds','phone_in'].forEach(p=>{ if(App.placeholders.includes(p)&&!App.values[p]) App.values[p]=parsed.phone; }); }
   }
   renderSteps(); renderWizardStep(); renderNote();
   setStatus(key.replace(/_/g,' / ')+' → '+member.corpus_workflow);
@@ -847,14 +858,13 @@ function buildField(ph){
   if(d.facs){ return facsField(); }
   input=el('input',{type:'text',value:App.values[ph]||'',placeholder:d.hint||'',
     oninput:e=>{ let v=e.target.value; if(d.upper)v=v.toUpperCase(); App.values[ph]=v;
-      updateFieldState(wrap,ph); renderNote(); },
-    onblur:e=>{ if(d.mask&&e.target.value){ App.values[ph]=maskLast4(e.target.value); e.target.value=App.values[ph]; }
       updateFieldState(wrap,ph); renderNote(); }});
   wrap.append(input);
   if(d.hint) wrap.append(el('div',{class:'hint'},d.hint));
-  const sp=spec(); const note=sp&&sp.field_notes&&sp.field_notes[ph];
-  if(note) wrap.append(el('div',{class:'src'},note));
-  else if(d.src) wrap.append(el('div',{class:'src'},'source: '+d.src));
+  const ex=exampleFor(ph); if(ex) wrap.append(el('div',{class:'eg'},'Example: ',el('code',{},ex)));
+  const sp=spec(); let note=sp&&sp.field_notes&&sp.field_notes[ph];
+  if(note){ note=note.replace(/\s*\(masked\)\.?/ig,'').trim(); if(note) wrap.append(el('div',{class:'src'},note)); }
+  if(d.src) wrap.append(el('div',{class:'src'},'Where to find it: '+d.src));
   wrap.append(el('div',{class:'vmsg'},d.vmsg||'Check this value'));
   wrap.append(el('div',{class:'vmsg ok'},'looks valid'));
   return wrap;
@@ -862,7 +872,7 @@ function buildField(ph){
 function validateField(ph){
   const d=fieldDef(ph); const v=(App.values[ph]||'').trim();
   if(d.validate) return d.validate(v);
-  if(d.mask) return /^\*{4}\d{4}$/.test(v);
+  if(d.mask){ const dg=v.replace(/\D/g,''); return dg.length>=4 && dg.length<=11; }   // phone/agreement-ish
   if(d.port) return v.includes(',');               // {cable},{pair}
   if(d.loc) return /BP,/i.test(v) || v.length>3;    // location w/ binding post
   return v.length>0;
@@ -1321,22 +1331,23 @@ function refDecoder(b){
    EXAMPLES TAB — labeled real example per workflow (from findings)
    ====================================================================== */
 const EXAMPLES=[
-  ['SINGLE — DSL DISC','128638 DSL DISC','128638 DSL DISC\n6.3.26 -DISC DSL- FACS UNCHANGED\n***-**** OUT\nFRNT-0321-0157 5,736 605d-4\nABRY N01-2-02-13 BP,13\n-DS'],
+  ['SINGLE — DSL DISC','128638 DSL DISC','128638 DSL DISC\n6.3.26 -DISC DSL- FACS UNCHANGED\n559-555-8989 OUT\nFRNT-0321-0157 5,736 605d-4\nABRY N01-2-02-13 BP,13\n-DS'],
   ['BONDED — VACA DISC','128747 VAC DISC','128747 VAC DISC\n6.3.26 -VACA DISC- FACS UNCHANGED\n*TEL\nFRNT-SVLK_N2-CLX05-02-29 5,736 605d-4\nSVLK N2-5-02-29 BP,29\n*DSL\nFRNT-SVLK_N2-CLX05-02-30 5,731 PIC,19 605D-4\nSVLK N2-5-02-30 BP,30\n-DS'],
-  ['PERM DISC + QDS','128948 DISC W/DSL & 128951 QDS CONN','128948 DISC W/DSL & 128951 QDS CONN\n6.3.26 -DISC & QDS CONN- FACS UNCHANGED\n***-**** W/DSL OUT\n***-**** QDS IN\nFRNT-0321-0157 5,736 605d-4\n-DS'],
+  ['PERM DISC + QDS','128948 DISC W/DSL & 128951 QDS CONN','128948 DISC W/DSL & 128951 QDS CONN\n6.3.26 -DISC & QDS CONN- FACS UNCHANGED\n559-555-8989 W/DSL OUT\n559-555-8989 QDS IN\nFRNT-0321-0157 5,736 605d-4\n-DS'],
   ['INT UPGRADE — MOVE PORTS FOR BOND','135764 INT UPGRADE','135764 INT UPGRADE\n6.3.26 MOVE PORTS FOR BOND, NEW DSL PAIR (891 FT) FACS CHANGED\n(old speed) OUT\n100/20 IN\n*TEL\n...\n*DSL\n...\n-DS'],
   ['SPLICE — ATTN SPLICER','135462 INT UPGRADE','135462 INT UPGRADE\n6.3.26 MOVE PORT AND NEW DSL PR (4,522 FT) FACS CHANGED\n*TEL\n...\n*DSL\n...\n***ATTN SPLICER*** @PED 1-8 SPLICE (100PR INCOMING) PIC,28 TO PIC,28 (50PR OUTGOING) AND USE FOR DSL ON DROP @ PED 1-9.\n-DS'],
-  ['X-CONN — jumper move','131020 qds disc & 131018 conn w/dsl','131020 qds disc & 131018 conn w/dsl\n6.3.26 -QDS DISC & CONN W/DSL, moved & added pair- XCONN FACS CHANGED\n***-**** QDS IN\n*TEL\nFRNT-SVLK_N2-CLX05-02-29 5,736 605d-4\nSVLK N2-5-02-29 BP,29\n*DSL\nFRNT-SVLK_N2-CLX05-02-30 5,731 XCONN,19 PIC,19 605D-4\nSVLK N2-5-02-30 BP,30\n**Remove jumper SVLK-5,731 Pic,31 from its xconn jumper. jump svlk-5,731 to 605_1,19 pic,19**\n-DS'],
-  ['MOVE — new + old address','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN\n6.3.26 -MOVE- FACS CHANGED\nNEW ADDRESS\n***-**** QDS OUT\n*TEL / *DSL …\nOLD ADDRESS\n***-**** OUT\n***-**** QDS IN\n*TEL / *DSL …\n-DS'],
-  ['RCF — switch to RCFA','RCF agreement (SO#167391)','6.3.26 SWITCH TO RCFA ONLY FACS CHANGED\n855-**** SWITCH TO RCFA ONLY\nFRNT-0326-1809\n-TDF'],
+  ['X-CONN — jumper move','131020 qds disc & 131018 conn w/dsl','131020 qds disc & 131018 conn w/dsl\n6.3.26 -QDS DISC & CONN W/DSL, moved & added pair- XCONN FACS CHANGED\n559-555-8989 QDS IN\n*TEL\nFRNT-SVLK_N2-CLX05-02-29 5,736 605d-4\nSVLK N2-5-02-29 BP,29\n*DSL\nFRNT-SVLK_N2-CLX05-02-30 5,731 XCONN,19 PIC,19 605D-4\nSVLK N2-5-02-30 BP,30\n**Remove jumper SVLK-5,731 Pic,31 from its xconn jumper. jump svlk-5,731 to 605_1,19 pic,19**\n-DS'],
+  ['MOVE — new + old address','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN\n6.3.26 -MOVE- FACS CHANGED\nNEW ADDRESS\n559-555-8989 QDS OUT\n*TEL / *DSL …\nOLD ADDRESS\n559-555-8989 OUT\n559-555-8989 QDS IN\n*TEL / *DSL …\n-DS'],
+  ['RCF — switch to RCFA','RCF agreement (SO#167391)','6.3.26 SWITCH TO RCFA ONLY FACS CHANGED\n855-555-8989 SWITCH TO RCFA ONLY\nFRNT-0326-1809\n-TDF'],
 ];
 /* Illustrative example per workflow — the verified template rendered with safe
    synthetic values (no customer data), so all 31 workflows have an example.
    Clearly tagged 'illustrative' and filterable so they don't dilute the real ones. */
 const SAMPLE={
-  tech:'KM',
-  phone_out:'***-**** OUT', phone_in:'***-****', phone_qds:'***-****',
-  account_out:'****4321', account_in:'****4321',
+  so:'135464', tech:'KM',
+  // fictitious 555 numbers — varied formats on purpose; bare (templates add OUT/IN labels)
+  phone_out:'559-555-8989', phone_in:'559 555 8989', phone_qds:'555-8989',
+  account_out:'101 555 8989', account_in:'125 555 8989',
   port:'FRNT-0321-0157 5,736 605d-4',
   port1:'FRNT-0321-0157 5,736 605d-4', port2:'FRNT-0321-0158 5,737 605d-5',
   tel_port:'FRNT-0321-0157 5,736 605d-4', tel_port1:'FRNT-0321-0157 5,736 605d-4', tel_port2:'FRNT-0321-0159 5,738 605d-6',
@@ -1593,7 +1604,7 @@ function loadForTraining(rec){
   App.training={ answer:note, source:rec, request:req, so, reveal:false };
   setTab('workflow');
   if($('#soRequest')) $('#soRequest').value = req || [so,wfVal,phone].filter(Boolean).join(' ');
-  const parsed={}; if(so)parsed.so=so; if(phone)parsed.phone=phone.replace(/\D/g,'').slice(-10);
+  const parsed={}; if(so)parsed.so=so; if(phone)parsed.phone=phone;   // corpus shown as-is (not masked)
   if(found){
     chooseWorkflow(foundKey, found, parsed);
     toast('Training: '+found.corpus_workflow+(so?` · SO ${so}`:''), 4000);
