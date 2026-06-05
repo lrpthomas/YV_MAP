@@ -665,7 +665,7 @@ function fieldDef(ph){
 const App = {
   tab:'workflow',
   flowKey:null, member:null, template:null, placeholders:[],
-  values:{}, facs:'UNCHANGED', stepIndex:0, options:{splice:false,xconn:false},
+  values:{}, facs:'UNCHANGED', facsValue:'', stepIndex:0, options:{splice:false,xconn:false},
   issues:[], issueFilter:'all', training:null, noteEdit:null, bulk:null,
   capture:{ctx:null, tag:'Wrong', shots:[]},
 };
@@ -1010,7 +1010,7 @@ function chooseWorkflow(key,member,parsed){
   // sensible defaults
   App.values.date=todayMDYY();
   App.values.action=deriveAction();   // line-1 work summary seeded from the workflow desc
-  App.facs = (sp&&sp.facs_default) || (/facs_status/.test(member.template)?'UNCHANGED':'CHANGED');
+  App.facs = (sp&&sp.facs_default) || (/facs_status/.test(member.template)?'UNCHANGED':'CHANGED'); App.facsValue='';
   // remember the tech's initials across SOs (auto-fill the -footer)
   const savedTech=localStorage.getItem('so_tech'); if(savedTech && App.placeholders.includes('tech')) App.values.tech=savedTech;
   // prime from parser
@@ -1217,14 +1217,24 @@ function renderOptions(w){
   }
 }
 
+/* the literal that goes in the note: the optional exact wording, else the binary roll-up */
+const FACS_VALUES={ UNCHANGED:['No FACS Changed','No FACS Listed','FACS Pending'],
+                    CHANGED:['FACS Updated','FACS Removed','FACS Corrected','FACS Cleared','FACS Reverted'] };
+function facsLiteral(){ return (App.facsValue||'').trim() || ('FACS '+App.facs); }
 function facsField(){
   const wrap=el('div',{class:'field'});
   wrap.append(el('label',{},'FACS status ',flagBtn('field:facs_status', {field:'facs_status'})));
   const seg=el('div',{class:'seg'});
-  const u=el('button',{class:(App.facs==='UNCHANGED'?'on':''),onclick:()=>{App.facs='UNCHANGED';renderWizardStep();renderNote();}},'FACS UNCHANGED');
-  const c=el('button',{class:(App.facs==='CHANGED'?'on changed':''),onclick:()=>{App.facs='CHANGED';renderWizardStep();renderNote();}},'FACS CHANGED');
+  const u=el('button',{class:(App.facs==='UNCHANGED'?'on':''),onclick:()=>{App.facs='UNCHANGED';App.facsValue='';renderWizardStep();renderNote();}},'FACS UNCHANGED');
+  const c=el('button',{class:(App.facs==='CHANGED'?'on changed':''),onclick:()=>{App.facs='CHANGED';App.facsValue='';renderWizardStep();renderNote();}},'FACS CHANGED');
   seg.append(u,c); wrap.append(seg);
-  wrap.append(el('div',{class:'hint'},'Binary. UNCHANGED → header shows the workflow desc; CHANGED → header states the facility action.'));
+  // optional exact wording (the multi-value enum) — defaults to the binary roll-up
+  const sel=el('select',{class:'search',style:'margin-top:8px;max-width:260px',
+    onchange:e=>{App.facsValue=e.target.value;renderNote();}});
+  sel.append(el('option',{value:''},'FACS '+App.facs+'  (default)'));
+  FACS_VALUES[App.facs].forEach(v=>{const o=el('option',{value:v},v); if(v===App.facsValue)o.selected=true; sel.append(o);});
+  wrap.append(el('label',{style:'font-size:11px;color:var(--text-light);margin-top:6px;display:block'},'Exact wording (optional)'), sel);
+  wrap.append(el('div',{class:'hint'},'Binary toggle is the roll-up; pick an exact value (No FACS Changed / FACS Updated / Removed…) when the order needs the specific word.'));
   return wrap;
 }
 
@@ -1306,7 +1316,8 @@ function buildNoteLines(){
   // body from template, substitute + omit empty
   App.template.split('\n').forEach(raw=>{
     let line=raw;
-    line=line.replace(/\{facs_status\}/g, 'FACS '+App.facs);
+    const hasFacs=/\{facs_status\}/.test(raw);
+    line=line.replace(/\{facs_status\}/g, facsLiteral());
     // substitute placeholders; track whether this line carried any data placeholder
     // and whether any of them got a value (date counts as data so headers survive).
     let hadPlaceholder=false, anyFilled=false;
@@ -1322,8 +1333,7 @@ function buildNoteLines(){
     // its decoration (OUT / QDS IN / *TEL:) goes with it. Constant lines (*TEL) stay.
     if(hadPlaceholder && !anyFilled) return;
     let cls='';
-    if(/FACS CHANGED/.test(line)) cls='facs-changed';
-    else if(/FACS UNCHANGED/.test(line)) cls='facs-unchanged';
+    if(hasFacs) cls = App.facs==='CHANGED' ? 'facs-changed' : 'facs-unchanged';
     else if(/ATTN SPLICER/i.test(line)) cls='splicer';
     else if(/^-/.test(raw.trim())) cls='foot';
     body.push({t:line.replace(/\s+$/,''), cls});
@@ -1377,7 +1387,7 @@ function copyNote(){ const t=noteText(); pushRecent();
 const DRAFT_KEY='so_trainer_draft', RECENT_KEY='so_trainer_recent';
 let _draftT;
 function draftSnapshot(){ return App.member?{flowKey:App.flowKey, workflow:App.member.corpus_workflow,
-  values:App.values, facs:App.facs, options:App.options, stepIndex:App.stepIndex, training:App.training, ts:Date.now()}:null; }
+  values:App.values, facs:App.facs, facsValue:App.facsValue, options:App.options, stepIndex:App.stepIndex, training:App.training, ts:Date.now()}:null; }
 function saveDraft(){ clearTimeout(_draftT); _draftT=setTimeout(()=>{
   const d=draftSnapshot(); if(!d) return;
   try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); }catch(e){} },350); }
@@ -1388,7 +1398,7 @@ function applyState(d){
   const m=f.members.find(x=>x.corpus_workflow===d.workflow); if(!m) return false;
   chooseWorkflow(d.flowKey, m, {});
   if(d.values) App.values=d.values;
-  if(d.facs) App.facs=d.facs;
+  if(d.facs) App.facs=d.facs; App.facsValue=d.facsValue||'';
   if(d.options) App.options=d.options;
   App.training=d.training||null;
   const steps=stepDefs(); App.stepIndex=Math.min(d.stepIndex||0, Math.max(0,steps.length-1));
