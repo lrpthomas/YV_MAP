@@ -1359,10 +1359,10 @@ const EXAMPLES=[
   ['SINGLE — DSL DISC','128638 DSL DISC','128638 DSL DISC\n6.3.26 -DISC DSL- FACS UNCHANGED\n559-555-8989 OUT\nFRNT-0321-0157 5,736 605d-4\nABRY N01-2-02-13 BP,13\n-DS'],
   ['BONDED — VACA DISC','128747 VAC DISC','128747 VAC DISC\n6.3.26 -VACA DISC- FACS UNCHANGED\n*TEL\nFRNT-SVLK_N2-CLX05-02-29 5,736 605d-4\nSVLK N2-5-02-29 BP,29\n*DSL\nFRNT-SVLK_N2-CLX05-02-30 5,731 PIC,19 605D-4\nSVLK N2-5-02-30 BP,30\n-DS'],
   ['PERM DISC + QDS','128948 DISC W/DSL & 128951 QDS CONN','128948 DISC W/DSL & 128951 QDS CONN\n6.3.26 -DISC & QDS CONN- FACS UNCHANGED\n559-555-8989 W/DSL OUT\n559-555-8989 QDS IN\nFRNT-0321-0157 5,736 605d-4\n-DS'],
-  ['INT UPGRADE — MOVE PORTS FOR BOND','135764 INT UPGRADE','135764 INT UPGRADE\n6.3.26 MOVE PORTS FOR BOND, NEW DSL PAIR (891 FT) FACS CHANGED\n(old speed) OUT\n100/20 IN\n*TEL\n...\n*DSL\n...\n-DS'],
-  ['SPLICE — ATTN SPLICER','135462 INT UPGRADE','135462 INT UPGRADE\n6.3.26 MOVE PORT AND NEW DSL PR (4,522 FT) FACS CHANGED\n*TEL\n...\n*DSL\n...\n***ATTN SPLICER*** @PED 1-8 SPLICE (100PR INCOMING) PIC,28 TO PIC,28 (50PR OUTGOING) AND USE FOR DSL ON DROP @ PED 1-9.\n-DS'],
+  ['INT UPGRADE — MOVE PORTS FOR BOND','135764 INT UPGRADE','135764 INT UPGRADE\n6.3.26 MOVE PORTS FOR BOND, NEW DSL PAIR (891 FT) FACS CHANGED\n25/3 OUT\n100/20 IN\n*TEL\nFRNT-LASH-ADT01-07-44\nTFRD N06-2-02-07 BP,157\n*DSL\nFRNT-0306-0776 TFRD 287 105N-3-1\nTFRD N06-2-02-08 BP,158\n-DS'],
+  ['SPLICE — ATTN SPLICER','135462 INT UPGRADE','135462 INT UPGRADE\n6.3.26 MOVE PORT AND NEW DSL PR (4,522 FT) FACS CHANGED\n*TEL\nFRNT-LASH-ADT01-07-44\nTFRD N06-2-02-07 BP,157\n*DSL\nFRNT-0306-0776 TFRD 287 105N-3-1\nTFRD N06-2-02-08 BP,158\n***ATTN SPLICER*** @PED 1-8 SPLICE (100PR INCOMING) PIC,28 TO PIC,28 (50PR OUTGOING) AND USE FOR DSL ON DROP @ PED 1-9.\n-DS'],
   ['X-CONN — jumper move','131020 qds disc & 131018 conn w/dsl','131020 qds disc & 131018 conn w/dsl\n6.3.26 -QDS DISC & CONN W/DSL, moved & added pair- XCONN FACS CHANGED\n559-555-8989 QDS IN\n*TEL\nFRNT-SVLK_N2-CLX05-02-29 5,736 605d-4\nSVLK N2-5-02-29 BP,29\n*DSL\nFRNT-SVLK_N2-CLX05-02-30 5,731 XCONN,19 PIC,19 605D-4\nSVLK N2-5-02-30 BP,30\n**Remove jumper SVLK-5,731 Pic,31 from its xconn jumper. jump svlk-5,731 to 605_1,19 pic,19**\n-DS'],
-  ['MOVE — new + old address','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN\n6.3.26 -MOVE- FACS CHANGED\nNEW ADDRESS\n559-555-8989 QDS OUT\n*TEL / *DSL …\nOLD ADDRESS\n559-555-8989 OUT\n559-555-8989 QDS IN\n*TEL / *DSL …\n-DS'],
+  ['MOVE — new + old address','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN','135461 MOVE, 135464 QDS DISC & 135466 QDS CONN\n6.3.26 -MOVE- FACS CHANGED\nNEW ADDRESS\n559-555-8989 QDS OUT\n*TEL\nFRNT-LASH-ADT01-07-44\nTFRD N06-2-02-07 BP,157\n*DSL\nFRNT-0306-0776 TFRD 287 105N-3-1\nTFRD N06-2-02-08 BP,158\nOLD ADDRESS\n559-555-8989 OUT\n559-555-8989 QDS IN\n*TEL\nFRNT-LASH-ADT01-07-45\nTFRD N06-2-02-09 BP,159\n*DSL\nFRNT-0327-1481 MNRT 44 M6-1-2B\nTFRD N06-2-02-10 BP,160\n-DS'],
   ['RCF — switch to RCFA','RCF agreement (SO#167391)','6.3.26 SWITCH TO RCFA ONLY FACS CHANGED\n855-555-8989 SWITCH TO RCFA ONLY\nFRNT-0326-1809\n-TDF'],
 ];
 /* Illustrative example per workflow — the verified template rendered with safe
@@ -1406,14 +1406,11 @@ function illustrativeExamples(){
   return out;
 }
 function allExamples(){
-  // real labeled examples (from ServiceOrders.docx) + the 9 full notes from
-  // build_data.json + one illustrative example for every workflow.
+  // 8 real labeled notes (complete, from ServiceOrders.docx) + one concrete
+  // illustrative example for every workflow. (The build_data examples were schema
+  // templates with NXX XXXX / ... placeholders — dropped so every example is concrete.)
   const real=EXAMPLES.map(([title,label,note])=>({title,label,note,kind:'real'}));
-  const full=(REFX.examples_full||[]).map(e=>{
-    const tags=[e.media,e.bonded?'bonded':null,e.facs].filter(Boolean).join(' · ');
-    return {title:e.type||e.action||'Example', label:(e.action||'')+(tags?'  ('+tags+')':''), note:demaskExample(e.note||''), kind:'real'};
-  });
-  return real.concat(full).concat(illustrativeExamples());
+  return real.concat(illustrativeExamples());
 }
 let exFilter='all';
 function renderExamples(){
