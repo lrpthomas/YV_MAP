@@ -1576,7 +1576,7 @@ $('#importFile')&&($('#importFile').onchange=async e=>{
    ====================================================================== */
 const REF_SECTIONS=[
   ['note','Note format'],['flows','Flows & workflows'],['actions','Action codes'],
-  ['terms','Glossary'],['speeds','Speed tiers'],['equipment','Equipment'],['cards','Card rules'],
+  ['terms','Glossary'],['speeds','Speed tiers'],['catalog','Speed catalog'],['equipment','Equipment'],['cards','Card rules'],
   ['cables','Cable book & plant'],['agreements','Agreements'],['switch','Switch features'],
   ['exchanges','Exchanges'],['decoder','Port decoder'],['rcf','RCF'],['systems','Systems'],
   ['techs','Tech styles'],['guide','Field guide'],['procedures','Procedures'],
@@ -1588,7 +1588,7 @@ function renderReference(){
   REF_SECTIONS.forEach(([k,label])=>nav.append(el('button',{class:k===refSection?'active':'',
     onclick:()=>{refSection=k;renderReference();}},label)));
   const b=$('#refBody'); b.innerHTML='';
-  ({note:refNote,flows:refFlows,actions:refActions,terms:refTerms,speeds:refSpeeds,
+  ({note:refNote,flows:refFlows,actions:refActions,terms:refTerms,speeds:refSpeeds,catalog:refCatalog,
     equipment:refEquipment,cards:refCards,cables:refCables,agreements:refAgreements,switch:refSwitch,
     exchanges:refExchanges,techs:refTechs,guide:refGuide,
     decoder:refDecoder,rcf:refRcf,systems:refSystems,procedures:refProcedures,routing:refRouting,legacy:refLegacy}[refSection])(b);
@@ -1695,6 +1695,28 @@ function refSystems(b){
     if(so.response_box) c.append(el('div',{style:'font-size:12.5px'},el('b',{},'Response box: '),esc(so.response_box)));
     b.append(c);
   }
+  // iVUE field enums (distinct values)
+  const en=REFX.ivue_enums||{};
+  if(en.class_of_serv){
+    refKV(b,'Class Of Serv (iVUE)',en.class_of_serv,['Value','Meaning']);
+    refKV(b,'Service Type',en.service_type,['Value','Meaning']);
+    refKV(b,'Disconnect Type',en.disconnect_type,['Value','Meaning']);
+    refKV(b,'Cable Type',en.cable_type,['Value','Meaning'],'Switch is always '+esc(en.switch||'TAQUA')+'.');
+  }
+}
+function refCatalog(b){
+  const cc=REFX.cc_catalog||{};
+  b.append(el('div',{class:'muted',style:'font-size:12px;margin-bottom:8px'},
+    'Full Ponderosa internet catalog (C&C codes + confirmed prices). The short tier ID (D036) maps 1:1 to the 7-char C&C code (D000036). Resolves Q20.'));
+  if(cc.groups) b.append(refCard('Facility-restriction groups & price',
+    refTable(['Group','Price','Rule','Tiers'], cc.groups.map(g=>[esc(g.name), g.price!=null?('$'+g.price.toFixed(2)):'—', esc(g.rule||''), esc(g.tiers||'')]))));
+  if(cc.tiers){
+    const c=refCard('All tiers · '+cc.tiers.length);
+    const inp=el('input',{class:'search',placeholder:'Filter by code, tier, speed, tech…',style:'margin-bottom:8px'});
+    const host=el('div'); const rows=cc.tiers.map(t=>[esc(t.tier||''),esc(t.cc||''),esc(t.product||''),esc(t.type||''),esc((t.down||'')+'/'+(t.up||'')),esc(t.tech||'')]);
+    const draw=q=>{host.innerHTML=''; host.append(refTable(['Tier','C&C code','Product','Service type','Dn/Up','Tech'], rows.filter(r=>!q||r.join(' ').toLowerCase().includes(q))));};
+    inp.addEventListener('input',e=>draw(e.target.value.toLowerCase())); c.append(inp,host); draw(''); b.append(c);
+  }
 }
 function refEquipment(b){
   const inv=REFX.equipment_inventory||{};
@@ -1758,7 +1780,10 @@ function refRouting(b){
   b.append(refCard('People',refTable(['Who','Role'],PEOPLE.map(p=>p.map(esc)))));
   b.append(refCard('SO Type codes (iVUE 2-letter)',refTable(['Code','Meaning'],SO_TYPE_CODES.map(p=>p.map(esc)))));
 }
-function refLegacy(b){ b.append(refCard('Legacy → modern identifier map',refTable(['Legacy','Now'],LEGACY_MAP.map(p=>p.map(esc))))); }
+function refLegacy(b){
+  const rows=LEGACY_MAP.map(p=>p.map(esc)).concat(Object.entries(REFX.legacy_extra||{}).map(([k,v])=>[esc(k),esc(v)]));
+  b.append(refCard('Legacy → modern identifier map',refTable(['Legacy','Now'],rows)));
+}
 
 /* port-line decoder tool */
 function refDecoder(b){
