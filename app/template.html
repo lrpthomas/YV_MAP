@@ -363,7 +363,7 @@ body.fs-l{font-size:15.5px}
 
 <!-- keyboard shortcuts overlay -->
 <div class="modal-scrim" id="helpScrim"></div>
-<div class="modal" id="helpModal" role="dialog" aria-label="Keyboard shortcuts">
+<div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
   <h3>Keyboard shortcuts</h3>
   <table class="kbd-table">
     <tr><td><kbd>Enter</kbd></td><td>Next step (from a field)</td></tr>
@@ -377,12 +377,29 @@ body.fs-l{font-size:15.5px}
   <button class="btn sm" onclick="toggleHelp(false)">Close</button>
 </div>
 
+<!-- first-run welcome -->
+<div class="modal-scrim" id="welcomeScrim"></div>
+<div class="modal" id="welcomeModal" role="dialog" aria-modal="true" aria-label="Welcome">
+  <h3>Welcome to the SO Trainer</h3>
+  <div style="font-size:13px;color:var(--text-mid);max-width:440px;line-height:1.6">
+    <p style="margin:0 0 10px">A guided way to complete Ponderosa E.FACS service orders — and practice them.</p>
+    <ul style="margin:0 0 10px;padding-left:18px">
+      <li><b>Paste an SO request</b> → it auto-routes to the right workflow.</li>
+      <li>The <b>POINTER</b> tells you which systems/fields to touch, in order; each step shows an example + where to find it.</li>
+      <li>The note <b>builds live</b> on the right — then Copy.</li>
+      <li><b>Corpus → Quiz me</b> practices a real SO and scores you.</li>
+      <li><kbd>Ctrl/⌘+P</kbd> jumps anywhere · <kbd>?</kbd> shows all shortcuts · <kbd>⚑</kbd> flags anything wrong.</li>
+    </ul>
+  </div>
+  <button class="btn sm primary" onclick="dismissWelcome()">Get started</button>
+</div>
+
 <!-- printable cheat-sheet (shown only when printing) -->
 <div id="cheatSheet"></div>
 
 <!-- command palette -->
 <div class="modal-scrim" id="palScrim"></div>
-<div class="palette" id="palette" role="dialog" aria-label="Command palette">
+<div class="palette" id="palette" role="dialog" aria-modal="true" aria-label="Command palette">
   <input id="palInput" placeholder="Jump to a workflow, reference section, term, or action…" autocomplete="off">
   <div id="palList" class="pal-list"></div>
 </div>
@@ -507,7 +524,7 @@ body.fs-l{font-size:15.5px}
   </div>
 </aside>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* ======================================================================
@@ -2038,15 +2055,18 @@ function paletteIndex(){
     items.push({label:m.corpus_workflow, kind:'Workflow ('+fk.replace(/_/g,'/')+')', run:()=>{setTab('workflow');chooseWorkflow(fk,m,{});}})));
   // reference sections
   REF_SECTIONS.forEach(([k,l])=>items.push({label:l, kind:'Reference', run:()=>{setTab('reference');refSection=k;renderReference();}}));
-  // terms -> open glossary filtered
+  // terms -> open glossary filtered (search also matches the where/note text)
   [...(KB.terms.validated||[]),...(KB.terms.suggested||[])].forEach(t=>t.term&&
-    items.push({label:t.term, kind:'Term', run:()=>{setTab('reference');refSection='terms';renderReference();
+    items.push({label:t.term, kind:'Term', search:(t.where||'')+' '+(t.note||'')+' '+(t.system||''), run:()=>{setTab('reference');refSection='terms';renderReference();
       setTimeout(()=>{const s=$('#refBody .search'); if(s){s.value=t.term; s.dispatchEvent(new Event('input'));}},30);}}));
+  // examples -> open Examples filtered (search matches the note body too)
+  allExamples().forEach(e=>items.push({label:e.title, kind:'Example', search:e.note,
+    run:()=>{setTab('examples'); setTimeout(()=>{const s=$('#exSearch'); if(s){s.value=e.title;s.dispatchEvent(new Event('input'));}},30);}}));
   return items;
 }
 function renderPalette(q){
   const ql=q.toLowerCase().trim();
-  let items = _palAll.filter(it=>!ql||(it.label+' '+it.kind).toLowerCase().includes(ql));
+  let items = _palAll.filter(it=>!ql||(it.label+' '+it.kind+' '+(it.search||'')).toLowerCase().includes(ql));
   // rank: label startsWith first
   if(ql) items.sort((a,b)=>(b.label.toLowerCase().startsWith(ql))-(a.label.toLowerCase().startsWith(ql)));
   _palItems=items.slice(0,40); _palIdx=0;
@@ -2078,9 +2098,18 @@ $('#btnFont').onclick=()=>{ const cur=localStorage.getItem('so_font')||'m';
 applyTheme(); applyFont();
 function toggleHelp(on){ const show = on===undefined ? !$('#helpModal').classList.contains('show') : on;
   $('#helpModal').classList.toggle('show',show); $('#helpScrim').classList.toggle('show',show); }
+function dismissWelcome(){ $('#welcomeModal').classList.remove('show'); $('#welcomeScrim').classList.remove('show');
+  try{ localStorage.setItem('so_onboarded','1'); }catch(e){} }
+function maybeWelcome(){ if(!localStorage.getItem('so_onboarded')){ $('#welcomeModal').classList.add('show'); $('#welcomeScrim').classList.add('show'); } }
+$('#welcomeScrim').onclick=dismissWelcome;
 $('#btnHelp').onclick=()=>toggleHelp();
 $('#helpScrim').onclick=()=>toggleHelp(false);
 $('#palScrim').onclick=closePalette;
+/* focus trap: keep Tab inside the open modal/palette/capture for accessibility */
+function activeModal(){ return ($('#palette').classList.contains('show')&&$('#palette'))
+  || ($('#helpModal').classList.contains('show')&&$('#helpModal'))
+  || ($('#welcomeModal').classList.contains('show')&&$('#welcomeModal'))
+  || ($('#capture').classList.contains('show')&&$('#capture')) || null; }
 $('#palInput').addEventListener('input',e=>renderPalette(e.target.value));
 $('#palInput').addEventListener('keydown',e=>{
   if(e.key==='ArrowDown'){e.preventDefault();palMove(1);}
@@ -2091,7 +2120,12 @@ $('#palInput').addEventListener('keydown',e=>{
 function inField(e){ const t=e.target; return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'); }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){ closeCapture(); toggleHelp(false); closePalette(); }
+  if(e.key==='Escape'){ closeCapture(); toggleHelp(false); closePalette(); dismissWelcome(); }
+  if(e.key==='Tab'){ const m=activeModal(); if(m){
+    const f=[...m.querySelectorAll('button,input,textarea,select,a[href],[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null);
+    if(f.length){ const first=f[0], last=f[f.length-1];
+      if(e.shiftKey&&document.activeElement===first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey&&document.activeElement===last){ e.preventDefault(); first.focus(); } } } }
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){ e.preventDefault();
     openCapture({where:App.member?App.member.corpus_workflow:'app',field:'general'}); }
   if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&App.member){ e.preventDefault(); copyNote(); }
@@ -2116,6 +2150,7 @@ document.addEventListener('keydown',e=>{
   }
   catch(e){ $('#sbStore').textContent='storage unavailable'; }
   startScreen();
+  maybeWelcome();
 })();
 </script>
 </body>
