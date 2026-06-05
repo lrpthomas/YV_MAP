@@ -23,7 +23,7 @@
   --navy:#234f74; --navy-light:#305379; --navy-dark:#1a3c5a;
   --green:#2a8649; --green-soft:#e3f2e8;
   --slate:#596e93; --red:#c0392b; --red-soft:#fbe5e2;
-  --bg:#ffffff; --panel:#f5f7fa; --inset:#eef1f5;
+  --bg:#ffffff; --panel:#f5f7fa; --inset:#eef1f5; --card:#ffffff;
   --border:#d8dee6; --border-soft:#e3e8ee;
   --text:#4a4a4a; --text-mid:#5d6470; --text-light:#8b949e;
   --mono:'JetBrains Mono','SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
@@ -76,7 +76,7 @@ nav.tabs button .badge.show{display:inline-block}
 .topbar-spacer{flex:1}
 .top-actions{display:flex;gap:6px;align-items:center}
 .btn{
-  border:1px solid var(--border);background:#fff;color:var(--navy);font-weight:700;font-size:12px;
+  border:1px solid var(--border);background:var(--card);color:var(--navy);font-weight:700;font-size:12px;
   padding:7px 12px;border-radius:6px;letter-spacing:.3px;
 }
 .btn:hover{background:var(--inset)}
@@ -153,7 +153,7 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--inset);border:1px so
 .field .src{font-size:10.5px;color:var(--slate);margin-top:2px;font-style:italic}
 .field input,.field select,.field textarea{
   width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:7px;font-size:13px;
-  font-family:var(--mono);background:#fff;color:var(--text);
+  font-family:var(--mono);background:var(--card);color:var(--text);
 }
 .field input:focus,.field select,.field textarea:focus{outline:none;border-color:var(--navy-light);box-shadow:0 0 0 3px rgba(48,83,121,.12)}
 .field.valid input{border-color:var(--green)}
@@ -162,7 +162,7 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--inset);border:1px so
 .field.invalid .vmsg{display:block;color:var(--red)}
 .field.valid .vmsg.ok{display:block;color:var(--green)}
 .seg{display:flex;gap:0;border:1px solid var(--border);border-radius:7px;overflow:hidden;width:fit-content}
-.seg button{border:none;background:#fff;padding:9px 16px;font-weight:700;font-size:12.5px;color:var(--text-mid)}
+.seg button{border:none;background:var(--card);padding:9px 16px;font-weight:700;font-size:12.5px;color:var(--text-mid)}
 .seg button.on{background:var(--navy);color:#fff}
 .seg button.on.changed{background:var(--orange)}
 .wizard-nav{display:flex;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border-soft)}
@@ -176,7 +176,7 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--inset);border:1px so
 
 /* flow picker cards */
 .flow-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:6px}
-.flow-card{border:1px solid var(--border);border-radius:10px;padding:14px;background:#fff;text-align:left;transition:.1s}
+.flow-card{border:1px solid var(--border);border-radius:10px;padding:14px;background:var(--card);text-align:left;transition:.1s}
 .flow-card:hover{border-color:var(--navy-light);box-shadow:0 2px 10px rgba(35,79,116,.08)}
 .flow-card .fc-name{font-weight:800;color:var(--navy-dark);font-size:14px}
 .flow-card .fc-meta{font-size:11px;color:var(--text-light);margin-top:3px}
@@ -184,7 +184,7 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--inset);border:1px so
   font-size:10.5px;font-weight:700;color:var(--slate)}
 .wf-list{list-style:none;margin:10px 0 0;padding:0}
 .wf-list li{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border-soft);
-  border-radius:8px;margin-bottom:6px;cursor:pointer;background:#fff}
+  border-radius:8px;margin-bottom:6px;cursor:pointer;background:var(--card)}
 .wf-list li:hover{border-color:var(--navy-light);background:var(--inset)}
 .wf-list .wf-name{font-weight:700;color:var(--navy);font-family:var(--mono);font-size:12.5px}
 .wf-list .wf-count{margin-left:auto;font-size:11px;color:var(--text-light)}
@@ -205,11 +205,11 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--inset);border:1px so
 .content{max-width:1100px;margin:0 auto;padding:22px 26px}
 .content h2.page{font-size:20px;margin-bottom:4px}
 .content p.lede{color:var(--text-light);margin:0 0 18px}
-.card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px}
 .card h3{font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
 .card h3 .pill{font-size:10px;background:var(--inset);color:var(--slate);border-radius:20px;padding:2px 8px;font-weight:700}
 .ref-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
-.ref-nav button{border:1px solid var(--border);background:#fff;color:var(--navy);font-weight:700;font-size:11.5px;
+.ref-nav button{border:1px solid var(--border);background:var(--card);color:var(--navy);font-weight:700;font-size:11.5px;
   padding:6px 11px;border-radius:20px}
 .ref-nav button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
 table.ref{width:100%;border-collapse:collapse;font-size:12.5px}
@@ -236,7 +236,7 @@ kbd{background:var(--inset);border:1px solid var(--border);border-bottom-width:2
 /* ---------------- issue capture slide-in ---------------- */
 .scrim{position:fixed;inset:0;background:rgba(26,60,90,.28);opacity:0;pointer-events:none;transition:.18s;z-index:40}
 .scrim.show{opacity:1;pointer-events:auto}
-.capture{position:fixed;top:0;right:0;height:100%;width:420px;max-width:92vw;background:#fff;
+.capture{position:fixed;top:0;right:0;height:100%;width:420px;max-width:92vw;background:var(--card);
   box-shadow:-8px 0 30px rgba(26,60,90,.18);transform:translateX(100%);transition:.2s;z-index:50;
   display:flex;flex-direction:column}
 .capture.show{transform:none}
@@ -248,7 +248,7 @@ kbd{background:var(--inset);border:1px solid var(--border);border-bottom-width:2
 .ctx-box .row{display:flex;gap:6px;margin-bottom:2px}
 .ctx-box .k{color:var(--text-light);min-width:80px}
 .tag-pick{display:flex;gap:6px;margin-bottom:14px}
-.tag-pick button{flex:1;border:1px solid var(--border);background:#fff;border-radius:7px;padding:8px;font-weight:800;font-size:11px;text-transform:uppercase}
+.tag-pick button{flex:1;border:1px solid var(--border);background:var(--card);border-radius:7px;padding:8px;font-weight:800;font-size:11px;text-transform:uppercase}
 .tag-pick button.on[data-tag=Wrong]{background:var(--red);color:#fff;border-color:var(--red)}
 .tag-pick button.on[data-tag=Note]{background:var(--slate);color:#fff;border-color:var(--slate)}
 .tag-pick button.on[data-tag=Idea]{background:var(--orange);color:#fff;border-color:var(--orange)}
@@ -260,7 +260,7 @@ kbd{background:var(--inset);border:1px solid var(--border);border-bottom-width:2
 .dropzone.over{border-color:var(--navy-light);background:var(--inset)}
 
 /* issues list */
-.issue{border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:10px;background:#fff}
+.issue{border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:10px;background:var(--card)}
 .issue.resolved{opacity:.6}
 .issue-h{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .issue-h .when{margin-left:auto;font-size:11px;color:var(--text-light)}
@@ -280,7 +280,27 @@ footer .sb-spacer{flex:1}
 .upload-zone.over{border-color:var(--navy);background:var(--inset)}
 .muted{color:var(--text-light)}
 .split2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* ---- dark theme ---- */
+body.dark{
+  --bg:#10151c; --panel:#1a212b; --inset:#222b37; --card:#1c242f;
+  --border:#2d3744; --border-soft:#27313e;
+  --text:#c6cdd7; --text-mid:#aab4c1; --text-light:#7d8896;
+  --navy:#6298c8; --navy-light:#79a8d0; --navy-dark:#e7eef6; --slate:#9fb0cb;
+  --green-soft:#15311e; --orange-soft:#3a2615; --red-soft:#3a201d;
+}
+body.dark .modal-scrim,body.dark .scrim{background:rgba(0,0,0,.6)}
+/* ---- font size ---- */
+body.fs-s{font-size:13px}
+body.fs-l{font-size:15.5px}
 @media(max-width:1100px){.three-pane{grid-template-columns:220px 1fr 320px}.split2{grid-template-columns:1fr}}
+/* ---- responsive: stack panes on a narrow window ---- */
+@media(max-width:860px){
+  body{overflow:auto;height:auto;min-height:100vh}
+  .three-pane{position:static;display:flex;flex-direction:column;overflow:visible}
+  .pane{height:auto;overflow:visible;border-width:0 0 1px 0!important}
+  .pane.left{order:2} .pane.center{order:1} .pane.right{order:3}
+  nav.tabs{flex-wrap:wrap}
+}
 @media print{header.topbar,footer.statusbar,.pane.left,.pane.center,nav.tabs,.note-actions,.rule{display:none!important}
   .three-pane{grid-template-columns:1fr}.note{font-size:12px}}
 </style>
@@ -304,6 +324,8 @@ footer .sb-spacer{flex:1}
   <div class="top-actions">
     <button class="btn sm ghost" id="btnRestart" title="Start a new SO">New SO</button>
     <button class="btn sm" id="btnExportIssues" title="Export all issues + screenshots to a file">Export Issues</button>
+    <button class="btn sm ghost icon" id="btnFont" title="Text size">A</button>
+    <button class="btn sm ghost icon" id="btnTheme" title="Light / dark theme">🌙</button>
     <button class="btn sm ghost icon" id="btnHelp" title="Keyboard shortcuts (?)">⌨</button>
   </div>
 </header>
@@ -1800,6 +1822,17 @@ function setStatus(s){ $('#sbState').textContent=s; }
 
 function openPalette(){}   /* defined in Phase 4 */
 function closePalette(){}
+
+/* ---- theme + text-size (persisted) ---- */
+function applyTheme(){ const dark=localStorage.getItem('so_theme')==='dark';
+  document.body.classList.toggle('dark',dark); const b=$('#btnTheme'); if(b) b.textContent=dark?'☀':'🌙'; }
+function applyFont(){ const s=localStorage.getItem('so_font')||'m';
+  document.body.classList.toggle('fs-s',s==='s'); document.body.classList.toggle('fs-l',s==='l');
+  const b=$('#btnFont'); if(b) b.textContent= s==='s'?'A−':(s==='l'?'A+':'A'); }
+$('#btnTheme').onclick=()=>{ localStorage.setItem('so_theme', document.body.classList.contains('dark')?'light':'dark'); applyTheme(); };
+$('#btnFont').onclick=()=>{ const cur=localStorage.getItem('so_font')||'m';
+  const next={s:'m',m:'l',l:'s'}[cur]; localStorage.setItem('so_font',next); applyFont(); };
+applyTheme(); applyFont();
 function toggleHelp(on){ const show = on===undefined ? !$('#helpModal').classList.contains('show') : on;
   $('#helpModal').classList.toggle('show',show); $('#helpScrim').classList.toggle('show',show); }
 $('#btnHelp').onclick=()=>toggleHelp();
