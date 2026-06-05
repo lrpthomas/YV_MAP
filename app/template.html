@@ -1775,7 +1775,11 @@ function refGuide(b){
   b.append(refCard('Field guide',el('div',{class:'muted',style:'font-size:12px'},'Answers to common "where/what is…" questions while working an order.')));
   Object.entries(g).forEach(([k,v])=>b.append(refCard(k,el('div',{style:'font-size:12.5px'},esc(v)))));
 }
-function refProcedures(b){ PROCEDURES.forEach(([t,body])=>b.append(refCard(t,el('p',{style:'font-size:12.5px'},body)))); }
+function refProcedures(b){
+  PROCEDURES.forEach(([t,body])=>b.append(refCard(t,el('p',{style:'font-size:12.5px'},body))));
+  (REFX.procedures_extra||[]).forEach(p=>b.append(refCard(p.title,
+    el('p',{style:'font-size:12.5px;white-space:pre-wrap'}, /crash Access/i.test(p.body)?glossify(p.body):p.body))));
+}
 function refRouting(b){
   b.append(refCard('People',refTable(['Who','Role'],PEOPLE.map(p=>p.map(esc)))));
   b.append(refCard('SO Type codes (iVUE 2-letter)',refTable(['Code','Meaning'],SO_TYPE_CODES.map(p=>p.map(esc)))));

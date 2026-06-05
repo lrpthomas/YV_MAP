@@ -1097,5 +1097,19 @@
   "OPX": "Off-Premises Extension",
   "VPI/VCI": "DSL identifier",
   "POTS (Class of Service)": "IDTL"
- }
+ },
+ "procedures_extra": [
+  {
+   "title": "Find a vacant pair — NewNetCMS SQL view",
+   "body": "NewNetCMS has a queryable view [NewNetCMS].[dbo].[IVUE_CablePair_Facs_Copper] that joins cables, pairs, equipment, agreements, addresses, speeds, bonding, X-connects and pending SOs into one flat row — this is how cutsheets are built and how you look up the full state of any cable pair. Filter e.g. [Cable Name]='SVLK-1' and pair between 900 and 1200; ORDER BY pair+0 asc (the +0 forces a numeric sort). Key columns: Pair Status, Bonded, XConn Cable Nm / XConn Pair, MinSvPt_BP / MaxSvPt_BP / Port_BP / BND_Port_BP, Serving Ped Parent Equip Name, CBOL, SubDown / SubUp, PendingSOs."
+  },
+  {
+   "title": "Path Trace (iVUE)",
+   "body": "Captures assignment data the Service Point screen can't. COPPER assignments: X-connect + X-connect pairs. FIBER assignments: power-pair + Feeder Fiber + Splitter + GPON assignments. Tutorial video: I:\\Eng_GIS\\Training\\GIS Training Library\\GIS Track\\Facility Assignments\\Pathtrace."
+  },
+  {
+   "title": "Pic-Pair records (as-built) + the Access gotcha",
+   "body": "BUILD: in Oasis select the 'line' cable leaving the (remote) CO, search the Route ID, open it, right-click the gray area -> Facility builder -> Facility Connection Wizard; if the 'To' cable has no records, Create Facility (set pic count, status, wirecenter). FIX / REMOVE: do NOT open the Facility table in the database directly -- it WILL crash Access. Instead use the 'Pic-Pair-Fix_sp' stored procedure: in design view set ROUTE_Name = N'LLLL-NNNNNN' (e.g. NFRK-123456) to narrow hundreds of thousands of records to just that copper."
+  }
+ ]
 }
