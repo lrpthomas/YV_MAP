@@ -173,6 +173,16 @@ abbr.gloss{text-decoration:underline dotted;text-underline-offset:2px;cursor:hel
 #tourTip h4{margin:4px 0 6px;font-size:15px;color:var(--navy-dark)}
 #tourTip p{margin:0 0 12px;font-size:12.5px;color:var(--text-mid);line-height:1.5}
 #tourTip .tt-nav{display:flex;gap:8px;justify-content:flex-end}
+.bulk-box{margin-top:14px;border:1px solid var(--border);border-radius:9px;padding:10px 12px;background:var(--panel)}
+.bulk-box summary{cursor:pointer;font-weight:700;color:var(--navy);font-size:13px}
+.batch-list{display:flex;flex-direction:column;gap:4px}
+.batch-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border-soft);border-radius:7px;padding:6px 9px;font-size:12.5px}
+.batch-item.done{opacity:.7}
+.batch-item .bi-so{font-family:var(--mono);font-weight:700;color:var(--navy-dark);min-width:60px}
+.batch-item .bi-wf{flex:1;color:var(--text-mid);font-size:12px}
+.batch-item .bi-st{font-size:11px;color:var(--text-light)}
+.batch-item.done .bi-st{color:var(--green)}
+.batch-note{font-family:var(--mono);font-size:11.5px;background:var(--inset);padding:8px;border-radius:6px;white-space:pre-wrap;margin:0}
 .field .eg code{font-family:var(--mono);background:var(--green-soft);color:var(--navy-dark);padding:1px 5px;border-radius:4px}
 .field .src{font-size:10.5px;color:var(--slate);margin-top:2px;font-style:italic}
 .field input,.field select,.field textarea{
@@ -408,6 +418,9 @@ body.fs-l{font-size:15.5px}
 
 <!-- printable cheat-sheet (shown only when printing) -->
 <div id="cheatSheet"></div>
+
+<!-- batch notes modal -->
+<div class="modal" id="batchModal" role="dialog" aria-modal="true" aria-label="Batch notes"></div>
 
 <!-- command palette -->
 <div class="modal-scrim" id="palScrim"></div>
@@ -653,7 +666,7 @@ const App = {
   tab:'workflow',
   flowKey:null, member:null, template:null, placeholders:[],
   values:{}, facs:'UNCHANGED', stepIndex:0, options:{splice:false,xconn:false},
-  issues:[], issueFilter:'all', training:null, noteEdit:null,
+  issues:[], issueFilter:'all', training:null, noteEdit:null, bulk:null,
   capture:{ctx:null, tag:'Wrong', shots:[]},
 };
 
@@ -795,6 +808,30 @@ function startScreen(){
   const parseOut=el('div',{id:'parseOut',style:'margin-top:10px'});
   w.append(el('div',{class:'field'},el('label',{},'SO request'),ta,parseBtn,parseOut));
 
+  // --- bulk mode ---
+  const bd=el('details',{class:'bulk-box'});
+  bd.append(el('summary',{},'⛁ Working a batch? Queue multiple SOs'));
+  if(App.bulk && App.bulk.items.length){
+    const pr=batchProgress();
+    bd.setAttribute('open','');
+    const list=el('div',{class:'batch-list'});
+    App.bulk.items.forEach((it,i)=>list.append(el('div',{class:'batch-item'+(it.note!=null?' done':'')},
+      el('span',{class:'bi-so'},it.so||'—'),
+      el('span',{class:'bi-wf'},it.member?it.member.corpus_workflow:(it.flowKey?it.flowKey.replace(/_/g,'/'):'?')),
+      el('span',{class:'bi-st'},it.note!=null?'✓ done':'pending'),
+      el('button',{class:'btn sm'+(it.note==null?' primary':''),onclick:()=>workBatchItem(i)}, it.note!=null?'Review':'Work'))));
+    bd.append(el('div',{class:'muted',style:'margin:6px 0;font-size:12px'},`${pr.done}/${pr.total} done`), list);
+    const row=el('div',{style:'display:flex;gap:8px;margin-top:8px'});
+    row.append(el('button',{class:'btn sm',onclick:showBatchNotes},`Batch notes (${pr.done})`),
+      el('button',{class:'btn sm ghost',onclick:()=>{App.bulk=null;startScreen();}},'Clear batch'));
+    bd.append(row);
+  } else {
+    const bta=el('textarea',{rows:4,placeholder:'One SO request per line…\n135700 INT UPGRADE 100/20 BND\n128948 VACA DISC\n…',
+      style:'width:100%;font-family:var(--mono);font-size:12px;padding:9px;border:1px solid var(--border);border-radius:8px'});
+    bd.append(bta, el('button',{class:'btn',style:'margin-top:8px',onclick:()=>buildBatch(bta.value)},'Queue these'));
+  }
+  w.append(bd);
+
   w.append(el('div',{class:'sub',style:'margin-top:18px'},'Or choose a flow ('+flowMeta().reduce((a,f)=>a+f.count,0).toLocaleString()+' SOs across 6 flows):'));
   const grid=el('div',{class:'flow-grid'});
   flowMeta().forEach(f=>{
@@ -864,6 +901,66 @@ function parseRequest(text){
   }
   out.append(box);
 }
+/* route a single request line to {so, phone, flowKey, member, splice, xconn} */
+function routeRequest(text){
+  const up=text.toUpperCase();
+  const so=(text.match(/\b\d{6}(?:\s*[&,/]\s*\d{6})*/)||[])[0]||null;
+  const phone=(text.match(/\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/)||text.match(/\b\d{3}[-.\s]?\d{4}\b/)||[])[0]||null;
+  let flowKey=null;
+  if(up.includes('FTTH')||up.includes('FIBER')||up.includes('EDGE')) flowKey='FIBER_FTTH';
+  else if(up.includes('XCONN')) flowKey='CROSS_CONNECT';
+  else if(up.includes('MOVE')) flowKey='MOVE';
+  else if(up.includes('UPGRADE')||up.includes('BND')||up.includes('BOND')||up.includes('ADSL')||up.includes('VDSL')) flowKey='UPGRADE';
+  else if(up.includes('RECON')||up.includes('CONN')||up.includes('QDS')) flowKey='CONNECT_RECONNECT';
+  else if(up.includes('DISC')||up.includes('NPD')||up.includes('VACA')) flowKey='DISCONNECT';
+  const member=flowKey?guessWorkflow(flowKey,up):null;
+  return {request:text, so, phone, flowKey, member, splice:/SPLIC/.test(up), xconn:/XCONN/.test(up)};
+}
+/* ---- bulk mode: queue many SO requests, work them in sequence, collect notes ---- */
+function buildBatch(text){
+  const lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  if(!lines.length){ toast('Paste one SO request per line'); return; }
+  App.bulk={ items:lines.map(l=>Object.assign(routeRequest(l),{note:null})), idx:-1 };
+  startScreen();
+}
+function workBatchItem(i){
+  const it=App.bulk.items[i]; if(!it) return; App.bulk.idx=i;
+  setTab('workflow');
+  if(it.member){ chooseWorkflow(it.flowKey, it.member, it); if(it.note!=null){ App.noteEdit=it.note; renderNote(); } }
+  else if(it.flowKey){ chooseFlow(it.flowKey, it); }
+  else { startScreen(); toast('No workflow match for this line — pick one'); }
+}
+function saveBatchAndNext(){
+  if(!App.bulk||App.bulk.idx<0) return;
+  App.bulk.items[App.bulk.idx].note=noteText();
+  const next=App.bulk.items.findIndex((it,i)=>i>App.bulk.idx && it.note==null);
+  const any=next>=0?next:App.bulk.items.findIndex(it=>it.note==null);
+  if(any>=0){ workBatchItem(any); toast('Saved · next SO'); }
+  else { App.bulk.idx=-1; setTab('workflow'); startScreen(); showBatchNotes(); toast('Batch complete'); }
+}
+function batchProgress(){ const d=App.bulk.items.filter(it=>it.note!=null).length; return {done:d, total:App.bulk.items.length}; }
+function showBatchNotes(){
+  const m=$('#batchModal'); m.innerHTML='';
+  const done=App.bulk.items.filter(it=>it.note!=null);
+  m.append(el('h3',{},`Batch notes · ${done.length}/${App.bulk.items.length} done`));
+  const body=el('div',{style:'max-height:52vh;overflow:auto'});
+  App.bulk.items.forEach((it,i)=>{
+    body.append(el('div',{style:'margin-bottom:10px'},
+      el('div',{style:'font-size:11px;color:var(--text-light);margin-bottom:2px'},
+        (it.so||'—')+' · '+(it.member?it.member.corpus_workflow:(it.flowKey||'?'))+(it.note==null?'  (pending)':'')),
+      el('pre',{class:'batch-note'}, it.note||it.request)));
+  });
+  m.append(body);
+  const allNotes=done.map(it=>it.note).join('\n\n');
+  const nav=el('div',{class:'tt-nav',style:'margin-top:10px'});
+  nav.append(el('button',{class:'btn sm',onclick:()=>{ if(navigator.clipboard) navigator.clipboard.writeText(allNotes).then(()=>toast('All notes copied')); }},'Copy all'),
+    el('button',{class:'btn sm',onclick:()=>{ const blob=new Blob([allNotes],{type:'text/plain'}); const u=URL.createObjectURL(blob);
+      const a=el('a',{href:u,download:'batch-notes-'+todayMDYY()+'.txt'}); a.click(); setTimeout(()=>URL.revokeObjectURL(u),400); }},'Export .txt'),
+    el('button',{class:'btn sm primary',onclick:closeBatch},'Close'));
+  m.append(nav);
+  m.classList.add('show'); $('#palScrim').classList.add('show');
+}
+function closeBatch(){ $('#batchModal').classList.remove('show'); $('#palScrim').classList.remove('show'); }
 /* best-guess specific workflow within a flow, from the request keywords */
 function guessWorkflow(flowKey, up){
   const f=KB.flows[flowKey]; if(!f) return null;
@@ -1048,6 +1145,15 @@ function renderWizardStep(){
     w.append(row);
   }
   const tb=trainingBanner(); if(tb) w.append(tb);
+  if(App.bulk && App.bulk.idx>=0){ const pr=batchProgress();
+    const bb=el('div',{class:'pointer-card',style:'border-left-color:var(--orange);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px'});
+    bb.append(el('span',{class:'pc-h',style:'color:var(--orange-dark)'},`⛁ BATCH · SO ${App.bulk.idx+1} of ${App.bulk.items.length}  ·  ${pr.done} done`));
+    const bn=el('span',{});
+    bn.append(el('button',{class:'btn sm primary',style:'margin-right:6px',onclick:saveBatchAndNext},'Save & next →'),
+      el('button',{class:'btn sm',style:'margin-right:6px',onclick:showBatchNotes},'Batch notes'),
+      el('button',{class:'btn sm ghost',onclick:()=>{App.bulk.idx=-1;startScreen();}},'Exit batch'));
+    bb.append(bn); w.append(bb);
+  }
   const pc=renderPointer(); if(pc) w.append(pc);
   if(s.id==='options'){ renderOptions(w); }
   else s.fields.forEach(f=>{
@@ -2158,7 +2264,7 @@ function maybeWelcome(){ if(!localStorage.getItem('so_onboarded')){ $('#welcomeM
 $('#welcomeScrim').onclick=dismissWelcome;
 $('#btnHelp').onclick=()=>toggleHelp();
 $('#helpScrim').onclick=()=>toggleHelp(false);
-$('#palScrim').onclick=closePalette;
+$('#palScrim').onclick=()=>{closePalette();closeBatch();};
 /* focus trap: keep Tab inside the open modal/palette/capture for accessibility */
 function activeModal(){ return ($('#palette').classList.contains('show')&&$('#palette'))
   || ($('#helpModal').classList.contains('show')&&$('#helpModal'))
@@ -2174,7 +2280,7 @@ $('#palInput').addEventListener('keydown',e=>{
 function inField(e){ const t=e.target; return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'); }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){ closeCapture(); toggleHelp(false); closePalette(); dismissWelcome(); }
+  if(e.key==='Escape'){ closeCapture(); toggleHelp(false); closePalette(); closeBatch(); dismissWelcome(); endTour(); }
   if(e.key==='Tab'){ const m=activeModal(); if(m){
     const f=[...m.querySelectorAll('button,input,textarea,select,a[href],[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null);
     if(f.length){ const first=f[0], last=f[f.length-1];
