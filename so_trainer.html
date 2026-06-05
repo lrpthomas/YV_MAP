@@ -320,6 +320,20 @@ body.fs-l{font-size:15.5px}
 }
 @media print{header.topbar,footer.statusbar,.pane.left,.pane.center,nav.tabs,.note-actions,.rule{display:none!important}
   .three-pane{grid-template-columns:1fr}.note{font-size:12px}}
+#cheatSheet{display:none}
+@media print{
+  body.print-cheat *{visibility:hidden}
+  body.print-cheat #cheatSheet,body.print-cheat #cheatSheet *{visibility:visible}
+  body.print-cheat #cheatSheet{display:block;position:absolute;left:0;top:0;width:100%;padding:0 4mm;color:#000}
+  #cheatSheet h1{font-size:17px;margin:0 0 4px;color:#000}
+  #cheatSheet h2{font-size:12px;margin:12px 0 4px;border-bottom:1px solid #bbb;padding-bottom:2px;color:#000}
+  #cheatSheet p{font-size:11px;margin:3px 0} #cheatSheet .cs-branch{font-weight:700}
+  #cheatSheet ol{font-size:11px;margin:4px 0 4px 18px} #cheatSheet li{margin-bottom:2px}
+  #cheatSheet pre{font-family:monospace;font-size:10.5px;white-space:pre-wrap;background:#f3f3f3;padding:6px;border-radius:3px}
+  #cheatSheet .cs-table{width:100%;border-collapse:collapse;font-size:10px}
+  #cheatSheet .cs-table td,#cheatSheet .cs-table th{border:1px solid #bbb;padding:3px 5px;text-align:left;vertical-align:top}
+  #cheatSheet .cs-foot{margin-top:10px;font-size:9px;color:#666}
+}
 </style>
 </head>
 <body>
@@ -362,6 +376,9 @@ body.fs-l{font-size:15.5px}
   </table>
   <button class="btn sm" onclick="toggleHelp(false)">Close</button>
 </div>
+
+<!-- printable cheat-sheet (shown only when printing) -->
+<div id="cheatSheet"></div>
 
 <!-- command palette -->
 <div class="modal-scrim" id="palScrim"></div>
@@ -1014,6 +1031,7 @@ function renderWizardStep(){
   nav.append(el('button',{class:'btn primary',onclick:nextStep},
     App.stepIndex<steps.length-1?'Next →':'Review →'));
   nav.append(el('button',{class:'btn ghost',onclick:()=>chooseFlow(App.flowKey)},'Change workflow'));
+  nav.append(el('button',{class:'btn ghost',onclick:printCheatSheet,title:'Printable one-pager for this workflow'},'🖨 Cheat sheet'));
   w.append(nav);
   // auto-focus the first field input so you can type immediately / press Enter to advance
   setTimeout(()=>{ const inp=w.querySelector('.field input:not([readonly]), .field textarea'); if(inp) inp.focus(); },0);
@@ -1818,6 +1836,12 @@ function drawCorpus(){
     const top=Object.entries(dist).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,n])=>`${k}: ${n.toLocaleString()}`);
     head.append(el('div',{class:'muted',style:'font-size:12px;margin-top:4px'},'By '+corpusKeys.wf+' — '+top.join('  ·  ')+(Object.keys(dist).length>6?'  …':'')));
   }
+  if(corpusKeys.note){
+    const q=readJSON('so_quiz'); const stat=q&&q.n?`  ·  session avg ${Math.round(q.sum/q.n)}% over ${q.n}`:'';
+    head.append(el('div',{style:'margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap'},
+      el('button',{class:'btn sm primary',onclick:quizStart},'🎲 Quiz me'),
+      el('span',{class:'muted',style:'font-size:12px'},'Practice a random real SO blind, then score your note.'+stat)));
+  }
   b.append(head);
 
   // controls
@@ -1910,17 +1934,64 @@ function loadForTraining(rec){
     toast('Loaded for training — pick the flow'+(wfVal?` (couldn't auto-match "${wfVal}")`:''), 5000);
   }
 }
+/* printable one-page cheat sheet for the current workflow */
+function printCheatSheet(){
+  if(!App.member) return;
+  const sp=spec()||{}; const cs=$('#cheatSheet'); cs.innerHTML='';
+  cs.append(el('h1',{},App.member.corpus_workflow+'  —  '+App.flowKey.replace(/_/g,' / ')));
+  if(sp.branch) cs.append(el('p',{class:'cs-branch'},sp.branch));
+  if(sp.guidance) cs.append(el('p',{},sp.guidance));
+  if(sp.pointer&&sp.pointer.length){ cs.append(el('h2',{},'POINTER — system-touch order'));
+    const ol=el('ol',{}); sp.pointer.forEach(p=>ol.append(el('li',{},p))); cs.append(ol); }
+  cs.append(el('h2',{},'Note shape (illustrative)'));
+  cs.append(el('pre',{}, '135464 '+(actionOf(App.template)||'')+'\n'+renderSample(App.template)));
+  cs.append(el('h2',{},'Fields — where to find each'));
+  const t=el('table',{class:'cs-table'});
+  t.append(el('tr',{},el('th',{},'Field'),el('th',{},'Example'),el('th',{},'Where to find it')));
+  App.placeholders.filter(p=>p!=='date'&&p!=='action').forEach(p=>{ const d=fieldDef(p);
+    t.append(el('tr',{},el('td',{},d.label),el('td',{},exampleFor(p)),el('td',{},(termFor(p)&&termFor(p).where)||d.src||''))); });
+  cs.append(t);
+  cs.append(el('div',{class:'cs-foot'},'Ponderosa SO Trainer · '+todayMDYY()));
+  document.body.classList.add('print-cheat');
+  window.print();
+  setTimeout(()=>document.body.classList.remove('print-cheat'),1500);
+}
+window.addEventListener('afterprint',()=>document.body.classList.remove('print-cheat'));
+
+/* quiz: pick a random real SO (with a note), load it blind to practice + score */
+function quizStart(){
+  const notes=corpusRecs.filter(r=>fieldVal(r,corpusKeys.note).trim());
+  if(!notes.length){ toast('No records with a note to quiz on'); return; }
+  const rec=notes[Math.floor(Math.random()*notes.length)];
+  loadForTraining(rec); if(App.training){ App.training.quiz=true; App.training.scored=null; App.training.reveal=false; }
+  if(App.member) renderWizardStep();
+}
+function scoreQuiz(){
+  const t=App.training; if(!t||!t.answer) return;
+  const mine=new Set(noteText().split('\n').map(s=>s.trim().toLowerCase()).filter(Boolean));
+  const exp=t.answer.split('\n').map(s=>s.trim()).filter(Boolean);
+  const matched=exp.filter(l=>mine.has(l.toLowerCase())).length;
+  const pct=exp.length?Math.round(matched/exp.length*100):0;
+  const q=readJSON('so_quiz')||{n:0,sum:0}; q.n++; q.sum+=pct; try{localStorage.setItem('so_quiz',JSON.stringify(q));}catch(e){}
+  t.scored=pct; t.reveal=true;
+  (App.member?renderWizardStep():startScreen());
+}
 /* training banner shown above the wizard / start screen while a record is loaded */
 function trainingBanner(){
   if(!App.training) return null;
   const t=App.training; const c=el('div',{class:'pointer-card',style:'border-left-color:var(--orange)'});
   const h=el('div',{class:'pc-h',style:'color:var(--orange-dark);display:flex;justify-content:space-between;align-items:center'});
-  h.append(el('span',{},'🎓 TRAINING'+(t.so?' · SO '+esc(t.so):'')));
+  h.append(el('span',{},(t.quiz?'🎲 QUIZ':'🎓 TRAINING')+(t.so?' · SO '+esc(t.so):'')));
   const btns=el('span',{});
+  if(t.quiz && t.answer) btns.append(el('button',{class:'btn sm primary',style:'margin-right:6px',onclick:scoreQuiz},'Score my note'));
   if(t.answer) btns.append(el('button',{class:'btn sm',style:'margin-right:6px',onclick:()=>{t.reveal=!t.reveal; (App.member?renderWizardStep():startScreen());}}, t.reveal?'Hide expected':'Reveal expected note'));
-  btns.append(el('button',{class:'btn sm ghost',onclick:()=>{App.training=null; (App.member?renderWizardStep():startScreen());}},'Exit training'));
+  btns.append(el('button',{class:'btn sm ghost',onclick:()=>{App.training=null; (App.member?renderWizardStep():startScreen());}},'Exit'));
   h.append(btns); c.append(h);
-  c.append(el('div',{class:'pc-guide'},'Build the note from this real order, then reveal the expected note to check yourself.'+(t.answer?'':' (No expected note in this record.)')));
+  if(t.scored!=null){ const q=readJSON('so_quiz')||{n:0,sum:0};
+    c.append(el('div',{style:'font-weight:800;margin:6px 0;color:'+(t.scored>=80?'var(--green)':t.scored>=50?'var(--orange-dark)':'var(--red)')},
+      `Score: ${t.scored}% lines matched`+(q.n?`  ·  session avg ${Math.round(q.sum/q.n)}% over ${q.n}`:'')));
+  }
+  c.append(el('div',{class:'pc-guide'}, t.quiz?'Build the note from this real order, then Score my note.':('Build the note from this real order, then reveal the expected note to check yourself.'+(t.answer?'':' (No expected note in this record.)'))));
   if(t.request) c.append(el('div',{style:'font-size:12px;margin-top:6px'},el('b',{},'Request: '),esc(t.request)));
   if(t.reveal&&t.answer){
     const mine=new Set(noteText().split('\n').map(s=>s.trim().toLowerCase()).filter(Boolean));
