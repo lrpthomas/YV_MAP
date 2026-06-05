@@ -164,6 +164,8 @@ kbd{font-family:var(--mono);font-size:11px;background:var(--inset);border:1px so
 abbr.gloss{text-decoration:underline dotted;text-underline-offset:2px;cursor:help;text-decoration-thickness:1px}
 .diff-line{font-family:var(--mono);font-size:12px;padding:1px 6px;border-radius:4px;white-space:pre-wrap}
 .diff-ok{color:var(--green)} .diff-miss{background:var(--orange-soft);color:var(--orange-dark)}
+.note-edit{width:100%;min-height:140px;background:var(--card);color:var(--text);border:1px solid var(--navy);border-radius:6px;
+  font-family:var(--mono);font-size:12.5px;padding:10px;resize:vertical;line-height:1.5}
 .field .eg code{font-family:var(--mono);background:var(--green-soft);color:var(--navy-dark);padding:1px 5px;border-radius:4px}
 .field .src{font-size:10.5px;color:var(--slate);margin-top:2px;font-style:italic}
 .field input,.field select,.field textarea{
@@ -385,6 +387,7 @@ body.fs-l{font-size:15.5px}
           <div class="note flag-target" id="notePreview"></div>
           <div class="note-actions">
             <button class="btn sm primary" id="btnCopyNote">Copy Note</button>
+            <button class="btn sm ghost" id="btnEditNote" title="Hand-edit the note before copying">✎ Edit</button>
             <button class="btn sm" id="btnFlagNote">⚑ Flag note</button>
           </div>
         </div>
@@ -604,7 +607,7 @@ const App = {
   tab:'workflow',
   flowKey:null, member:null, template:null, placeholders:[],
   values:{}, facs:'UNCHANGED', stepIndex:0, options:{splice:false,xconn:false},
-  issues:[], issueFilter:'all', training:null,
+  issues:[], issueFilter:'all', training:null, noteEdit:null,
   capture:{ctx:null, tag:'Wrong', shots:[]},
 };
 
@@ -775,6 +778,7 @@ function parseRequest(text){
     ['BOND','BONDED'],['FTTH','FIBER'],['EDGE','EDGE'],['MOVE','MOVE'],['DISC','DISC'],
     ['RECON','RECON'],['ADSL','ADSL'],['VDSL','VDSL'],['SPLIC','SPLICE'],['RCF','RCF']];
   flagWords.forEach(([w,tag])=>{ if(up.includes(w)) parsed.flags.push(tag); });
+  parsed.splice=/SPLIC/.test(up); parsed.xconn=/XCONN/.test(up);   // note-construct hints
   // Beasore / dev → engineering hold (Q24)
   const eng = /BEASORE|BSOR|MIRA BELLA|BELLA VISTA|TESORO/i.test(text);
   // route to a flow
@@ -799,13 +803,35 @@ function parseRequest(text){
   if(eng){box.append(el('div',{style:'margin-top:10px;padding:8px 10px;background:var(--red-soft);border-radius:7px;color:var(--red);font-weight:700;font-size:12px'},
     '⚠ Dev / Beasore detected → *REFER TO ENGINEERING* + HOLD first (Q24, confirm routing).'));}
   if(suggest){
-    box.append(el('div',{style:'margin-top:12px;display:flex;align-items:center;gap:10px'},
-      el('span',{},'Routes to:'),el('b',{style:'color:var(--navy)'},suggest.replace(/_/g,' / ')),
-      el('button',{class:'btn sm primary',onclick:()=>{chooseFlow(suggest, parsed);}},'Open this flow →')));
+    const guess=guessWorkflow(suggest, up);
+    const row=el('div',{style:'margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap'});
+    row.append(el('span',{},'Routes to:'),el('b',{style:'color:var(--navy)'},suggest.replace(/_/g,' / ')));
+    if(guess){
+      const opt=[parsed.splice&&'splice', parsed.xconn&&'xconn'].filter(Boolean);
+      row.append(el('button',{class:'btn sm primary',onclick:()=>{setTab('workflow');chooseWorkflow(suggest, guess, parsed);}},
+        '→ '+guess.corpus_workflow+(opt.length?(' (+'+opt.join('+')+')'):'')));
+    }
+    row.append(el('button',{class:'btn sm ghost',onclick:()=>{setTab('workflow');chooseFlow(suggest, parsed);}},'Pick workflow…'));
+    box.append(row);
   } else {
     box.append(el('div',{class:'muted',style:'margin-top:10px'},'No clear flow match — pick one below.'));
   }
   out.append(box);
+}
+/* best-guess specific workflow within a flow, from the request keywords */
+function guessWorkflow(flowKey, up){
+  const f=KB.flows[flowKey]; if(!f) return null;
+  const has=s=>up.includes(s);
+  const pick=name=>f.members.find(m=>m.corpus_workflow===name);
+  const bonded=has('BND')||has('BOND');
+  let name=null;
+  if(flowKey==='DISCONNECT') name = has('VACA')?'VACA_DISCONNECT' : has('NPD')?'NPD' : has('EDGE')?'EDGE_DISCONNECT' : has('BILL')?'BILLING_ONLY' : 'DISCONNECT_ONLY';
+  else if(flowKey==='UPGRADE') name = has('XCONN')?'UPGRADE_XCONN' : has('ADSL')?'UPGRADE_ADSL' : has('VDSL')?'UPGRADE_VDSL' : has('DOWNGRADE')?'DOWNGRADE' : bonded?'UPGRADE_BONDED' : 'UPGRADE_GENERIC';
+  else if(flowKey==='CONNECT_RECONNECT') name = has('VACA')?'VACA_RECONNECT' : (has('DISC')&&has('QDS'))?'GEN_DISCONNECT_QDS_BILLING' : has('QDS')?'RECONNECT_ONLY' : 'CONNECT_ONLY';
+  else if(flowKey==='MOVE') name = has('QDS')?'MOVE_QDS' : 'MOVE';
+  else if(flowKey==='FIBER_FTTH') name = (has('EDGE')&&has('UPGRADE'))?'EDGE_UPGRADE' : has('EDGE')?'EDGE_OTHER' : has('UPGRADE')?'UPGRADE_FTTH' : has('CONN')?'FTTH_CONNECT' : 'FTTH_OTHER';
+  else if(flowKey==='CROSS_CONNECT') name = has('UPGRADE')?'UPGRADE_XCONN' : 'CROSS_CONNECT';
+  return (name&&pick(name)) || f.members[0] || null;
 }
 
 function chooseFlow(key, parsed){
@@ -834,7 +860,7 @@ function placeholdersOf(tpl){
 function chooseWorkflow(key,member,parsed){
   App.flowKey=key; App.member=member; App.template=member.template;
   App.placeholders=placeholdersOf(member.template);
-  App.values={}; App.stepIndex=0;
+  App.values={}; App.stepIndex=0; App.noteEdit=null;
   const sp=SPECS[member.corpus_workflow]||null;
   // special note constructs this workflow can use (splice / xconn jumper); xconn defaults on for XCONN
   App.options={ splice:false, xconn: !!(sp&&sp.options&&sp.options.xconn) };
@@ -842,10 +868,14 @@ function chooseWorkflow(key,member,parsed){
   App.values.date=todayMDYY();
   App.values.action=deriveAction();   // line-1 work summary seeded from the workflow desc
   App.facs = (sp&&sp.facs_default) || (/facs_status/.test(member.template)?'UNCHANGED':'CHANGED');
+  // remember the tech's initials across SOs (auto-fill the -footer)
+  const savedTech=localStorage.getItem('so_tech'); if(savedTech && App.placeholders.includes('tech')) App.values.tech=savedTech;
   // prime from parser
   if(parsed){
     if(parsed.so) App.values.so=parsed.so;
     if(parsed.phone){ ['phone_out','phone_qds','phone_in'].forEach(p=>{ if(App.placeholders.includes(p)&&!App.values[p]) App.values[p]=parsed.phone; }); }
+    if(parsed.splice && sp&&sp.options&&sp.options.splice) App.options.splice=true;
+    if(parsed.xconn && sp&&sp.options&&sp.options.xconn) App.options.xconn=true;
   }
   renderSteps(); renderWizardStep(); renderNote();
   setStatus(key.replace(/_/g,' / ')+' → '+member.corpus_workflow);
@@ -1052,11 +1082,16 @@ function buildField(ph){
   wrap.append(el('label',{},d.label+' ',flagBtn('field:'+ph,{field:ph})));
   let input;
   if(d.facs){ return facsField(); }
-  input=el('input',{type:'text',value:App.values[ph]||'',placeholder:d.hint||'',
+  const listId='dl_'+ph;
+  input=el('input',{type:'text',value:App.values[ph]||'',placeholder:d.hint||'',list:listId,autocomplete:'off',
     oninput:e=>{ let v=e.target.value; if(d.upper)v=v.toUpperCase(); App.values[ph]=v;
+      if(ph==='tech'&&v.trim()) localStorage.setItem('so_tech', v.trim());   // remember initials
       updateFieldState(wrap,ph); renderNote(); saveDraft(); },
+    onblur:e=>{ if(e.target.value.trim()) rememberValue(ph, e.target.value.trim()); },   // field history
     onkeydown:e=>{ if(e.key==='Enter'){ e.preventDefault(); nextStep(); } }});  // Enter → next step
   wrap.append(input);
+  const hist=valueHistory(ph); if(hist.length){ const dl=el('datalist',{id:listId});
+    hist.forEach(v=>dl.append(el('option',{value:v}))); wrap.append(dl); }
   if(d.hint) wrap.append(el('div',{class:'hint'},d.hint));
   const ex=exampleFor(ph); if(ex) wrap.append(el('div',{class:'eg'},'Example: ',el('code',{},ex)));
   const sp=spec(); let note=sp&&sp.field_notes&&sp.field_notes[ph];
@@ -1158,14 +1193,26 @@ function actionOf(tpl){
 }
 function deriveAction(){ return actionOf(App.template); }
 function renderNote(){
-  const box=$('#notePreview'); box.innerHTML='';
+  const box=$('#notePreview');
+  if(App.noteEdit!=null){ if(!box._editing){ box.innerHTML=''; box._editing=true;
+      const ta=el('textarea',{class:'note-edit',oninput:e=>{App.noteEdit=e.target.value;saveDraft();}}, App.noteEdit);
+      box.append(ta); ta.style.height=Math.max(140,ta.scrollHeight)+'px'; setTimeout(()=>ta.focus(),0);
+    } saveDraft(); return; }
+  box._editing=false; box.innerHTML='';
+  const eb=$('#btnEditNote'); if(eb) eb.textContent='✎ Edit';
   if(!App.member){ box.append(el('span',{class:'muted'},'Pick a flow and workflow — the note builds here as you fill fields.')); return; }
   buildNoteLines().forEach(l=>{
-    box.append(el('span',{class:'nl '+l.cls}, l.t? glossify(l.t):'\u00a0'));
+    box.append(el('span',{class:'nl '+l.cls}, l.t? glossify(l.t):' '));
     box.append(document.createTextNode('\n'));
   });
+  saveDraft();
 }
-function noteText(){ return buildNoteLines().map(l=>l.t).join('\n'); }
+function toggleNoteEdit(){
+  if(App.noteEdit==null){ if(!App.member) return; App.noteEdit=noteText(); }
+  else { App.noteEdit=null; }
+  renderNote();
+}
+function noteText(){ return App.noteEdit!=null ? App.noteEdit : buildNoteLines().map(l=>l.t).join('\n'); }
 function copyNote(){ const t=noteText(); pushRecent();
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(t).then(()=>toast('Note copied')).catch(()=>toast('Press Ctrl/⌘+C — clipboard blocked'));
@@ -1193,6 +1240,16 @@ function applyState(d){
   setTab('workflow'); renderSteps(); renderWizardStep(); renderNote();
   return true;
 }
+/* ---- per-field value history (autocomplete suggestions) ---- */
+const HIST_KEY='so_field_hist';
+function rememberValue(ph, v){
+  if(['so','date','phone_out','phone_in','phone_qds','account_out','account_in'].includes(ph)) return; // don't suggest PII / per-order ids
+  const h=readJSON(HIST_KEY)||{}; const base=ph.replace(/\d+$/,'');
+  const arr=(h[base]||[]).filter(x=>x!==v); arr.unshift(v); h[base]=arr.slice(0,8);
+  try{ localStorage.setItem(HIST_KEY, JSON.stringify(h)); }catch(e){}
+}
+function valueHistory(ph){ const h=readJSON(HIST_KEY)||{}; return h[ph.replace(/\d+$/,'')]||[]; }
+
 function pushRecent(){
   const d=draftSnapshot(); if(!d) return;
   d.so=(App.values.so||'').trim(); d.action=App.values.action||deriveAction();
@@ -1888,6 +1945,7 @@ $('#corpusFile').onchange=e=>{ if(e.target.files[0]) handleCorpus(e.target.files
    ====================================================================== */
 $('#btnRestart').onclick=()=>{clearDraft();startScreen();};
 $('#btnCopyNote').onclick=copyNote;
+$('#btnEditNote').onclick=toggleNoteEdit;
 $('#btnFlagNote').onclick=()=>openCapture({where:App.member?App.member.corpus_workflow:'note',field:'note',
   output:App.member?noteText():'', target:'note'});
 function setStatus(s){ $('#sbState').textContent=s; }
