@@ -1395,7 +1395,6 @@ function renderNote(){
   if(!App.member){ box.append(el('span',{class:'muted'},'Pick a flow and workflow — the note builds here as you fill fields.')); return; }
   buildNoteLines().forEach(l=>{
     box.append(el('span',{class:'nl '+l.cls}, l.t? glossify(l.t):' '));
-    box.append(document.createTextNode('\n'));
   });
   saveDraft();
 }
