@@ -337,6 +337,15 @@ body.fs-l{font-size:15.5px}
   header.topbar{flex-wrap:wrap;gap:8px 12px}   /* let brand/nav/actions reflow instead of overlapping */
   nav.tabs{flex-wrap:wrap;margin-left:0;order:3;width:100%}
   .topbar-spacer{display:none}
+  /* easier thumb taps on a phone */
+  .btn{min-height:40px} .seg button{min-height:40px} nav.tabs button{min-height:38px}
+  /* desktop-only status hints (keyboard shortcuts, version) aren't useful on a phone — free the bottom */
+  footer.statusbar{display:none}
+  /* sticky copy bar so the note is always one tap away without scrolling to the page bottom */
+  body.has-note .note-actions{position:fixed;left:0;right:0;bottom:0;z-index:35;
+    border-top:1px solid var(--border);box-shadow:0 -3px 12px rgba(0,0,0,.16);padding:9px 12px}
+  body.has-note .note-actions .btn{flex:1}
+  body.has-note #view-workflow .three-pane{padding-bottom:62px}
 }
 @media print{header.topbar,footer.statusbar,.pane.left,.pane.center,nav.tabs,.note-actions,.rule{display:none!important}
   .three-pane{grid-template-columns:1fr}.note{font-size:12px}}
@@ -1382,6 +1391,7 @@ function actionOf(tpl){
 function deriveAction(){ return actionOf(App.template); }
 function renderNote(){
   const box=$('#notePreview');
+  document.body.classList.toggle('has-note', !!App.member);   // mobile: show the sticky copy bar only when a note exists
   if(App.noteEdit!=null){
     let ta=box.querySelector('textarea.note-edit');
     if(!ta){ box.innerHTML=''; box._editing=true;
