@@ -36,7 +36,7 @@
     {
      "corpus_workflow": "DISCONNECT_ONLY",
      "count": 1281,
-     "template": "{date} -DISC DSL- {facs_status}\n{port1}\n{port2}\n-{tech}",
+     "template": "{date} -DISC DSL- {facs_status}\n{phone_out} OUT\n{port1}\n{port2}\n-{tech}",
      "variants": 389
     },
     {
