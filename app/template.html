@@ -871,13 +871,15 @@ function parseRequest(text){
   parsed.splice=/SPLIC/.test(up); parsed.xconn=/XCONN/.test(up);   // note-construct hints
   // Beasore / dev → engineering hold (Q24)
   const eng = /BEASORE|BSOR|MIRA BELLA|BELLA VISTA|TESORO/i.test(text);
+  // RCF / RCFA — remote call forwarding is a reference rule, not one of the 6 note-builder flows
+  const rcf = /\bRCFA?\b|REMOTE CALL FORWARD/i.test(text);
   // route to a flow
   let suggest=null;
   if(up.includes('FTTH')||up.includes('FIBER')||up.includes('EDGE')) suggest='FIBER_FTTH';
   else if(up.includes('XCONN')) suggest='CROSS_CONNECT';
   else if(up.includes('MOVE')) suggest='MOVE';
   else if(up.includes('UPGRADE')||up.includes('BND')||up.includes('BOND')||up.includes('ADSL')||up.includes('VDSL')) suggest='UPGRADE';
-  else if(up.includes('RECON')||up.includes('CONN')||up.includes('QDS')) suggest='CONNECT_RECONNECT';
+  else if(up.includes('RECON')||up.includes('CONN')||up.includes('QDS')||up.includes('CORRECT')||up.includes('SERVICE POINT')) suggest='CONNECT_RECONNECT';
   else if(up.includes('DISC')||up.includes('NPD')||up.includes('VACA')) suggest='DISCONNECT';
 
   out.innerHTML='';
@@ -892,6 +894,11 @@ function parseRequest(text){
   box.append(tbl);
   if(eng){box.append(el('div',{style:'margin-top:10px;padding:8px 10px;background:var(--red-soft);border-radius:7px;color:var(--red);font-weight:700;font-size:12px'},
     '⚠ Dev / Beasore detected → *REFER TO ENGINEERING* + HOLD first (Q24, confirm routing).'));}
+  if(rcf){ const rb=el('div',{style:'margin-top:10px;padding:8px 10px;background:var(--orange-soft);border-radius:7px;font-size:12px'});
+    rb.append(el('div',{style:'color:var(--orange-dark);font-weight:700'},'↪ RCF / RCFA order — not one of the 6 note-builder flows.'),
+      el('div',{class:'muted',style:'margin-top:3px'},'Remote Call Forwarding follows its own rule — note reads “SWITCH TO RCFA ONLY”, footer is the RCF tech (e.g. -TDF). '),
+      el('button',{class:'btn sm',style:'margin-top:6px',onclick:()=>{setTab('reference');refSection='rcf';renderReference();}},'Open Reference ▸ RCF'));
+    box.append(rb); }
   if(suggest){
     const guess=guessWorkflow(suggest, up);
     const row=el('div',{style:'margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap'});
@@ -918,7 +925,7 @@ function routeRequest(text){
   else if(up.includes('XCONN')) flowKey='CROSS_CONNECT';
   else if(up.includes('MOVE')) flowKey='MOVE';
   else if(up.includes('UPGRADE')||up.includes('BND')||up.includes('BOND')||up.includes('ADSL')||up.includes('VDSL')) flowKey='UPGRADE';
-  else if(up.includes('RECON')||up.includes('CONN')||up.includes('QDS')) flowKey='CONNECT_RECONNECT';
+  else if(up.includes('RECON')||up.includes('CONN')||up.includes('QDS')||up.includes('CORRECT')||up.includes('SERVICE POINT')) flowKey='CONNECT_RECONNECT';
   else if(up.includes('DISC')||up.includes('NPD')||up.includes('VACA')) flowKey='DISCONNECT';
   const member=flowKey?guessWorkflow(flowKey,up):null;
   return {request:text, so, phone, flowKey, member, splice:/SPLIC/.test(up), xconn:/XCONN/.test(up)};
@@ -976,8 +983,16 @@ function guessWorkflow(flowKey, up){
   const bonded=has('BND')||has('BOND');
   let name=null;
   if(flowKey==='DISCONNECT') name = has('VACA')?'VACA_DISCONNECT' : has('NPD')?'NPD' : has('EDGE')?'EDGE_DISCONNECT' : has('BILL')?'BILLING_ONLY' : 'DISCONNECT_ONLY';
-  else if(flowKey==='UPGRADE') name = has('XCONN')?'UPGRADE_XCONN' : has('ADSL')?'UPGRADE_ADSL' : has('VDSL')?'UPGRADE_VDSL' : has('DOWNGRADE')?'DOWNGRADE' : bonded?'UPGRADE_BONDED' : 'UPGRADE_GENERIC';
-  else if(flowKey==='CONNECT_RECONNECT') name = has('VACA')?'VACA_RECONNECT' : (has('DISC')&&has('QDS'))?'GEN_DISCONNECT_QDS_BILLING' : has('QDS')?'RECONNECT_ONLY' : 'CONNECT_ONLY';
+  else if(flowKey==='UPGRADE') name = has('XCONN')?'UPGRADE_XCONN' : has('ADSL')?'UPGRADE_ADSL' : has('VDSL')?'UPGRADE_VDSL' : has('DOWNGRADE')?'DOWNGRADE' : (has('BAD PORT')||has('BAD_PORT')||has('BADPORT'))?'BAD_PORT_UPDATE' : bonded?'UPGRADE_BONDED' : 'UPGRADE_GENERIC';
+  else if(flowKey==='CONNECT_RECONNECT') name =
+        (has('CORRECT')||has('SERVICE POINT')||has('SVC POINT')) ? 'SERVICE_POINT_CORRECTION'
+      : has('VACA') ? 'VACA_RECONNECT'
+      : (has('DISC')&&has('QDS')&&has('CONN')) ? 'DISC_QDS_CONN'        // "qds disc & conn w/dsl"
+      : (has('DISC')&&has('QDS')&&has('RECON')) ? 'DISC_QDS_RECON'
+      : (has('DISC')&&has('QDS')) ? 'GEN_DISCONNECT_QDS_BILLING'
+      : has('RECON') ? 'RECONNECT_ONLY'
+      : has('QDS') ? 'RECONNECT_ONLY'
+      : 'CONNECT_ONLY';
   else if(flowKey==='MOVE') name = has('QDS')?'MOVE_QDS' : 'MOVE';
   else if(flowKey==='FIBER_FTTH') name = (has('EDGE')&&has('UPGRADE'))?'EDGE_UPGRADE' : has('EDGE')?'EDGE_OTHER' : has('UPGRADE')?'UPGRADE_FTTH' : has('CONN')?'FTTH_CONNECT' : 'FTTH_OTHER';
   else if(flowKey==='CROSS_CONNECT') name = has('UPGRADE')?'UPGRADE_XCONN' : 'CROSS_CONNECT';
@@ -2163,7 +2178,10 @@ function quizStart(){
 }
 /* fallback practice record built from a curated EXAMPLE (real-shape, no customer data) */
 function quizFromExample(){
-  const ex=EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)];
+  // only quiz on examples that resolve to a buildable workflow (skips e.g. the RCF example, which has no note-builder flow)
+  const routable=EXAMPLES.filter(ex=>{ try{ const r=routeRequest(ex[1]); return r&&r.flowKey&&r.member; }catch(e){ return false; } });
+  const pool=routable.length?routable:EXAMPLES;
+  const ex=pool[Math.floor(Math.random()*pool.length)];
   const [title,req,note]=ex;
   App.training={ answer:note, source:{example:title}, request:req, so:(req.match(/\d{4,7}/)||[''])[0], reveal:false, fromExample:true };
   setTab('workflow');
@@ -2173,12 +2191,33 @@ function quizFromExample(){
   else { startScreen(); }
   toast('Quiz · curated example: '+title, 4000);
 }
+/* normalize a note line so scoring forgives case, spacing and number-separator style
+   ("559-555-8989" == "559 555 8989") without erasing the structural words. */
+function normLine(s){
+  return (s||'').toLowerCase()
+    .replace(/[‐-―]/g,'-')        // unicode dashes -> hyphen
+    .replace(/(\d)[\s.\-](?=\d)/g,'$1')     // join number separators: 6.3.26 -> 6326, 559-555-8989 -> 5595558989
+    .replace(/\d+/g,'#')                     // genericize pure numbers: score the STRUCTURE, not the exact SO/phone/date
+    .replace(/\s+/g,' ').trim()
+    .replace(/[.,;]+$/,'');                  // drop trailing punctuation
+}
+/* credit for one expected line vs the set of normalized lines the user wrote:
+   1.0 exact (normalized), else best token-overlap (Jaccard) if >=0.55, else 0. */
+function lineCredit(exp, mineNorms){
+  const e=normLine(exp); if(!e) return 1;        // blank lines are free
+  if(mineNorms.has(e)) return 1;
+  const et=e.split(' ').filter(Boolean); let best=0;
+  mineNorms.forEach(m=>{ const mt=m.split(' ').filter(Boolean);
+    const inter=et.filter(x=>mt.includes(x)).length;
+    const uni=new Set([...et,...mt]).size; const j=uni?inter/uni:0; if(j>best)best=j; });
+  return best>=0.55 ? best : 0;
+}
 function scoreQuiz(){
   const t=App.training; if(!t||!t.answer) return;
-  const mine=new Set(noteText().split('\n').map(s=>s.trim().toLowerCase()).filter(Boolean));
+  const mineNorms=new Set(noteText().split('\n').map(normLine).filter(Boolean));
   const exp=t.answer.split('\n').map(s=>s.trim()).filter(Boolean);
-  const matched=exp.filter(l=>mine.has(l.toLowerCase())).length;
-  const pct=exp.length?Math.round(matched/exp.length*100):0;
+  let credit=0; exp.forEach(l=>credit+=lineCredit(l,mineNorms));
+  const pct=exp.length?Math.round(credit/exp.length*100):0;
   const q=readJSON('so_quiz')||{n:0,sum:0}; q.n++; q.sum+=pct; try{localStorage.setItem('so_quiz',JSON.stringify(q));}catch(e){}
   t.scored=pct; t.reveal=true;
   (App.member?renderWizardStep():startScreen());
@@ -2201,12 +2240,13 @@ function trainingBanner(){
   c.append(el('div',{class:'pc-guide'}, t.quiz?'Build the note from this real order, then Score my note.':('Build the note from this real order, then reveal the expected note to check yourself.'+(t.answer?'':' (No expected note in this record.)'))));
   if(t.request) c.append(el('div',{style:'font-size:12px;margin-top:6px'},el('b',{},'Request: '),esc(t.request)));
   if(t.reveal&&t.answer){
-    const mine=new Set(noteText().split('\n').map(s=>s.trim().toLowerCase()).filter(Boolean));
+    const mineNorms=new Set(noteText().split('\n').map(normLine).filter(Boolean));
     const box=el('div',{style:'margin-top:8px;background:var(--inset);padding:10px;border-radius:8px'});
-    box.append(el('div',{class:'muted',style:'font-size:11px;margin-bottom:5px'},'Expected note — ✓ a matching line is in yours, • still missing:'));
+    box.append(el('div',{class:'muted',style:'font-size:11px;margin-bottom:5px'},'Expected note — ✓ in yours (✓~ close), • still missing:'));
     t.answer.split('\n').forEach(line=>{
-      const tr=line.trim(); const has= tr==='' || mine.has(tr.toLowerCase());
-      box.append(el('div',{class:'diff-line '+(has?'diff-ok':'diff-miss')}, (tr===''?'':(has?'✓ ':'• '))+line));
+      const tr=line.trim(); const cr= tr==='' ? 1 : lineCredit(line, mineNorms);
+      const mark = tr===''?'' : cr>=0.999?'✓ ' : cr>0?'✓~ ' : '• ';
+      box.append(el('div',{class:'diff-line '+(cr>0?'diff-ok':'diff-miss')}, mark+line));
     });
     c.append(box);
   }
