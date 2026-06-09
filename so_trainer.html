@@ -487,6 +487,10 @@ body.fs-l{font-size:15.5px}
         <input type="file" id="corpusFile" accept=".json,application/json" hidden>
         <p class="muted" style="margin-top:10px;font-size:12px">Accepts: corpus SOs, equipment_examples, ttickets, Sili CLLI dictionary.</p>
       </div>
+      <div class="card" style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <button class="btn sm primary" id="corpusQuizSample">🎲 Quiz me on a sample</button>
+        <span class="muted" style="font-size:12px">No corpus yet? Practice blind on a curated example order, then score your note. Upload an export above to practice on real SOs.</span>
+      </div>
       <div id="corpusBody"></div>
     </div>
   </section>
@@ -1444,6 +1448,7 @@ function flagBtn(target, ctx){
     onclick:e=>{e.preventDefault();e.stopPropagation();openCapture({...ctx,target});}},'⚑');
 }
 function openCapture(ctx){
+  ctx=ctx||{};   // defensive: every real caller passes a context, but never crash on a bare call
   App.capture={ctx, tag:'Wrong', shots:[]};
   // build context block
   const c={
@@ -2147,10 +2152,26 @@ window.addEventListener('afterprint',()=>document.body.classList.remove('print-c
 /* quiz: pick a random real SO (with a note), load it blind to practice + score */
 function quizStart(){
   const notes=corpusRecs.filter(r=>fieldVal(r,corpusKeys.note).trim());
-  if(!notes.length){ toast('No records with a note to quiz on'); return; }
-  const rec=notes[Math.floor(Math.random()*notes.length)];
-  loadForTraining(rec); if(App.training){ App.training.quiz=true; App.training.scored=null; App.training.reveal=false; }
+  if(notes.length){
+    const rec=notes[Math.floor(Math.random()*notes.length)];
+    loadForTraining(rec);
+  } else {
+    quizFromExample();   // no corpus uploaded — practice on a curated example so the loop works out of the box
+  }
+  if(App.training){ App.training.quiz=true; App.training.scored=null; App.training.reveal=false; }
   if(App.member) renderWizardStep();
+}
+/* fallback practice record built from a curated EXAMPLE (real-shape, no customer data) */
+function quizFromExample(){
+  const ex=EXAMPLES[Math.floor(Math.random()*EXAMPLES.length)];
+  const [title,req,note]=ex;
+  App.training={ answer:note, source:{example:title}, request:req, so:(req.match(/\d{4,7}/)||[''])[0], reveal:false, fromExample:true };
+  setTab('workflow');
+  if($('#soRequest')) $('#soRequest').value=req;
+  let r=null; try{ r=routeRequest(req); }catch(e){}
+  if(r && r.flowKey && r.member){ chooseWorkflow(r.flowKey, r.member, {so:App.training.so}); }
+  else { startScreen(); }
+  toast('Quiz · curated example: '+title, 4000);
 }
 function scoreQuiz(){
   const t=App.training; if(!t||!t.answer) return;
@@ -2193,6 +2214,7 @@ function trainingBanner(){
 }
 $('#corpusPick').onclick=()=>$('#corpusFile').click();
 $('#corpusFile').onchange=e=>{ if(e.target.files[0]) handleCorpus(e.target.files[0]); };
+$('#corpusQuizSample').onclick=quizStart;   // works with no corpus — falls back to a curated example
 ['dragover','dragleave','drop'].forEach(ev=>$('#corpusDrop').addEventListener(ev,e=>{e.preventDefault();
   $('#corpusDrop').classList.toggle('over',ev==='dragover');
   if(ev==='drop'&&e.dataTransfer.files[0]) handleCorpus(e.dataTransfer.files[0]);}));
