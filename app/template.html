@@ -1359,6 +1359,10 @@ function buildNoteLines(){
       const v= ph==='date' ? (App.values.date||todayMDYY()) : (App.values[ph]||'').trim();
       if(v) anyFilled=true; return v;
     });
+    // the date line carries the work descriptor between dashes; keep it in sync with the editable
+    // Action field so changing the speed/description updates BOTH header lines, not just line 1.
+    if(/\{date\}/.test(raw)){ const def=actionOf(App.template);
+      if(def && action && action!==def) line=line.split(def).join(action); }
     const isFooter=/^-\s*\{?tech\}?\s*-?$/.test(raw.trim());
     if(isFooter){ if((App.values.tech||'').trim()) footer={t:line.replace(/\s+$/,''), cls:'foot'}; return; }
     // N/A rule: a line that HAD placeholders but none got a value is dropped —

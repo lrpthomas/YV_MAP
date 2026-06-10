@@ -177,7 +177,7 @@
     {
      "corpus_workflow": "MOVE_QDS",
      "count": 108,
-     "template": "{date} - Move DSL from 3390 to 2801 - No FACS Changed\n{phone_out} ({account_out}) OUT\n{phone_qds} QDS IN\n*TEL\n{tel_port}\n{tel_location}\n*DSL\n{dsl_port1}\n{dsl_port2}\n{dsl_location1}\n{dsl_location2}\n-{tech}",
+     "template": "{date} -Move DSL- {facs_status}\n{phone_out} ({account_out}) OUT\n{phone_qds} QDS IN\n*TEL\n{tel_port}\n{tel_location}\n*DSL\n{dsl_port1}\n{dsl_port2}\n{dsl_location1}\n{dsl_location2}\n-{tech}",
      "variants": 87
     }
    ]
@@ -224,7 +224,7 @@
     {
      "corpus_workflow": "PATH_TRACE_UPDATE",
      "count": 1,
-     "template": "{date} - QDS DISC & CONN FTTH 100/100\n{phone_qds} QDS IN\n{phone_in} IN\n{port1}\n{port2}\n-{tech}",
+     "template": "{date} -QDS DISC & CONN FTTH- {facs_status}\n{phone_qds} QDS IN\n{phone_in} IN\n{port1}\n{port2}\n-{tech}",
      "variants": 1
     }
    ]
