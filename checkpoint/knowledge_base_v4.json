@@ -212,7 +212,7 @@
     {
      "corpus_workflow": "FTTH_CONNECT",
      "count": 4,
-     "template": "{date} - FTTH 1G/1G - {facs_status}\n{phone_in} IN\n-{tech}",
+     "template": "{date} -CONN FTTH 1G/1G (CBOL)- {facs_status}\n{phone_in} IN\n{port}\n{gpon}\n{splitter}\n{dist_fiber}\nFSAN: {fsan}\n-{tech}",
      "variants": 4
     },
     {

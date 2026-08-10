@@ -663,7 +663,10 @@ const FIELD_DEFS = {
   tel_location:{label:"*TEL location", hint:"{wirecenter} {node-shelf-card-port} BP,{bp}", src:"Node/Shelf/Card/Port=LinePacks Type · BP=LinePacks LN", loc:true},
   dsl_location:{label:"*DSL location", hint:"{wirecenter} {node-shelf-card-port} BP,{bp}", src:"LinePacks Type + LN", loc:true},
   edge_id: {label:"EDGE id", hint:"EDGE service identifier", src:"iVUE EDGE agreement (125-prefixed)"},
-  fsan:    {label:"FSAN", hint:"ONT FSAN", src:"ONT label / Calix CMS"},
+  fsan:    {label:"FSAN", hint:"ONT FSAN serial (CXNK…) — the modem/ONT the tech delivers", src:"ONT label / Calix CMS / Modem # in the SO"},
+  gpon:    {label:"GPON card/port", hint:"Wirecenter_GPON shelf-slot-port, e.g. PRSV_GPON 01-01-05", src:"iVUE → equipment record → Path Trace Connectivity"},
+  splitter:{label:"Splitter & port", hint:"Splitter + port leg, e.g. PRSV S5 P4", src:"iVUE → Path Trace (splitter + port)"},
+  dist_fiber:{label:"Dist fiber / MST / PED", hint:"cable,pair + MST port + PED, e.g. PRSV,251 MST,6 AH1636", src:"ASBUILT / Fiber Book"},
 };
 function fieldDef(ph){
   const m = ph.match(/^(.*?)(\d+)$/);                 // port1 → base "port", n "1"
@@ -1892,6 +1895,7 @@ const SAMPLE={
   tel_location:'TFRD N06-2-02-07 BP,157', tel_location1:'TFRD N06-2-02-07 BP,157', tel_location2:'TFRD N06-2-02-09 BP,159',
   dsl_location:'TFRD N06-2-02-08 BP,158', dsl_location1:'TFRD N06-2-02-08 BP,158', dsl_location2:'TFRD N06-2-02-10 BP,160',
   edge_id:'125 001 8989', fsan:'CXNK01234567',
+  gpon:'PRSV_GPON 01-01-05', splitter:'PRSV S5 P4', dist_fiber:'PRSV,251 MST,6 AH1636',
   // port3..port16 intentionally absent -> omitted by the N/A rule (realistic)
 };
 function renderSample(tpl){

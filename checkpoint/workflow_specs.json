@@ -1,395 +1,492 @@
 {
-  "_meta": {
-    "purpose": "Full-depth per-workflow enrichment for the SO Trainer engine: POINTER (system-touch order), workflow guidance, special note constructs, and field-source notes. Grounded in DATA_REVIEW_FINDINGS.md + knowledge_base_v4.json. Note templates themselves stay in the KB.",
-    "generated": "2026-06-03",
-    "facs_note": "facs_default is a starting suggestion only — the binary toggle is always user-driven. UNCHANGED when facilities are held/untouched; CHANGED when ports/pairs move, add, or release.",
-    "provenance": "PTCGIS_ServiceOrders.docx (Rosetta), Quintrex legacy doc, Troy Feldner .msg emails, RCF PDFs. Derived (template-only) specs are marked derived:true."
-  },
-  "DISCONNECT_ONLY": {
-    "branch": "Plain disconnect of a service (TEL or DSL).",
-    "facs_default": "UNCHANGED",
-    "guidance": "Remove the line; facilities normally stay assigned unless explicitly released. If internet is disconnecting, include the card/port so NetOps can de-provision.",
-    "pointer": [
-      "LinePacks: CO Disconnect the line; clear the agreement; Status += CODISC + date.",
-      "Cable Book: line through the 4-digit number; write CODISC + date.",
-      "iVUE: Service Points tab -> Disconnect Service Point (Activity = Disconnect).",
-      "Route along (P:KIMW)."
-    ],
-    "field_notes": {
-      "port1": "Primary port being disconnected (LinePacks CSX + Cable Book).",
-      "port2": "Second pair if bonded; omit if single."
-    }
-  },
-  "VACA_DISCONNECT": {
-    "branch": "Vacation disconnect — facilities HELD for the customer's return.",
-    "facs_default": "UNCHANGED",
-    "guidance": "Do NOT release the port/pair. iVUE Class Of Serv = VACATION. The facility is reserved so the VACA RECON can reuse it.",
-    "pointer": [
-      "LinePacks: mark vacation; KEEP the port assigned (do not clear facs).",
-      "iVUE: Disconnect Service Point, Class Of Serv = VACATION.",
-      "Route along."
-    ],
-    "field_notes": { "port": "The held port — stays assigned." }
-  },
-  "NPD": {
-    "branch": "Non-Pay Disconnect — phone removed, QDS (restricted dial tone) stays.",
-    "facs_default": "UNCHANGED",
-    "guidance": "Suspend for non-payment; the QDS line remains so the customer keeps restricted service. Facilities held.",
-    "pointer": [
-      "LinePacks: suspend phone; QDS stays.",
-      "iVUE: Class Of Serv = ARREARS BILLING.",
-      "Route along."
-    ],
-    "field_notes": { "port": "Suspended line port." }
-  },
-  "BILLING_ONLY": {
-    "branch": "DISC TEL (CBOL) & Billing Correction — phone off, internet stays.",
-    "facs_default": "UNCHANGED",
-    "guidance": "Remove the phone line via CBOL; the internet service stays up on its pair. Mostly a billing correction with a facility note.",
-    "pointer": [
-      "LinePacks: disconnect the TEL line only; leave the DSL/internet pair.",
-      "iVUE: billing correction; confirm the internet SP remains connected.",
-      "Route along."
-    ],
-    "field_notes": { "phone_out": "Phone being removed (masked).", "port1": "TEL port out.", "port2": "DSL/internet port that STAYS." }
-  },
-  "EDGE_DISCONNECT": {
-    "branch": "Disconnect an EDGE (fiber) service.",
-    "facs_default": "UNCHANGED",
-    "guidance": "EDGE = fiber product. Disconnect the service; note carries the action only (no copper port line).",
-    "pointer": [
-      "iVUE: Disconnect the EDGE Service Point.",
-      "LinePacks: clear ONT/GPON assignment if releasing.",
-      "Route along."
-    ],
-    "field_notes": {}
-  },
-  "NPD_DISCONNECT": {
-    "branch": "Non Paid Suspend on a bonded service (*TEL / *DSL).",
-    "facs_default": "UNCHANGED",
-    "guidance": "Suspend a bonded customer for non-payment; both legs noted. Facilities held.",
-    "pointer": [
-      "LinePacks: suspend; keep BND TEL/DSL ports (n,n) assigned.",
-      "iVUE: Class Of Serv = ARREARS BILLING.",
-      "Route along."
-    ],
-    "field_notes": {
-      "tel_port": "*TEL leg port.", "tel_location": "*TEL location (wirecenter node-shelf-card-port BP).",
-      "dsl_port": "*DSL leg port.", "dsl_location": "*DSL location."
-    }
-  },
-  "GEN_DISCONNECT_QDS_BILLING": {
-    "branch": "DISC TEL (CBOL), QDS CONN, & Billing Correction.",
-    "facs_default": "UNCHANGED",
-    "guidance": "Remove the phone (internet stays via CBOL), connect the QDS line, fix billing. The most common CONNECT/RECONNECT pattern.",
-    "pointer": [
-      "LinePacks: DISC TEL (CBOL); CONN the QDS line.",
-      "iVUE: connect QDS Service Point; billing correction.",
-      "Route along."
-    ],
-    "field_notes": { "phone_out": "Phone removed (masked).", "phone_qds": "QDS number connected (masked).", "port": "The serving port." }
-  },
-  "DISC_QDS_RECON": {
-    "branch": "DISC & QDS CONN — disconnect phone, connect QDS.",
-    "facs_default": "UNCHANGED",
-    "guidance": "Swap the working number off and bring the QDS line on, same facility.",
-    "pointer": [
-      "LinePacks: disconnect phone; connect QDS.",
-      "iVUE: reconnect SP as QDS.",
-      "Route along."
-    ],
-    "field_notes": { "phone_out": "Out (masked).", "account_out": "Account (masked).", "phone_qds": "QDS IN (masked).", "port": "Serving port." }
-  },
-  "VACA_RECONNECT": {
-    "branch": "Vacation reconnect — customer back; reuse the held facility.",
-    "facs_default": "UNCHANGED",
-    "guidance": "The VACA DISC held the port — reconnect on the same facility. No new assignment needed.",
-    "pointer": [
-      "iVUE: Reconnect Service Point (Activity = Connect) on the held facility.",
-      "LinePacks: re-enable; confirm the held port.",
-      "Route along."
-    ],
-    "field_notes": { "port": "The previously held port, now reconnected." }
-  },
-  "RECONNECT_ONLY": {
-    "branch": "QDS CONN — straightforward reconnect.",
-    "facs_default": "UNCHANGED",
-    "guidance": "Connect the QDS line on an available/held port.",
-    "pointer": [
-      "iVUE: connect the QDS Service Point.",
-      "LinePacks: confirm/assign the port.",
-      "Route along."
-    ],
-    "field_notes": { "phone_qds": "QDS IN (masked).", "port1": "Port.", "port2": "Second pair if bonded." }
-  },
-  "SERVICE_POINT_CORRECTION": {
-    "branch": "Correcting Service Points — record cleanup, usually no facility change.",
-    "facs_default": "UNCHANGED",
-    "guidance": "Fix mismatched SP records so iVUE matches the switch. Often header-only (no port lines).",
-    "pointer": [
-      "iVUE: correct the Service Point association.",
-      "LinePacks: verify against the switch (the north-star: records must match what's in the switch).",
-      "Route along."
-    ],
-    "field_notes": {}
-  },
-  "DISC_QDS_CONN": {
-    "branch": "Disconnect + QDS connect (header desc carried by FACS state).",
-    "facs_default": "UNCHANGED",
-    "guidance": "Disconnect the old number, connect QDS on the same serving port.",
-    "pointer": [
-      "LinePacks: DISC old; CONN QDS.",
-      "iVUE: update Service Points.",
-      "Route along."
-    ],
-    "field_notes": { "phone_out": "Out (masked).", "phone_qds": "QDS IN (masked).", "port": "Serving port." }
-  },
-  "CONNECT_ONLY": {
-    "branch": "New connect of service (bonded *TEL / *DSL).",
-    "facs_default": "CHANGED",
-    "guidance": "Fresh install — assign facilities and connect. Facilities change (new assignment).",
-    "pointer": [
-      "Cable Book: find an available pair to the drop ped.",
-      "LinePacks: assign the port(s) (GET/PUT).",
-      "iVUE: connect the Service Point(s).",
-      "Route along."
-    ],
-    "field_notes": {
-      "tel_port": "*TEL port.", "tel_location": "*TEL location.",
-      "dsl_port": "*DSL port.", "dsl_location": "*DSL location."
-    }
-  },
-  "UPGRADE_BONDED": {
-    "branch": "Internet upgrade to a bonded tier (e.g. 100/20 BND) — *TEL / *DSL.",
-    "facs_default": "UNCHANGED",
-    "guidance": "Bonded = two pairs: *TEL leg + *DSL leg, each a port line + location. If ports must move for the bond, set FACS CHANGED and consider a splice.",
-    "pointer": [
-      "LinePacks: confirm/assign BND TEL (n,n) + BND DSL (n,n) ports.",
-      "Cable Book: verify the DSL pair to the drop ped (and PIC).",
-      "iVUE: update facilities for the bonded agreement.",
-      "If a new DSL pair needs splicing -> enable the splice option (email Dispatch).",
-      "Route along."
-    ],
-    "options": { "splice": true },
-    "field_notes": {
-      "tel_port": "*TEL leg port (LinePacks CSX + Cable Book).",
-      "tel_location": "*TEL location (LinePacks Type + LN).",
-      "dsl_port": "*DSL leg port; may carry PIC,n.",
-      "dsl_location": "*DSL location."
-    }
-  },
-  "UPGRADE_ADSL": {
-    "branch": "Upgrade to an ADSL-bonded tier (e.g. 25/3 ADSL BND).",
-    "facs_default": "UNCHANGED",
-    "guidance": "ADSL bonded upgrade across *TEL / *DSL legs. ADTRAN cards: shorter/faster, good odd/odd & even/even.",
-    "pointer": [
-      "LinePacks: confirm bonded ports for the ADSL tier.",
-      "Cable Book: verify pairs.",
-      "iVUE: update facilities.",
-      "Route along."
-    ],
-    "options": { "splice": true },
-    "field_notes": { "tel_port": "*TEL leg.", "dsl_port": "*DSL leg.", "tel_location": "*TEL location.", "dsl_location": "*DSL location." }
-  },
-  "UPGRADE_GENERIC": {
-    "branch": "Single-pair internet upgrade (e.g. 25/3 SNGL).",
-    "facs_default": "UNCHANGED",
-    "guidance": "Single pair upgrade — one port line. No bonding.",
-    "pointer": [
-      "LinePacks: confirm the single port for the new tier.",
-      "Cable Book: verify the pair.",
-      "iVUE: update facilities.",
-      "Route along."
-    ],
-    "field_notes": { "port": "The single serving port." }
-  },
-  "GENERAL": {
-    "branch": "Bulk port update (e.g. 'need DSL only BND ports, POTS stays') — up to 16 port lines.",
-    "facs_default": "CHANGED",
-    "guidance": "Per-HAN bulk facility change across many ports. Fill only the ports involved; the rest omit (N/A rule).",
-    "pointer": [
-      "LinePacks: per HAN, assign/move the DSL bond ports; POTS unchanged.",
-      "Cable Book: verify each pair.",
-      "iVUE: update facilities for each.",
-      "Route along."
-    ],
-    "field_notes": { "port1": "First port; add as many as the order needs (others omit)." }
-  },
-  "UPGRADE_VDSL": {
-    "branch": "Single-pair VDSL upgrade (e.g. 25/3 SNGL VDSL).",
-    "facs_default": "UNCHANGED",
-    "guidance": "VDSL single pair. One port line.",
-    "pointer": [
-      "LinePacks: confirm the VDSL port.",
-      "Cable Book: verify the pair.",
-      "iVUE: update facilities.",
-      "Route along."
-    ],
-    "field_notes": { "port": "VDSL serving port." }
-  },
-  "BAD_PORT_UPDATE": {
-    "branch": "Per-Han new ports — moving off bad ports to new *TEL / *DSL ports.",
-    "facs_default": "CHANGED",
-    "guidance": "Replace failing ports with new ones; both legs get new port + location. Facilities change.",
-    "pointer": [
-      "LinePacks: GET old ports; PUT the new *TEL/*DSL ports.",
-      "Cable Book: verify new pairs.",
-      "iVUE: update facilities to the new ports.",
-      "Route along."
-    ],
-    "field_notes": {
-      "phone_out": "Working number (masked).", "account_out": "Account (masked).",
-      "tel_port1": "New *TEL port.", "tel_port2": "Second *TEL pair if any.",
-      "dsl_port1": "New *DSL port.", "dsl_port2": "Second *DSL pair if any."
-    }
-  },
-  "DOWNGRADE": {
-    "branch": "Internet downgrade (e.g. to 25/3) across *TEL / *DSL.",
-    "facs_default": "UNCHANGED",
-    "guidance": "Step the tier down; usually the same facilities. (Q15 downgrade specifics still settling.)",
-    "pointer": [
-      "LinePacks: adjust the tier on the existing ports.",
-      "iVUE: update the agreement tier.",
-      "Route along."
-    ],
-    "field_notes": { "tel_port": "*TEL leg.", "dsl_port": "*DSL leg." }
-  },
-  "MOVE": {
-    "branch": "Move service — NEW ADDRESS block + OLD ADDRESS block. Both addresses fully written.",
-    "facs_default": "CHANGED",
-    "guidance": "Write up BOTH ends: new address (connect side) and old address (disconnect side). Same or cross exchange. Facilities change.",
-    "pointer": [
-      "Cable Book: find facilities at the NEW address.",
-      "LinePacks: assign new port; disconnect old port.",
-      "iVUE: Move the agreement; connect new SP, disconnect old SP.",
-      "Route along."
-    ],
-    "options": { "twoAddress": true },
-    "field_notes": { "phone_out": "Out at old (masked).", "phone_in": "In at new (masked).", "port1": "New-address port.", "port2": "Old-address port." }
-  },
-  "MOVE_QDS": {
-    "branch": "Move DSL between numbers with QDS — *TEL / *DSL at the destination.",
-    "facs_default": "CHANGED",
-    "guidance": "Move the DSL from one number to another, QDS in. Bonded legs at the destination.",
-    "pointer": [
-      "LinePacks: move the DSL ports; QDS in.",
-      "Cable Book: verify destination pairs.",
-      "iVUE: update Service Points.",
-      "Route along."
-    ],
-    "options": { "twoAddress": true },
-    "field_notes": { "phone_out": "Out (masked).", "phone_qds": "QDS IN (masked).", "dsl_port1": "DSL port.", "dsl_port2": "Second DSL pair." }
-  },
-  "FTTH_OTHER": {
-    "branch": "Fiber connect (e.g. CONN FTTH 1G/1G, CBOL).",
-    "facs_default": "UNCHANGED",
-    "guidance": "GPON/ONT path. CBOL = no CRV needed. The Node is the parent GPON (e.g. SVLK_GPON), NOT the splitter — write the GPON so NetOps finds it in Calix.",
-    "pointer": [
-      "LinePacks: assign the GPON/splitter port; Node = parent GPON.",
-      "iVUE: connect the fiber Service Point; set the ONT port.",
-      "Route along."
-    ],
-    "field_notes": { "port": "GPON/ONT serving port (parent GPON as Node)." }
-  },
-  "UPGRADE_FTTH": {
-    "branch": "Fiber upgrade (e.g. INT Upgrade to 100/100 FTTH).",
-    "facs_default": "UNCHANGED",
-    "guidance": "Step the fiber tier up on the existing ONT path.",
-    "pointer": [
-      "LinePacks: confirm the GPON/ONT port for the new tier.",
-      "iVUE: update the fiber agreement.",
-      "Route along."
-    ],
-    "field_notes": { "phone_out": "Out (masked).", "account_out": "Account (masked).", "port1": "ONT port.", "port2": "Second service on ONT (PRT-2) if any." }
-  },
-  "EDGE_UPGRADE": {
-    "branch": "EDGE fiber upgrade (e.g. to 1G/1G).",
-    "facs_default": "UNCHANGED",
-    "guidance": "EDGE product tier change. Action-only note.",
-    "pointer": [
-      "iVUE: update the EDGE agreement tier.",
-      "Route along."
-    ],
-    "field_notes": {}
-  },
-  "EDGE_OTHER": {
-    "branch": "EDGE connect/other (e.g. CONN EDGE 100/100).",
-    "facs_default": "UNCHANGED",
-    "guidance": "EDGE service action. Action-only note (no copper port line).",
-    "pointer": [
-      "iVUE: connect/adjust the EDGE Service Point.",
-      "Route along."
-    ],
-    "field_notes": {}
-  },
-  "FTTH_CONNECT": {
-    "branch": "FTTH connect (thin — 1G/1G).",
-    "facs_default": "UNCHANGED",
-    "guidance": "Fiber connect; number in. Derived from a small sample.",
-    "derived": true,
-    "pointer": [
-      "LinePacks: assign the ONT port.",
-      "iVUE: connect the fiber SP.",
-      "Route along."
-    ],
-    "field_notes": { "phone_in": "Number in (masked)." }
-  },
-  "EDGE_CONNECT": {
-    "branch": "EDGE connect with FSAN (thin sample).",
-    "facs_default": "CHANGED",
-    "guidance": "Connect an EDGE service; carries the EDGE id + ONT FSAN. Derived from a small sample.",
-    "derived": true,
-    "pointer": [
-      "iVUE: connect the EDGE Service Point; record FSAN.",
-      "LinePacks: assign ONT.",
-      "Route along."
-    ],
-    "field_notes": { "edge_id": "EDGE service id.", "fsan": "ONT FSAN." }
-  },
-  "PATH_TRACE_UPDATE": {
-    "branch": "Path-trace / QDS disc + CONN FTTH (single-sample).",
-    "facs_default": "CHANGED",
-    "guidance": "Rare path-trace update tied to a fiber connect. Derived from one sample — confirm specifics.",
-    "derived": true,
-    "pointer": [
-      "LinePacks: update the path-trace; QDS in; connect FTTH.",
-      "iVUE: reconcile Service Points.",
-      "Route along."
-    ],
-    "field_notes": { "phone_qds": "QDS IN (masked).", "phone_in": "In (masked).", "port1": "Port.", "port2": "Second pair." }
-  },
-  "CROSS_CONNECT": {
-    "branch": "Cross-connect — bonded upgrade needing a jumper move at the SAI/X-Connect.",
-    "facs_default": "CHANGED",
-    "guidance": "The DSL pair line carries XCONN,n + PIC,n, and a jumper-move instruction tells the splicer which jumper to remove and where to re-jump. Enable the XCONN option to add that instruction line.",
-    "pointer": [
-      "X-Connect report + Cable Book: identify the SAI cross-connect pair (XCONN,n).",
-      "LinePacks: assign the bonded *TEL/*DSL ports.",
-      "Write the jumper-move instruction (remove old jumper, re-jump to new pair).",
-      "Email Dispatch / splicer as needed; Route along."
-    ],
-    "options": { "xconn": true },
-    "field_notes": {
-      "phone_qds": "QDS IN (masked).", "phone_in": "In (masked).", "account_in": "Account (masked).",
-      "tel_port": "*TEL port.", "dsl_port": "*DSL port; carries XCONN,n PIC,n.",
-      "tel_location": "*TEL location.", "dsl_location": "*DSL location."
-    }
-  },
-  "UPGRADE_XCONN": {
-    "branch": "Upgrade with a cross-connect (moved + added pair, XCONN).",
-    "facs_default": "CHANGED",
-    "guidance": "Internet upgrade that also moves/adds a pair via cross-connect. DSL line carries XCONN,n; add the jumper-move instruction.",
-    "pointer": [
-      "X-Connect report + Cable Book: find the XCONN pair.",
-      "LinePacks: move/assign the bonded ports.",
-      "Write the jumper-move instruction.",
-      "Route along."
-    ],
-    "options": { "xconn": true },
-    "field_notes": {
-      "phone_out": "Out (masked).", "account_out": "Account (masked).", "phone_qds": "QDS IN (masked).",
-      "tel_port": "*TEL port.", "dsl_port": "*DSL port; carries XCONN,n.",
-      "tel_location": "*TEL location.", "dsl_location": "*DSL location."
-    }
+ "_meta": {
+  "purpose": "Full-depth per-workflow enrichment for the SO Trainer engine: POINTER (system-touch order), workflow guidance, special note constructs, and field-source notes. Grounded in DATA_REVIEW_FINDINGS.md + knowledge_base_v4.json. Note templates themselves stay in the KB.",
+  "generated": "2026-06-03",
+  "facs_note": "facs_default is a starting suggestion only — the binary toggle is always user-driven. UNCHANGED when facilities are held/untouched; CHANGED when ports/pairs move, add, or release.",
+  "provenance": "PTCGIS_ServiceOrders.docx (Rosetta), Quintrex legacy doc, Troy Feldner .msg emails, RCF PDFs. Derived (template-only) specs are marked derived:true."
+ },
+ "DISCONNECT_ONLY": {
+  "branch": "Plain disconnect of a service (TEL or DSL).",
+  "facs_default": "UNCHANGED",
+  "guidance": "Remove the line; facilities normally stay assigned unless explicitly released. If internet is disconnecting, include the card/port so NetOps can de-provision.",
+  "pointer": [
+   "LinePacks: CO Disconnect the line; clear the agreement; Status += CODISC + date.",
+   "Cable Book: line through the 4-digit number; write CODISC + date.",
+   "iVUE: Service Points tab -> Disconnect Service Point (Activity = Disconnect).",
+   "Route along (P:KIMW)."
+  ],
+  "field_notes": {
+   "port1": "Primary port being disconnected (LinePacks CSX + Cable Book).",
+   "port2": "Second pair if bonded; omit if single."
   }
+ },
+ "VACA_DISCONNECT": {
+  "branch": "Vacation disconnect — facilities HELD for the customer's return.",
+  "facs_default": "UNCHANGED",
+  "guidance": "Do NOT release the port/pair. iVUE Class Of Serv = VACATION. The facility is reserved so the VACA RECON can reuse it.",
+  "pointer": [
+   "LinePacks: mark vacation; KEEP the port assigned (do not clear facs).",
+   "iVUE: Disconnect Service Point, Class Of Serv = VACATION.",
+   "Route along."
+  ],
+  "field_notes": {
+   "port": "The held port — stays assigned."
+  }
+ },
+ "NPD": {
+  "branch": "Non-Pay Disconnect — phone removed, QDS (restricted dial tone) stays.",
+  "facs_default": "UNCHANGED",
+  "guidance": "Suspend for non-payment; the QDS line remains so the customer keeps restricted service. Facilities held.",
+  "pointer": [
+   "LinePacks: suspend phone; QDS stays.",
+   "iVUE: Class Of Serv = ARREARS BILLING.",
+   "Route along."
+  ],
+  "field_notes": {
+   "port": "Suspended line port."
+  }
+ },
+ "BILLING_ONLY": {
+  "branch": "DISC TEL (CBOL) & Billing Correction — phone off, internet stays.",
+  "facs_default": "UNCHANGED",
+  "guidance": "Remove the phone line via CBOL; the internet service stays up on its pair. Mostly a billing correction with a facility note.",
+  "pointer": [
+   "LinePacks: disconnect the TEL line only; leave the DSL/internet pair.",
+   "iVUE: billing correction; confirm the internet SP remains connected.",
+   "Route along."
+  ],
+  "field_notes": {
+   "phone_out": "Phone being removed (masked).",
+   "port1": "TEL port out.",
+   "port2": "DSL/internet port that STAYS."
+  }
+ },
+ "EDGE_DISCONNECT": {
+  "branch": "Disconnect an EDGE (fiber) service.",
+  "facs_default": "UNCHANGED",
+  "guidance": "EDGE = fiber product. Disconnect the service; note carries the action only (no copper port line).",
+  "pointer": [
+   "iVUE: Disconnect the EDGE Service Point.",
+   "LinePacks: clear ONT/GPON assignment if releasing.",
+   "Route along."
+  ],
+  "field_notes": {}
+ },
+ "NPD_DISCONNECT": {
+  "branch": "Non Paid Suspend on a bonded service (*TEL / *DSL).",
+  "facs_default": "UNCHANGED",
+  "guidance": "Suspend a bonded customer for non-payment; both legs noted. Facilities held.",
+  "pointer": [
+   "LinePacks: suspend; keep BND TEL/DSL ports (n,n) assigned.",
+   "iVUE: Class Of Serv = ARREARS BILLING.",
+   "Route along."
+  ],
+  "field_notes": {
+   "tel_port": "*TEL leg port.",
+   "tel_location": "*TEL location (wirecenter node-shelf-card-port BP).",
+   "dsl_port": "*DSL leg port.",
+   "dsl_location": "*DSL location."
+  }
+ },
+ "GEN_DISCONNECT_QDS_BILLING": {
+  "branch": "DISC TEL (CBOL), QDS CONN, & Billing Correction.",
+  "facs_default": "UNCHANGED",
+  "guidance": "Remove the phone (internet stays via CBOL), connect the QDS line, fix billing. The most common CONNECT/RECONNECT pattern.",
+  "pointer": [
+   "LinePacks: DISC TEL (CBOL); CONN the QDS line.",
+   "iVUE: connect QDS Service Point; billing correction.",
+   "Route along."
+  ],
+  "field_notes": {
+   "phone_out": "Phone removed (masked).",
+   "phone_qds": "QDS number connected (masked).",
+   "port": "The serving port."
+  }
+ },
+ "DISC_QDS_RECON": {
+  "branch": "DISC & QDS CONN — disconnect phone, connect QDS.",
+  "facs_default": "UNCHANGED",
+  "guidance": "Swap the working number off and bring the QDS line on, same facility.",
+  "pointer": [
+   "LinePacks: disconnect phone; connect QDS.",
+   "iVUE: reconnect SP as QDS.",
+   "Route along."
+  ],
+  "field_notes": {
+   "phone_out": "Out (masked).",
+   "account_out": "Account (masked).",
+   "phone_qds": "QDS IN (masked).",
+   "port": "Serving port."
+  }
+ },
+ "VACA_RECONNECT": {
+  "branch": "Vacation reconnect — customer back; reuse the held facility.",
+  "facs_default": "UNCHANGED",
+  "guidance": "The VACA DISC held the port — reconnect on the same facility. No new assignment needed.",
+  "pointer": [
+   "iVUE: Reconnect Service Point (Activity = Connect) on the held facility.",
+   "LinePacks: re-enable; confirm the held port.",
+   "Route along."
+  ],
+  "field_notes": {
+   "port": "The previously held port, now reconnected."
+  }
+ },
+ "RECONNECT_ONLY": {
+  "branch": "QDS CONN — straightforward reconnect.",
+  "facs_default": "UNCHANGED",
+  "guidance": "Connect the QDS line on an available/held port.",
+  "pointer": [
+   "iVUE: connect the QDS Service Point.",
+   "LinePacks: confirm/assign the port.",
+   "Route along."
+  ],
+  "field_notes": {
+   "phone_qds": "QDS IN (masked).",
+   "port1": "Port.",
+   "port2": "Second pair if bonded."
+  }
+ },
+ "SERVICE_POINT_CORRECTION": {
+  "branch": "Correcting Service Points — record cleanup, usually no facility change.",
+  "facs_default": "UNCHANGED",
+  "guidance": "Fix mismatched SP records so iVUE matches the switch. Often header-only (no port lines).",
+  "pointer": [
+   "iVUE: correct the Service Point association.",
+   "LinePacks: verify against the switch (the north-star: records must match what's in the switch).",
+   "Route along."
+  ],
+  "field_notes": {}
+ },
+ "DISC_QDS_CONN": {
+  "branch": "Disconnect + QDS connect (header desc carried by FACS state).",
+  "facs_default": "UNCHANGED",
+  "guidance": "Disconnect the old number, connect QDS on the same serving port.",
+  "pointer": [
+   "LinePacks: DISC old; CONN QDS.",
+   "iVUE: update Service Points.",
+   "Route along."
+  ],
+  "field_notes": {
+   "phone_out": "Out (masked).",
+   "phone_qds": "QDS IN (masked).",
+   "port": "Serving port."
+  }
+ },
+ "CONNECT_ONLY": {
+  "branch": "New connect of service (bonded *TEL / *DSL).",
+  "facs_default": "CHANGED",
+  "guidance": "Fresh install — assign facilities and connect. Facilities change (new assignment).",
+  "pointer": [
+   "Cable Book: find an available pair to the drop ped.",
+   "LinePacks: assign the port(s) (GET/PUT).",
+   "iVUE: connect the Service Point(s).",
+   "Route along."
+  ],
+  "field_notes": {
+   "tel_port": "*TEL port.",
+   "tel_location": "*TEL location.",
+   "dsl_port": "*DSL port.",
+   "dsl_location": "*DSL location."
+  }
+ },
+ "UPGRADE_BONDED": {
+  "branch": "Internet upgrade to a bonded tier (e.g. 100/20 BND) — *TEL / *DSL.",
+  "facs_default": "UNCHANGED",
+  "guidance": "Bonded = two pairs: *TEL leg + *DSL leg, each a port line + location. If ports must move for the bond, set FACS CHANGED and consider a splice.",
+  "pointer": [
+   "LinePacks: confirm/assign BND TEL (n,n) + BND DSL (n,n) ports.",
+   "Cable Book: verify the DSL pair to the drop ped (and PIC).",
+   "iVUE: update facilities for the bonded agreement.",
+   "If a new DSL pair needs splicing -> enable the splice option (email Dispatch).",
+   "Route along."
+  ],
+  "options": {
+   "splice": true
+  },
+  "field_notes": {
+   "tel_port": "*TEL leg port (LinePacks CSX + Cable Book).",
+   "tel_location": "*TEL location (LinePacks Type + LN).",
+   "dsl_port": "*DSL leg port; may carry PIC,n.",
+   "dsl_location": "*DSL location."
+  }
+ },
+ "UPGRADE_ADSL": {
+  "branch": "Upgrade to an ADSL-bonded tier (e.g. 25/3 ADSL BND).",
+  "facs_default": "UNCHANGED",
+  "guidance": "ADSL bonded upgrade across *TEL / *DSL legs. ADTRAN cards: shorter/faster, good odd/odd & even/even.",
+  "pointer": [
+   "LinePacks: confirm bonded ports for the ADSL tier.",
+   "Cable Book: verify pairs.",
+   "iVUE: update facilities.",
+   "Route along."
+  ],
+  "options": {
+   "splice": true
+  },
+  "field_notes": {
+   "tel_port": "*TEL leg.",
+   "dsl_port": "*DSL leg.",
+   "tel_location": "*TEL location.",
+   "dsl_location": "*DSL location."
+  }
+ },
+ "UPGRADE_GENERIC": {
+  "branch": "Single-pair internet upgrade (e.g. 25/3 SNGL).",
+  "facs_default": "UNCHANGED",
+  "guidance": "Single pair upgrade — one port line. No bonding.",
+  "pointer": [
+   "LinePacks: confirm the single port for the new tier.",
+   "Cable Book: verify the pair.",
+   "iVUE: update facilities.",
+   "Route along."
+  ],
+  "field_notes": {
+   "port": "The single serving port."
+  }
+ },
+ "GENERAL": {
+  "branch": "Bulk port update (e.g. 'need DSL only BND ports, POTS stays') — up to 16 port lines.",
+  "facs_default": "CHANGED",
+  "guidance": "Per-HAN bulk facility change across many ports. Fill only the ports involved; the rest omit (N/A rule).",
+  "pointer": [
+   "LinePacks: per HAN, assign/move the DSL bond ports; POTS unchanged.",
+   "Cable Book: verify each pair.",
+   "iVUE: update facilities for each.",
+   "Route along."
+  ],
+  "field_notes": {
+   "port1": "First port; add as many as the order needs (others omit)."
+  }
+ },
+ "UPGRADE_VDSL": {
+  "branch": "Single-pair VDSL upgrade (e.g. 25/3 SNGL VDSL).",
+  "facs_default": "UNCHANGED",
+  "guidance": "VDSL single pair. One port line.",
+  "pointer": [
+   "LinePacks: confirm the VDSL port.",
+   "Cable Book: verify the pair.",
+   "iVUE: update facilities.",
+   "Route along."
+  ],
+  "field_notes": {
+   "port": "VDSL serving port."
+  }
+ },
+ "BAD_PORT_UPDATE": {
+  "branch": "Per-Han new ports — moving off bad ports to new *TEL / *DSL ports.",
+  "facs_default": "CHANGED",
+  "guidance": "Replace failing ports with new ones; both legs get new port + location. Facilities change.",
+  "pointer": [
+   "LinePacks: GET old ports; PUT the new *TEL/*DSL ports.",
+   "Cable Book: verify new pairs.",
+   "iVUE: update facilities to the new ports.",
+   "Route along."
+  ],
+  "field_notes": {
+   "phone_out": "Working number (masked).",
+   "account_out": "Account (masked).",
+   "tel_port1": "New *TEL port.",
+   "tel_port2": "Second *TEL pair if any.",
+   "dsl_port1": "New *DSL port.",
+   "dsl_port2": "Second *DSL pair if any."
+  }
+ },
+ "DOWNGRADE": {
+  "branch": "Internet downgrade (e.g. to 25/3) across *TEL / *DSL.",
+  "facs_default": "UNCHANGED",
+  "guidance": "Step the tier down; usually the same facilities. (Q15 downgrade specifics still settling.)",
+  "pointer": [
+   "LinePacks: adjust the tier on the existing ports.",
+   "iVUE: update the agreement tier.",
+   "Route along."
+  ],
+  "field_notes": {
+   "tel_port": "*TEL leg.",
+   "dsl_port": "*DSL leg."
+  }
+ },
+ "MOVE": {
+  "branch": "Move service — NEW ADDRESS block + OLD ADDRESS block. Both addresses fully written.",
+  "facs_default": "CHANGED",
+  "guidance": "Write up BOTH ends: new address (connect side) and old address (disconnect side). Same or cross exchange. Facilities change.",
+  "pointer": [
+   "Cable Book: find facilities at the NEW address.",
+   "LinePacks: assign new port; disconnect old port.",
+   "iVUE: Move the agreement; connect new SP, disconnect old SP.",
+   "Route along."
+  ],
+  "options": {
+   "twoAddress": true
+  },
+  "field_notes": {
+   "phone_out": "Out at old (masked).",
+   "phone_in": "In at new (masked).",
+   "port1": "New-address port.",
+   "port2": "Old-address port."
+  }
+ },
+ "MOVE_QDS": {
+  "branch": "Move DSL between numbers with QDS — *TEL / *DSL at the destination.",
+  "facs_default": "CHANGED",
+  "guidance": "Move the DSL from one number to another, QDS in. Bonded legs at the destination.",
+  "pointer": [
+   "LinePacks: move the DSL ports; QDS in.",
+   "Cable Book: verify destination pairs.",
+   "iVUE: update Service Points.",
+   "Route along."
+  ],
+  "options": {
+   "twoAddress": true
+  },
+  "field_notes": {
+   "phone_out": "Out (masked).",
+   "phone_qds": "QDS IN (masked).",
+   "dsl_port1": "DSL port.",
+   "dsl_port2": "Second DSL pair."
+  }
+ },
+ "FTTH_OTHER": {
+  "branch": "Fiber connect (e.g. CONN FTTH 1G/1G, CBOL).",
+  "facs_default": "UNCHANGED",
+  "guidance": "GPON/ONT path. CBOL = no CRV needed. The Node is the parent GPON (e.g. SVLK_GPON), NOT the splitter — write the GPON so NetOps finds it in Calix.",
+  "pointer": [
+   "LinePacks: assign the GPON/splitter port; Node = parent GPON.",
+   "iVUE: connect the fiber Service Point; set the ONT port.",
+   "Route along."
+  ],
+  "field_notes": {
+   "port": "GPON/ONT serving port (parent GPON as Node)."
+  }
+ },
+ "UPGRADE_FTTH": {
+  "branch": "Fiber upgrade (e.g. INT Upgrade to 100/100 FTTH).",
+  "facs_default": "UNCHANGED",
+  "guidance": "Step the fiber tier up on the existing ONT path.",
+  "pointer": [
+   "LinePacks: confirm the GPON/ONT port for the new tier.",
+   "iVUE: update the fiber agreement.",
+   "Route along."
+  ],
+  "field_notes": {
+   "phone_out": "Out (masked).",
+   "account_out": "Account (masked).",
+   "port1": "ONT port.",
+   "port2": "Second service on ONT (PRT-2) if any."
+  }
+ },
+ "EDGE_UPGRADE": {
+  "branch": "EDGE fiber upgrade (e.g. to 1G/1G).",
+  "facs_default": "UNCHANGED",
+  "guidance": "EDGE product tier change. Action-only note.",
+  "pointer": [
+   "iVUE: update the EDGE agreement tier.",
+   "Route along."
+  ],
+  "field_notes": {}
+ },
+ "EDGE_OTHER": {
+  "branch": "EDGE connect/other (e.g. CONN EDGE 100/100).",
+  "facs_default": "UNCHANGED",
+  "guidance": "EDGE service action. Action-only note (no copper port line).",
+  "pointer": [
+   "iVUE: connect/adjust the EDGE Service Point.",
+   "Route along."
+  ],
+  "field_notes": {}
+ },
+ "FTTH_CONNECT": {
+  "branch": "FTTH connect (thin — 1G/1G).",
+  "facs_default": "UNCHANGED",
+  "guidance": "Fiber connect; number in (usually the 101-account number). Include the full equipment route: CSX, GPON, splitter, dist-fiber/MST, FSAN. Later dated lines (ONT assignment, CMS creation, delivery, install) get appended by other teams — your E.FACS block is the first entry.",
+  "derived": true,
+  "pointer": [
+   "LinePacks: assign the ONT port (CSX line, e.g. FRNT-PRSV_GPON-CLX01-01-05-1504-01).",
+   "iVUE → equipment record → Path Trace Connectivity: GPON card/port (e.g. PRSV_GPON 01-01-05) + splitter & port (e.g. PRSV S5 P4).",
+   "ASBUILT / Fiber Book: dist fiber cable,pair + MST port + PED (e.g. PRSV,251 MST,6 AH1636).",
+   "FSAN: the ONT serial (CXNK…) — write **PENDING** if the ONT isn't assigned yet; warehouse/dispatch appends the assignment.",
+   "iVUE: connect the fiber SP; set the speed C&C on the agreement. Route along."
+  ],
+  "field_notes": {
+   "phone_in": "Number in (masked)."
+  }
+ },
+ "EDGE_CONNECT": {
+  "branch": "EDGE connect with FSAN (thin sample).",
+  "facs_default": "CHANGED",
+  "guidance": "Connect an EDGE service; carries the EDGE id + ONT FSAN. Derived from a small sample.",
+  "derived": true,
+  "pointer": [
+   "iVUE: connect the EDGE Service Point; record FSAN.",
+   "LinePacks: assign ONT.",
+   "Route along."
+  ],
+  "field_notes": {
+   "edge_id": "EDGE service id.",
+   "fsan": "ONT FSAN."
+  }
+ },
+ "PATH_TRACE_UPDATE": {
+  "branch": "Path-trace / QDS disc + CONN FTTH (single-sample).",
+  "facs_default": "CHANGED",
+  "guidance": "Rare path-trace update tied to a fiber connect. Derived from one sample — confirm specifics.",
+  "derived": true,
+  "pointer": [
+   "LinePacks: update the path-trace; QDS in; connect FTTH.",
+   "iVUE: reconcile Service Points.",
+   "Route along."
+  ],
+  "field_notes": {
+   "phone_qds": "QDS IN (masked).",
+   "phone_in": "In (masked).",
+   "port1": "Port.",
+   "port2": "Second pair."
+  }
+ },
+ "CROSS_CONNECT": {
+  "branch": "Cross-connect — bonded upgrade needing a jumper move at the SAI/X-Connect.",
+  "facs_default": "CHANGED",
+  "guidance": "The DSL pair line carries XCONN,n + PIC,n, and a jumper-move instruction tells the splicer which jumper to remove and where to re-jump. Enable the XCONN option to add that instruction line.",
+  "pointer": [
+   "X-Connect report + Cable Book: identify the SAI cross-connect pair (XCONN,n).",
+   "LinePacks: assign the bonded *TEL/*DSL ports.",
+   "Write the jumper-move instruction (remove old jumper, re-jump to new pair).",
+   "Email Dispatch / splicer as needed; Route along."
+  ],
+  "options": {
+   "xconn": true
+  },
+  "field_notes": {
+   "phone_qds": "QDS IN (masked).",
+   "phone_in": "In (masked).",
+   "account_in": "Account (masked).",
+   "tel_port": "*TEL port.",
+   "dsl_port": "*DSL port; carries XCONN,n PIC,n.",
+   "tel_location": "*TEL location.",
+   "dsl_location": "*DSL location."
+  }
+ },
+ "UPGRADE_XCONN": {
+  "branch": "Upgrade with a cross-connect (moved + added pair, XCONN).",
+  "facs_default": "CHANGED",
+  "guidance": "Internet upgrade that also moves/adds a pair via cross-connect. DSL line carries XCONN,n; add the jumper-move instruction.",
+  "pointer": [
+   "X-Connect report + Cable Book: find the XCONN pair.",
+   "LinePacks: move/assign the bonded ports.",
+   "Write the jumper-move instruction.",
+   "Route along."
+  ],
+  "options": {
+   "xconn": true
+  },
+  "field_notes": {
+   "phone_out": "Out (masked).",
+   "account_out": "Account (masked).",
+   "phone_qds": "QDS IN (masked).",
+   "tel_port": "*TEL port.",
+   "dsl_port": "*DSL port; carries XCONN,n.",
+   "tel_location": "*TEL location.",
+   "dsl_location": "*DSL location."
+  }
+ }
 }
