@@ -1,0 +1,761 @@
+Table of Contents
+
+Processing Types of Service Orders 
+	Acronyms and Definition of Terms	1
+	Basic steps to line assignments	2
+	Check vacant pair in Green Screen	15
+	Find a Node	13
+	Service Order Types	1
+AD	Reinstall or Install Additional (POTS) Line	7
+AD	Add teen line	17
+BD	Disconnect number	2
+ED	Change POTS to DSL	13
+EQ	OPX	16
+MV	Change a number	12
+MV	Disconnect & Move	5
+RD	Change DSL to POTS	3
+RD	Disconnect DSL w/ QDS (POTS) IN	8
+RD	Disconnect number	2
+RD	POTS disconnect w/ QDS IN	11
+RI	Install DSL IN w/ QDS OUT	17
+RI	Install POTS IN w/ QDS OUT	10
+RI	Supercedure	4
+SI	Reinstall POTS IN w/ QDS OUT	10
+SR	Seasonal Reconnect	15
+
+note: If you need a cut sheet, it is an Excel spreadsheet on the N drive.
+
+Service Order Types
+AD	Additional Number
+BD	Business Disconnect
+BI	Business Install
+ED	DSL order
+EQ	DSL order
+FD	Final Disconnect
+MV	Move
+QD	Quintrex Disconnect
+QI	Quintrex QDS Install
+QR	Reinstall
+RD	Residential Disconnect
+RI	Residential Install
+SI	Reinstall service
+SR	Seasonal Reconnect
+
+Acronyms and Definition of Terms
+AFC = Advanced Fiber Communication (equipment type)
+Node = A Calix Shelf
+Pannaway = Equipment type
+RST = an AFC 'Port' with Binding Posts
+
+CRV = Call Reference Value (last four digits of IDE number)
+DSL = Digital Subscriber Line
+IDE = IDT Index
+OPX = Off Premises Extension
+POTS = plain old telephone service
+RCFA = remote call forwarding. It has no physical cable pairs.
+VPI VCI = Unique DSL Identifier
+
+Basic Steps to Line Assignments
+    1. Quintrex
+    2. Access (Line Packs1 Table)
+    3. AS400 (for review only)
+    4. Excel
+    5. Cablebook
+
+Initial search:
+    1. Open 'Service Order maintenance'
+    2. Click on 'Change' Button
+    3. Search by 'Department'
+    4. Type in 'E.FACS' (Engineering Facilities)
+    5. Select 'Next due in route/not completed' Radio button
+    6. Click Search button
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Disconnect Number (RD or BD)
+    1. Quintrex
+    a. Service Order Search window
+    b. Click the search button to refresh the screen
+    c. Double-click on the line you want to process
+    d. Write down the disconnect number (POTS OUT or DSL OUT)
+    e. Click on the Plant Information button 
+    f. Write down the cable information, pair number, IDE, RST, etc.
+    2. Access table - Line Pack1
+    a. Ctrl F to find the phone number (POTS OUT or DSL OUT)
+    b. Write down any additional facility information (Line #, Same thing as Binding Post)
+    c. Delete phone number 
+    d. Status column ~ to existing info. add CO (or CODISC) & disconnect date
+    3. Cablebook
+    a. Find the pair information
+    b. Draw a line through the existing four-digit phone number
+    c. Write CODISC & disconnect date in the next column
+    4. Quintrex
+    a. Add facility comment for DSL.
+    b. Click the Route button & the Save button
+    c. Scroll to the right and uncheck the three boxes at the end of the line.  It will complicate your life, if you skip this step.  
+    d. Do NOT print
+    e. For an RD (For a BD there is no QDS IN.  Is there anything else that needs to be done?)
+        1) Open QDS IN service order.  Unassign service location and reassign.  Check facilities.
+        2) Route and save
+
+Change DSL to POTS (RD)
+        1. Quintrex
+    a. Click on the Plant Information button to get the pair information
+        2. Access tables
+            a. Line Pack
+                1) Ctrl F to find the phone number
+                2) Write down the old Facility Info on a piece of scratch paper.
+                3) Delete the phone number
+                4) Status column ~ to existing info. add CO & today's date
+                5) Scroll down to find an available POTS connection (scroll up, if looking for DSL) 
+[note: for Shaver Calix cabinets ? in the Type column, Ctrl F and type SHVR R* to find an AFC cabinet. Then scroll down to find an available POTS connection.]
+                6) Add the phone number to that row
+                7) Status column ~ delete any CODISC info
+                8) Write down the POTS IN IDE, RST & BP numbers in the Subscriber Name & Address section of the Service Order Printout
+                9) Transfer pair and pedestal info. from page two to the Subscriber Name & Address section of the Service Order Printout.  If no printout, wait until AS400 section.
+            b. VPI VCI Inventory
+                1) Ctrl F to find the phone number
+                2) Delete the phone number
+                3) For POTS to DSL put in phone # for DSL Install
+        3. AS400 (note: Avoid using the 10-key pad.)
+                    a. Press Enter on the first screen
+                    b. Enter OP for Plant Records
+                    c. Enter AC for Add/Change/Delete/Display or press F12 (Okay to press multiple times) to get to the A-B-C-D screen
+                    d. Enter I for Subscriber Line Information Change/Display
+                    e. May need to press F10 to switch from the Display screen to the Change screen.
+                    f. Backspace to change the end of the phone number. Press Enter, if no dash was included in the typing.  This deletes everything after the last number.
+                    g. Type D (Work with Subscriber Cable Pairs) & then press Enter
+                    h. Press any key (i.e. the "x" key. Avoid the Enter key because it takes you to the next screen prematurely.) to select the record, and press Enter.
+                    i. Press Enter & write down the DSL pair information
+                    j. Type Y to unassign the number and press Enter multiple times to get back to the press-any-key screen (a.k.a. Choose a Cable Pair Record to Work with).
+                    k. Press any key & the Enter key twice.
+                    l. Type Y to assign a new number & press the Tab key 
+                    m. Type in the new POTS IDE number & press the Enter key 
+                    n. Check the Class of Service (POTS = IDTL) & Press the Enter key twice
+                    o. Tab down to the first AFC RST PRIMARY line & type in the RST number
+                    p. AFT LET should be blank
+                    q. Press Enter multiple times to return to the A-B-C-D screen
+                    r. F3 to exit change mode
+                    s. MM to get to the Main Menu
+                    t. F3 to exit and return to the login screen
+        4. Excel ~ nothing to do here
+        5. Cablebook
+    a. Find the pair information
+    b. Erase the DSL note on that line
+    c. Change the IDE number & check for continuation on another page
+    d. Verify pedestal location is the same
+        6. Quintrex
+    a. Add a PLNT comment with the IDE and RST numbers for both DSL OUT and POTS IN
+    b. Make sure to check the box to Update Subscriber Comments, and click Add.
+    c. Click the Route button & send to P:KIMW
+    d. Save & no print
+    e. Click OK
+
+Supercedure (RI)
+    1. Quintrex
+        a. Click Plant Information button
+        b. Make sure that the Service Location radio button is selected
+        c. Click Assign
+        d. Click Search
+        e. Highlight line & click OK
+        f. Highlight line & click Reassign
+        g. Click the Route button
+        h. Highlight the line & right click to complete
+        i. Save & print (for own use)
+    2. Access ~ nothing to do here
+    3. AS400 ~ nothing to do here
+    4. Excel - Terminal Book
+        a. Ctrl F to find phone number
+        b. Change subscriber name
+        c. Double check facility information
+    5. Cablebook ~ nothing to do here
+
+Disconnect & Move (MV) in 2 exchanges
+    1. Quintrex
+        a. Start with QDS IN Service Order
+        b. Click the Plant Information button
+        c. Highlight the QDS IN number & click the Assign button with the service location radio button selected.  (You may need to unassign service location first.)
+        d. Highlight the number & click the Search button
+        e. QDS OUT write down information, including service location number
+    2. Access tables
+    a. Line Pack
+    1) Ctrl F to find the old phone number
+    2) Enter the new QDS phone number 
+    3) Status column ~ change to QDS
+    4) Search for existing phone number at new location (i.e. - parents' number) or QD (QDS Disconnect) number
+    5) If new location, scroll down to look for available POTS connection
+    6) Enter new phone number (i.e. - additional line) If QD, use same facilities.
+    7) Status column - delete any disconnect information
+    8) Write down the new IDE, RSF & BP numbers in the Service Order Comments section of the Service Order printout
+    b. Line Card (for additional line)
+        1) Ctrl F to find the existing number at the new location
+        2) Write down the existing pedestal in the Service Order Comment section of the Service Order printout.  Also write down the existing pair information on a note pad.
+    3. Cablebook
+            a. Find the empty pair and fill in the information (if additional line)
+            b. Write down the new pair and pic information in the Service Order Comment section of the Service Order printout
+    4. AS400 ~ nothing to do here
+    5. Excel - Terminal Book
+    a. for 2 exchanges
+        1) Ctrl F to find the old disconnect phone number
+        2) Change COS (Class of Service) column to D
+        3) Add disconnect date in appropriate column (note: It may not be today's date.)
+        4) Check facility information for future reference
+        5) Scroll down to find a different number for the disconnect at the old location
+        6) Change COS column to 1FB
+        7) Delete the disconnect date on QDS IN number
+        8) Update the facility information
+        9) Look for new phone number POTS IN
+        10) Change COS to 1FR
+        11) Update subscriber information and facility information
+    b. For 1 exchange
+    1) Find POTS OUT (a.k.a. MV number)
+    2) Write down facility information
+    3) Find QDS IN
+    4) Change COS to 1FB
+    5) Change subscriber name to QDS
+    6) Delete disconnect date
+    7) Update facility information
+    8) Find QDS OUT
+    9) Change COS to D
+    10) Change subscriber name to QDS
+    11) Add disconnect date
+    12) Write down facility information
+    13) Find POTS IN
+    14) Update facility information (a.k.a. MV number)
+    6. Quintrex (again)
+    a. For 1 exchange, "do" QDS OUT first.
+        1) Open service order
+        2) Save
+        3) Uncheck boxes on the right side of the window
+        4) Click OK
+        5) Then "do" POTS IN (a.k.a. MV)
+    b. Highlight the new phone number & click the Plant Information button
+    c. Highlight the new phone number & click the Assign button
+    d. Click the Search button
+    e. Click the OK button
+    f. For an additional line 
+    1) click the New button
+    2) Select the Cable Pair radio button & click the Assign button
+    3) Switch ID = FRNT or CIMA
+    4) Cable No = wire center (i.e. - CRES)
+    5) Pair = (i.e. - 493)
+    6) Click the Select button
+    7) Highlight the line & click the Assign button
+    8) Click the OK button
+    9) Select the Cable Pair radio button again & click the Change button
+    10) Fill in the route, pedestal location and pic-pair information
+    11) Click the OK button
+    12) Select the Line Circuit radio button & click the Assign button
+    13) In the Location box, type the IDE number for the new phone number
+    14) Click the Select button
+    15) Highlight the line & click the Assign button
+    16) Click the OK button
+    17) Select the Line Circuit radio button again & click the Change button
+    18) Add the Binding Pair number & click the OK button
+    g. For QDS OUT & POTS IN facilities, click the Reassign button.
+    h. Select the Party radio button & click the Change button
+    i. In the AFC RST PRIMARY box, add the RST information & click the OK button
+    j. Highlight the original number at the old location & click the Unassign button
+    k. Click the OK button
+    l. Click the Route button, send to PKIMW & right click the complete
+    m. Save and no print
+    7. Cablebook (again)
+    a. Find the original pair information for the old location
+    b. Change the 4-digit phone number & write the word "QDS" next to it
+
+Reinstall or Install Additional (POTS) Line
+    1. Access table - Line Card
+    a. Ctrl F to find the main phone number 
+    b. Write down the new phone number, the pedestal number, and the wirecenter in the Subscriber Name & Address section of the Service Order printout
+    2. Cablebook
+    a. Look for the pair information & vacant pair near there.  Verify with Line Packs1 table.
+    b. Write pair & pic information in the Subscriber Name & Address section of the Service Order printout
+    c. Write the new information on that line
+    3. Access table - Line Packs1
+    a. Ctrl F to find the main phone number
+    b. Scroll down to look for available POTS connection
+    c. Type in the new information
+    d. Write down the facility information in the Subscriber Name & Address section of the Service Order printout
+    4. Excel - Terminal Book
+    a. Ctrl F to find new phone number
+    b. Delete the disconnect date
+    c. Change the COS column to 1FR
+    5. Quintrex
+            a. Double click on the service order line
+            b. Click on the Plant Information button
+            c. Highlight the new phone number & click the Assign button, the Search button and the OK button.
+            d. Click the New button
+            e. Select the Cable Pair radio button & click the Assign button
+            f. Switch ID = FRNT or CIMA
+            g. Cable No = wirecenter (i.e. - SVSP)
+            h. Pair = (i.e. - 119)
+            i. Click the Select button
+            j. Highlight the line & click the Assign button
+            k. Select the Cable Pair radio button again & click the Change button
+            l. Enter the route, ped and pic-pair information & click the OK button
+            m. Select the Line Circuit radio button & click the Assign button
+            n. In the Location box, type the new IDE number & click the Select button
+            o. Highlight the line & click the Assign button
+            p. Click the OK button
+            q. Select the Line Circuit radio button again & click on the Change button
+            r. In the Line Number box, type the Binding Pair number & click the OK button
+            s. Select the Party radio button & click the Change button
+            t. In the first AFC RST PRIMARY box, add the RST information & click the OK button
+            u. Add a PLNT comment with new facility information
+            v. Click on the Route button, right click to complete & route to P:KIMW.
+            w. Save & no print
+    6. AS400 ~ nothing to do here
+
+Disconnect DSL w/ QDS (POTS) IN
+    1. Quintrex
+        a. Double click on the DSL disconnect line
+        b. Double click in the comments area
+        c. Click the Route button
+        d. Unselect 2 boxes on the right end of the line & click the OK button
+        e. Save & print (for own use)
+    2. Access - Line Pack
+    a. Ctrl F to find the DSL phone number
+    b. Write down the IDE, RST & BP numbers in the Subscriber Name & Address section of the Service Order printout
+    c. Delete the DSL phone number
+    d. In the Status column, add CODISC and the date of disconnect
+    e. Scroll down to look for an available POTS connection
+    3. Quintrex
+        a. Highlight the QDS line that you think you want and scroll to the right to match the addresses
+        b. Double click on the QDS line & click the NO button
+        c. Write the new QDS phone number & Service Order number in the Service Order Comments section of the Service Order printout
+        d. Click on the Plant Information button
+        e. Write down the new QDS IDE, RST and BP numbers
+    4. Access
+    a. Line Pack
+        1) On the line where the POTS is available, enter the new QDS phone number
+        2) Type QDS in the Status column
+    b. VPI VCI Inventory
+        1) Ctrl F to find the old DSL phone number
+        2) Delete old DSL phone number
+    5. AS400 ~ nothing to do here
+    6. Excel - Terminal Book
+    a. Ctrl F to find the old DSL phone number
+    b. Change the COS to D
+    c. Add the disconnect date
+    d. Check the facilities and update as necessary
+    e. Ctrl F to find the new QDS POTS number
+    f. Change the COS to 1FB
+    g. Delete the disconnect date
+    h. Check the facilities and update as necessary
+    7. Cablebook
+    a. Look for the pair information
+    b. Erase the four-digit DSL number and the word "DSL"
+    c. Write in the last four-digits of the new POTS QDS phone number & the word "QDS" next to it
+    d. Update the facilities
+    8. Quintrex
+    a. Highlight the old QDS phone number line
+    b. Select the Service Location radio button & click the Unassign button
+    c. Highlight the new QDS phone number line
+    d. Select the Service Location radio button & click the Assign button
+    e. Click the Search button
+    f. Highlight the line & click the OK button
+    g. In the pop-up window, check the Channel column.  If it has anything in it, then click the Reassign button.  If it is blank, go to step w.
+    h. When it asks if the subscriber is moving, click the Yes button
+    i. Select the Carrier Channel radio button & click the Unassign button
+    j. Click the Yes button
+    k. Select the Service Location radio button & click the Assign button
+    l. Click the Search button & the OK button
+    m. Do NOT highlight the line & click the New button
+    n. Select the Cable Pair radio button & click the Assign button
+    o. Switch ID: FRNT or CIMA
+    p. Cable No: wirecenter (i.e. - CSDL)
+    q. Pair: (i.e. - 146)
+    r. Uncheck the box next to available pairs only because the system still has it assigned to the old QDS phone number
+    s. Click the Select button
+    t. Highlight the bottom line & click the Assign button
+    u. Click the Yes button & the OK button
+    v. Click the Yes button
+    w. Select the Line Circuit radio button & click the Unassign button
+    x. Click the Yes button
+    y. Select the Line Circuit radio button & click the Assign button
+    z. In the location box, type the new QDS IDE & click the Select button
+    aa. Highlight the line & click the Assign button
+    bb. Click the OK button
+    cc. Select the Line Circuit radio button & click the Change button
+    dd. In the Line Number box, type the new Binding Pair number
+    ee. Select the Party radio button & click the Change button
+    ff. In the AFC RST PRIMARY box, type in the new RST
+    gg. Click the OK button
+    hh. Click the Route button & send to PKIMW
+    ii. Save & no print
+
+Reinstall or install POTS IN w/ QDS OUT
+    1. Quintrex
+        a. Double click on the new POTS phone number line
+        b. Double click in the comments section to view all of the comments
+        c. Save & print, or write down the facility information.
+        d. Click the Plant Information button
+        e. Make sure that the Service Location radio button is selected, and click the Assign button.
+        f. Click the Search button.  
+        g. If there are multiple Service Location IDs, you may need to get out of this Service Order, and check the QDS OUT Service Order for the correct Service Location ID.  Highlight the line & click the OK button
+        h. Write down the IDE and pair numbers (usually the red line) in the Contact/Priority Information section of the Service Order printout
+        i. Highlight the line & click the Reassign button
+        j. Click the Yes button
+        k. Select the Cable Pair radio button & click the Change button
+        l. Write down the pedestal information in the Contact/Priority Information section of the Service Order printout
+        m. Click the OK button
+        n. Click the Route button (send to Kim if facilities change or DSL is involved) & right click to complete
+        o. Save & no print
+        p. Double click on the QDS phone number line
+        q. Write down the QDS out phone number & the Service Order number in the Subscriber Name & Address section of the Service Order printout
+        r. Click the Route button & right click to complete
+        s. Save & no print
+        t. Unselect the Leave Cable Pair box and make sure all three of those boxes are unchecked.  It will complicate your life later on, if you forget this step.
+        u. Click the OK button
+    2. Access
+    a. Line Pack
+        1) Ctrl F to find the QDS OUT phone number
+        2) Replace the QDS phone number with the new phone number
+        3) In the Status column, delete the word "QDS"
+        4) Verify no DSL
+    b. VPI VCI Inventory ~ verify no DSL
+    3. AS400 ~ nothing to do here
+    4. Excel - Terminal Book
+    a. Ctrl F to find the QDS OUT phone number
+    b. Change the COS to D
+    c. Add the disconnect date
+    d. Find the new phone number
+    e. Change the COS to 1FR
+    f. Change the name
+    g. Delete the disconnect date
+    h. Type in the new facilities information
+    5. Cablebook
+    a. Find the pair information
+    b. Erase the old QDS phone number & the word "QDS"
+    c. Write in the new phone number
+    d. Check the facilities
+
+POTS disconnect w/ QDS IN (reverse of reinstall POTS w/ QDS OUT)
+    1. Quintrex
+        a. Double click on the existing POTS phone number line
+        b. Double click in the comments section to view all of the comments
+        c. Save & print
+        d. Double click on the new QDS phone number line
+        e. Write down the words "QDS IN", the new QDS phone number and the Service Order number in the Contact/Priority Information section of the Service Order printout
+        f. Click the Plant Information button
+        g. Highlight the QDS phone number & click the Assign button
+        h. Click the Search button
+        i. Highlight the line & click the OK button
+        j. Write down the IDE and pair numbers in the Contact/Priority Information section of the Service Order printout
+        k. Click the Reassign button & the Yes button
+        l. Select the Cable Pair radio button & click the Change button
+        m. Write down the pedestal information in the Contact/Priority Information section of the Service Order printout
+        n. Click the OK button
+        o. Click the Route button
+        p. Save & no print
+        q. Double click on the existing POTS phone number line
+        r. Write down the words "POTS OUT' and the existing POTS phone number in the Subscriber Name & Address section of the Service Order printout
+        s. Click the Route button 
+        t. Save & no print
+        u. Unselect the Leave Cable Pair box and make sure all three of those boxes are unchecked.  It will complicate your life later on, if you forget this step.
+        v. Click the OK button
+    2. Access
+    a. Line Pack
+        1) Ctrl F to find the POTS phone number
+        2) Replace the POTS phone number with the QDS phone number
+        3) In the Status column, type the word "QDS"
+    b. VPI VCI Inventory ~ nothing to do here (no DSL)
+    3. AS400 ~ nothing to do here
+    4. Excel - Terminal Book
+    a. Ctrl F to find the POTS phone number
+    b. Change the COS to D
+    c. Add the disconnect date
+    d. Find the QDS phone number
+    e. Change the COS to 1FB
+    f. Leave the name as is
+    g. Check the facilities
+    5. Cablebook
+    a. Find the pair information
+    b. Update the 4-digit phone number & add the word "QDS"
+    c. Check the facilities
+
+Change a number (in the same exchange)
+Most of the time this is how to process both POTS and DSL.
+    1. Excel - Terminal Book [Start with this step if there is a possibility that the new number looks like it might be in a new bank of 100 phone numbers.  (i.e. - 822-****)]
+        a. Ctrl F to find the new phone number (In this case it is in an existing bank.  At this point we checked the cablebook because it had facility information with it.)
+        b. Ctrl F to find the existing phone number
+        c. Write down the cable and pair information
+        d. Change the COS column to RCFA (in this case otherwise #CHG)
+        e. Delete the facility information because this is now going to be a virtual subscriber
+    2. Quintrex
+    a. Highlight the new phone number
+    b. Select the Service Location radio button & click the Assign button
+    c. Click the Search button
+    d. Highlight the same ServLocID & click the OK button
+    e. Highlight the existing phone number & click the Reassign button
+    f. Is this subscriber moving? Click the Yes button
+    g. Highlight the existing number again
+    h. Select the Cable Pair radio button & click the Unassign button
+    i. Click the Yes button
+    j. Uncheck the Leave Cable Pair Connected ? box and the Leave Line Circuit Connected ? box
+    k. Click the OK button twice
+    3. Cablebook
+    a. Update the 4-digit phone number
+    b. Update the IDE number (note: if you update this after you finish in Quintrex, write down the IDE number; otherwise, you can just use it off of the screen.)
+    4. Quintrex (again)
+    a. Highlight the existing phone number line
+    b. Click the Route button & send to PPROG
+    c. Save & no print
+    5. Access
+    a. Ctrl F to find the existing number
+    b. Replace with the new phone number
+    6. AS400 ~ nothing to do here
+
+Find a Node
+    1. Look in the Line Pack Access database for the phone number
+    2. update facilities in the Green Screen
+
+
+
+EQ or ED 
+Change POTS to DSL (also known as Install DSL) 
+    1. Quintrex
+    a. Open Service order clicking 'No' when asked to print/preview
+    b. If an "alert Comment" pops up just close it at the bottom to get to the main service order window.
+    c. write down POTS OUT phone number, due date,  and service order number 
+    d. Click the 'Plant Information' button and write down POTS Facilities (IDE and RST/NODE), Service Location ID, Serving ped (Found by selecting work with Cable Pair radio button and selecting change, then once done cancel out of there)
+    2. Access tables
+        a. Line Packs1Table
+            1) Click in the Number column
+            2) Ctrl F to find the POTS OUT phone number
+            3) Verify IDE, RST and write down Binding Post numbers if any
+            4) Delete the POTS OUT phone number
+            5) In the Status column add CO and the disconnect date
+            6) Scroll up to look for an available DSL connection. If it is a node, do not use the first number.
+            7) Type in existing phone number
+            8) Write down NEW IDE, RST,  Binding Post information, and VPI/VCI
+            9) For Go-Digital
+                a) Search for the phone number on the line above without a space
+                b) Look for card information below that line (i.e. 5x4)
+                c) Write down the node & VPI VCI numbers
+                d) Type in the phone number without a space
+        b. VPI VCI Table
+                    1) For Go-Digital there nothing to do here because of step 8 above
+                    2) For all others
+    a) Search for the phone number on the line above the DSL IN line in the Line Packs1 table
+    b)  Verify you are on the correct RST and VPI/VCI
+    c) Type in the new phone number
+    3. Quintrex
+    a. Open Service Order
+    b. Click on the Plant Information button
+    c. For RST to RST connection and if the Carrier Channel has information in it (note: The Carrier Channel is the short version of the AFC RFC Primary information.)
+        1) Select the Carrier Channel radio button & click the Unassign button
+        2) Click the Yes button & then the No button
+        3) Select the Service Location radio button & click the Assign button
+        4) Click the Search button
+        5) Highlight the line with the right service Location ID (SLID) & click the OK button
+        6) In the pop-up window click the NEW button
+        7) Select the Carrier Channel Radio Button and click assign
+        8) Select the appropriate switch ID (FRNT or CIMA)
+        9) Select the appropriate wirecenter or 'Carrier system'
+Ie. NFRK / DLC (DLC is AFC equipment) or NFRK CLX / CALIX
+        10) Type in the new RST in this format: RST00-0-00-0
+Some systems have the two digits at the end: RST0-0-00-00
+Then select 'Search' Highlight the correct RST and click 'Assign' then 'OK'
+        11) Select the Cable Pair radio button & click the Assign button
+        12) Switch ID: select FRNT or CIMA (should already be filled out)
+        13) Cable No.: (i.e. - SRHS or 1)
+        14) Pair: (i.e. - 737)
+        15) Unselect the box next to Available pairs only
+        16) Click the Select button, the Assign button, the YES button, the NO button & the YES button.
+    d. Select the Line Circuit radio button & click the Unassign button
+    e. Click the Yes button
+    f. Select the Line Circuit radio button & click the Assign button
+Assign the correct IDE and 
+    g. In the Location box, type the new DSL IDE number
+    h. Highlight the line & click the Assign button
+    i. Click the OK button
+    j. For RST to RST connection 
+    1) Select the Line Circuit radio button & click the Change button
+    2) Update the Binding Post number, and write down cable and pair information.
+    3) Check the Class of Service information, and update the card type for RSTs, as necessary (i.e. - 6x6)  Update line number/Binding Post (note: 1DTL = POTS in a Calix cabinet)
+    4) Click the OK button
+    k. Select the Party radio button & click the Change button
+    l. For RSTs update the first AFC RST PRIMARY field (the long one) & click the OK button
+    m. Update the AFC LET, when it is a node. 
+    n. Click on the Comments button & click the Add button
+    o. Change the Code to ADSL, and check the box to Update Subscriber Comments near the bottom of the window.
+    p. In the Comment box type the POTS OUT facility information & the DSL IN facility information
+    q. Click the Route button & select P:KIMW
+    r. Save & no print
+    4. AS400 ~ most of the time there is nothing to do here
+    5. Excel - Terminal Book
+    a. Ctrl F to find the phone number
+    b. Change the COS column from 1FR to DSL
+    c. Check the facilities information
+    6. Cablebook
+    a. Find the cable (a.k.a. wirecenter) and pair
+    b. Add the word "DSL " after the four-digit phone number
+    c. Change the Binding Post and CRV
+    d. Check for any cross-connect information
+    e. Add the word "DSL" after that four-digit phone number
+
+
+
+
+
+
+
+
+
+Seasonal Reconnect (SR)
+        1. Access - LinePacks1
+            a. Ctrl F to find the phone number
+            b. In the Status column delete SDP and date
+            c. If DSL, check VPI VCI table.
+        2. Quintrex
+    a. Read comments to make sure that nothing unusual is happening.
+    b. Route to P:PROG
+    c. No facility changes, unless special situation
+        3. Excel ~ nothing to do here
+        4. Cablebook ~ nothing to do here
+
+Check vacant pair in Green Screen
+    1. login
+    2. type OP for Plant records
+    3. type IQ for Inquiry
+    4. type B for Cable Pairs
+        a. company = 1
+        b. exchange = use 3-digit prefix
+        c. switch = FRNT unless looking up something in CIMA
+        d. type in CLLI code for the wirecenter
+        e. range = use 1 or 2 pages of Cablebook pairs (i.e. - 1-25 or 26-75)
+        f. page down to display more
+        g. type X to select a pair for more details and enter to see other pages of information
+        h. F12 to go back
+    5. Type L for Service Location IDs or other options for Line Circuits, etc.
+
+OPX
+    1. Access ~ Line Card
+        a. Look up main phone number
+        b. Print out
+        c. Write down new address
+        d. Find closest ped in AutoCAD
+    2. Cablebook
+    a. Find ped and vacant pair
+    b. Write 4-digit phone number, OPX/ and the IDE & RST numbers for the main phone number.  (Don't forget to write on multiple pages, if necessary.)
+    c. Find main phone number, pic and pair
+    d. Next to 4-digit phone number write MAIN/OPX as well as cable, pair and pedestal information for the OPX.  (Don't forget to write on multiple pages, if necessary.)
+    3. Quintrex
+    a. In the service order, add a comment
+    b. From the pull down select Engineering Remarks
+    c. Type Install OPX on one line
+    d. On another line type Main:, the existing address, the IDE & RST information as well as the cable and pair information.
+    e. On the next line type OPX:, the new address, the same IDE & RST information as well as the new cable and pair information.
+    f. On the last line type *** Using the same CRV & RST to both locations.  If you have questions, please call the Line Assigner.
+    g. Click the Submit button
+    h. Click the Plant Information button
+    i. Make sure that the Service Location radio button is selected and click the Assign button.  (note: The system will generate a new ID number)
+    j. Click the Add button
+    k. Type in the new address information
+    l. Click the Add button and the No button
+    m. Search for the Service Location ID number
+    n. Click the Assign button
+    o. Make sure that the Cable Pair radio button is selected, and click the Change button.
+    p. Update the information
+    q. Click on the Pair Comment
+    r. Select the Misc. Comment, and type in OPX: and the new address
+    s. Click the Add button and the Close button (note: The system may complain if it is not an official 9-1-1 address, yet.)
+    4. Excel ~ nothing to do here
+
+Add teen line (It has a different ring but no new facilities.)
+    1. Access ~ nothing to do here
+    2. Excel ~ find the new phone number, and change COS to TEEN
+    3. Quintrex ~ just route it to P:PROG
+    4. Cablebook
+        a. find cable & pair info for existing phone number
+        b. write TEEN and four-digit phone number, after existing four-digit phone number
+
+Install DSL with QDS OUT (This section needs to be checked.)
+    1. Quintrex
+        a. Write down QDS OUT phone number, due date, service order number, address & Service Location ID.
+    2. Access tables
+        a. Line Packs1
+            1) Click in the Number column
+            2) Ctrl F to find the POTS OUT phone number
+            3) Write down the IDE, RST and Binding Post numbers
+            4) Delete the POTS OUT phone number
+            5) In the Status column add CO and the disconnect date
+            6) Scroll up to look for an available DSL connection.    If it is a node, do not use the first number.
+            7) Type in existing phone number
+            8) Write down IDE, RST and Binding Post information
+            9) For Go-Digital
+                a) Search for the phone number on the line above without a space
+                b) Look for card information below that line (i.e. 5x4)
+                c) Write down the node & VPI VCI numbers
+                d) Type in the phone number without a space
+        b. VPI VCI
+                    1) For Go-Digital there nothing to do here because of step 8 above
+                    2) For all others
+    d) Search for the phone number on the line above the DSL IN line in the Line Packs1 table
+    e)  Check the facilitates
+    f) Type in the new phone number
+    3. Quintrex
+    a. Open Service Order
+    b. Click on the Plant Information button
+    c. For RST to RST connection, if Carrier Channel has information in it.  That is the short version of the AFC RFC Primary information.
+        1) Select the Carrier Channel radio button & click the Unassign button
+        2) Click the Yes button & then the No button
+        3) Select the Service Location radio button & click the Assign button
+        4) Click the Search button
+        5) Highlight the line & click the OK button
+        6) In the pop-up window click the NEW button
+        7) Select the Cable Pair radio button & click the Assign button
+        8) Switch ID: select FRNT or CIMA
+        9) Cable No.: (i.e. - SRHS)
+        10) Pair: (i.e. - 737)
+        11) Unselect the box next to Available pairs only
+        12) Click the Select button, the Assign button, the YES button, the NO button & the YES button.
+    d. Select the Line Circuit radio button & click the Unassign button
+    e. Click the Yes button
+    f. Select the Line Circuit radio button & click the Assign button
+    g. In the Location box, type the new DSL IDE number
+    h. Highlight the line & click the Assign button
+    i. Click the OK button
+    j. For RST to RST connection 
+    1) Select the Line Circuit radio button & click the Change button
+    2) Update the Binding Post number, and write down pedestal number
+    3) Check the Class of Service information, and update the card type for RSTs, as necessary (i.e. - 6x6)  Update line number/Binding Post (note: 1DTL = POTS in a Calix cabinet)
+    4) Click the OK button
+    k. Select the Party radio button & click the Change button
+    l. For RSTs update the AFC RST PRIMARY field (the long one) & click the OK button
+    m. Update the AFC LET, when it is a node. 
+    n. Click on the Comments button & click the Add button
+    o. Change the Code to ADSL
+    p. In the Comment box type the POTS OUT facility information & the DSL IN facility information
+    q. Click the Route button & select PKIMW
+    r. Save & no print
+    s. For the QDS OUT
+        1) Just route it on its way
+        2) Do NOT forget to uncheck the 2 boxes at the end of the line.
+    4. AS400 ~ most of the time there is nothing to do here
+    5. Excel - Terminal Book
+    d. Ctrl F to find the phone number
+    e. Change the COS column from 1FR to DSL
+    f. Check the facilities information
+    6. Cablebook
+    f. Find the cable (a.k.a. wirecenter) and pair
+    g. Add the word "DSL " after the four-digit phone number
+    h. Change the Binding Post and CRV
+    i. Check for any cross-connect information
+    j. Add the word "DSL" after that four-digit phone number
+
+

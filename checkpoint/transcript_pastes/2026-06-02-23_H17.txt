@@ -1,0 +1,9 @@
+4.26.23 upgrade service to bonded
+(101 877 ****) 877 **** 25/3
+FRNT-0304-0053 A 815 703-8
+NFRK N01-1-02-05
+ 
+FRNT-0304-0056 a 805 PIC 5, 703-8
+NFRK N01-1-02-08
+DSL Pair stops at 703-1, will need to be spliced back into 25 pair continuing to 703-8.
+**** Attention splicer***

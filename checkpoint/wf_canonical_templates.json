@@ -1,0 +1,157 @@
+{
+  "GEN_DISCONNECT_QDS_BILLING": {
+    "count": 1783,
+    "template": "{date} -DISC TEL (CBOL), QDS CONN, & Billing Correction- {facs_status}\n{phone_out} OUT\n{phone_qds} QDS IN\n{port}\n-{tech}",
+    "n_variants": 150
+  },
+  "DISC_QDS_RECON": {
+    "count": 1672,
+    "template": "{date} -DISC & QDS CONN- {facs_status}\n{phone_out} ({account_out}) OUT\n{phone_qds} QDS IN\n{port}\n-{tech}",
+    "n_variants": 605
+  },
+  "VACA_RECONNECT": {
+    "count": 1285,
+    "template": "{date} -VACA RECON- {facs_status}\n{port}\n-{tech}",
+    "n_variants": 67
+  },
+  "DISCONNECT_ONLY": {
+    "count": 1281,
+    "template": "{date} -DISC DSL- {facs_status}\n{port1}\n{port2}\n-{tech}",
+    "n_variants": 389
+  },
+  "RECONNECT_ONLY": {
+    "count": 1243,
+    "template": "{date} -QDS CONN- {facs_status}\n{phone_qds} QDS IN\n{port1}\n{port2}\n-{tech}",
+    "n_variants": 486
+  },
+  "VACA_DISCONNECT": {
+    "count": 1124,
+    "template": "{date} -VACA DISC- {facs_status}\n{port}\n-{tech}",
+    "n_variants": 66
+  },
+  "UPGRADE_BONDED": {
+    "count": 510,
+    "template": "{date} -INT Upgrade to 100/20 BND- {facs_status}\n*TEL\n{tel_port}\n{tel_location}\n*DSL\n{dsl_port}\n{dsl_location}\n-{tech}",
+    "n_variants": 189
+  },
+  "UPGRADE_ADSL": {
+    "count": 457,
+    "template": "{date} -INT Upgrade to 25/3 ADSL BND- {facs_status}\n*TEL\n{tel_port}\n{tel_location}\n*DSL\n{dsl_port}\n{dsl_location}\n-{tech}",
+    "n_variants": 109
+  },
+  "FTTH_OTHER": {
+    "count": 441,
+    "template": "{date} -CONN FTTH 1G/1G (CBOL)- {facs_status}\n{port}\n-{tech}",
+    "n_variants": 205
+  },
+  "NPD": {
+    "count": 440,
+    "template": "{date} -NPD- {facs_status}\n{port}\n-{tech}",
+    "n_variants": 72
+  },
+  "BILLING_ONLY": {
+    "count": 439,
+    "template": "{date} -DISC TEL (CBOL) & Billing Correction- {facs_status}\n{phone_out} OUT\n{port1}\n{port2}\n-{tech}",
+    "n_variants": 26
+  },
+  "UPGRADE_GENERIC": {
+    "count": 412,
+    "template": "{date} -INT Upgrade to 25/3 SNGL- {facs_status}\n{port}\n-{tech}",
+    "n_variants": 209
+  },
+  "GENERAL": {
+    "count": 358,
+    "template": "{date} -Per HAN, need DSL only BND ports, POTS Stays the same- {facs_status}\n{port1}\n{port2}\n{port3}\n{port4}\n{port5}\n{port6}\n{port7}\n{port8}\n{port9}\n{port10}\n{port11}\n{port12}\n{port13}\n{port14}\n{port15}\n{port16}\n-{tech}",
+    "n_variants": 304
+  },
+  "SERVICE_POINT_CORRECTION": {
+    "count": 265,
+    "template": "{date} -Correcting Service points- {facs_status}",
+    "n_variants": 7
+  },
+  "UPGRADE_VDSL": {
+    "count": 254,
+    "template": "{date} -INT Upgrade to 25/3 SNGL VDSL- {facs_status}\n{port}\n-{tech}",
+    "n_variants": 79
+  },
+  "UPGRADE_FTTH": {
+    "count": 245,
+    "template": "{date} -INT Upgrade to 100/100 FTTH- {facs_status}\n{phone_out} ({account_out}) OUT\n{port1}\n{port2}\n-{tech}",
+    "n_variants": 125
+  },
+  "MOVE": {
+    "count": 207,
+    "template": "{date} -MOVE- {facs_status}\n{phone_out} OUT\n{phone_in} IN\n{port1}\n{port2}\n-{tech}",
+    "n_variants": 177
+  },
+  "BAD_PORT_UPDATE": {
+    "count": 133,
+    "template": "{date} -Per Han, need new ports- {facs_status}\n{phone_out} ({account_out}) OUT\n*TEL\n{tel_port1}\n{tel_port2}\n{tel_location1}\n{tel_location2}\n*DSL\n{dsl_port1}\n{dsl_port2}\n{dsl_location1}\n{dsl_location2}\n-{tech}",
+    "n_variants": 108
+  },
+  "EDGE_UPGRADE": {
+    "count": 130,
+    "template": "{date} - EDGE INT Upgrade to 1G/1G - {facs_status}\n-{tech}",
+    "n_variants": 43
+  },
+  "MOVE_QDS": {
+    "count": 108,
+    "template": "{date} - Move DSL from 3390 to 2801 - No FACS Changed\n{phone_out} ({account_out}) OUT\n{phone_qds} QDS IN\n*TEL\n{tel_port}\n{tel_location}\n*DSL\n{dsl_port1}\n{dsl_port2}\n{dsl_location1}\n{dsl_location2}\n-{tech}",
+    "n_variants": 87
+  },
+  "EDGE_OTHER": {
+    "count": 93,
+    "template": "{date} -CONN EDGE 100/100- {facs_status}\n-{tech}",
+    "n_variants": 54
+  },
+  "EDGE_DISCONNECT": {
+    "count": 76,
+    "template": "{date} -DISC EDGE- {facs_status}\n-{tech}",
+    "n_variants": 17
+  },
+  "DISC_QDS_CONN": {
+    "count": 75,
+    "template": "{date} \u2013 {facs_status}\n{phone_out} OUT\n{phone_qds} QDS IN\n{port}\n-{tech}",
+    "n_variants": 40
+  },
+  "NPD_DISCONNECT": {
+    "count": 53,
+    "template": "{date} \u2013 Non Paid Suspend - {facs_status}\n*TEL\n{tel_port}\n{tel_location}\n*DSL\n{dsl_port}\n{dsl_location}\n-{tech}",
+    "n_variants": 34
+  },
+  "DOWNGRADE": {
+    "count": 36,
+    "template": "{date} -INT Downgrade to 25/3- {facs_status}\n*TEL\n{tel_port}\n{tel_location}\n*DSL\n{dsl_port}\n{dsl_location}\n-{tech}",
+    "n_variants": 27
+  },
+  "CONNECT_ONLY": {
+    "count": 22,
+    "template": "{date} CONNECT SERVICE\n*TEL: {tel_port}\n{tel_location}\n*DSL: {dsl_port}\n{dsl_location}\n-{tech}-",
+    "n_variants": 19
+  },
+  "CROSS_CONNECT": {
+    "count": 8,
+    "template": "{date} - QDS DISC & CONN 18/3, moved & added pair - XCONN - {facs_status}\n{phone_qds} QDS IN\n{phone_in} ({account_in}) IN\n*TEL\n{tel_port}\n{tel_location}\n*DSL\n{dsl_port}\n{dsl_location}\n-{tech}",
+    "n_variants": 7
+  },
+  "FTTH_CONNECT": {
+    "count": 4,
+    "template": "{date} - FTTH 1G/1G - {facs_status}\n{phone_in} IN\n-{tech}",
+    "n_variants": 4
+  },
+  "UPGRADE_XCONN": {
+    "count": 2,
+    "template": "{date} - INT Upgrade to 25/3, Moved, added pair, XCONN- {facs_status}\n{phone_out} ({account_out}) OUT\n{phone_qds} QDS IN\n*TEL\n{tel_port}\n{tel_location}\n*DSL\n{dsl_port}\n{dsl_location}\n-{tech}",
+    "n_variants": 2
+  },
+  "EDGE_CONNECT": {
+    "count": 2,
+    "template": "{date} CONNECT EDGE SERVICE\n{edge_id} FTTH\nFSAN: {fsan}\n-{tech}-",
+    "n_variants": 2
+  },
+  "PATH_TRACE_UPDATE": {
+    "count": 1,
+    "template": "{date} - QDS DISC & CONN FTTH 100/100\n{phone_qds} QDS IN\n{phone_in} IN\n{port1}\n{port2}\n-{tech}",
+    "n_variants": 1
+  }
+}

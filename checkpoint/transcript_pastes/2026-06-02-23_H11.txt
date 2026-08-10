@@ -1,0 +1,11 @@
+Q: 1. Which build approach?
+A: whatever gets it completed properly
+
+Q: 2. The 5 missing items (CBR#, DUE DATE, agreement search, FACS clicks, heatmap)?
+A: break those questions down so i can fully understand them
+
+Q: 3. JF/DS annotated examples (~200+ real SOs with inline field labels)?
+A: make them usable in the app but redo them and dont use their names or any thing that looks liken its their, completely redo them but keep the knowledge
+
+Q: 4. Walkthrough priority — copper vs fiber vs EDGE?
+A: everything is important
